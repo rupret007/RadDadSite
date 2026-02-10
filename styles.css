@@ -50,9 +50,9 @@ body::before {
 .container {
     position: relative;
     z-index: 1;
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem 1.5rem;
+    padding: 1.5rem 1.5rem;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -66,13 +66,13 @@ body::before {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     animation: fadeInDown 1s ease-out;
 }
 
 .logo-wrapper {
     position: relative;
-    padding: 1rem;
+    padding: 1.5rem;
     background: var(--dark-surface);
     border-radius: 20px;
     box-shadow: var(--shadow-glow);
@@ -85,7 +85,7 @@ body::before {
 }
 
 .logo {
-    max-width: 240px;
+    max-width: 360px;
     width: 100%;
     height: auto;
     display: block;
@@ -103,7 +103,7 @@ body::before {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.75rem;
     animation: fadeInUp 1s ease-out 0.3s both;
 }
 
@@ -113,12 +113,12 @@ body::before {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
 .festival-poster-wrapper {
     width: 100%;
-    max-width: 650px;
+    max-width: 800px;
     position: relative;
     border-radius: 20px;
     overflow: hidden;
@@ -183,15 +183,15 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
     background: var(--dark-surface);
     border: 2px solid transparent;
     border-radius: 12px;
     text-decoration: none;
     color: var(--text-light);
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -226,8 +226,8 @@ body::before {
 }
 
 .festival-icon {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     stroke: currentColor;
     fill: none;
 }
@@ -317,7 +317,7 @@ body::before {
 
 .video-wrapper {
     width: 100%;
-    max-width: 750px;
+    max-width: 900px;
     position: relative;
 }
 
@@ -427,16 +427,16 @@ body::before {
 /* Section Titles */
 .section-title {
     font-family: 'Oswald', sans-serif;
-    font-size: 1.25rem;
+    font-size: 2rem;
     font-weight: 700;
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
     background: var(--gradient-1);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
     position: relative;
 }
 
@@ -475,15 +475,15 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 1rem 1.5rem;
+    gap: 1rem;
+    padding: 1.25rem 2rem;
     background: var(--dark-surface);
     border: 2px solid transparent;
     border-radius: 15px;
     text-decoration: none;
     color: var(--text-light);
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -518,8 +518,8 @@ body::before {
 }
 
 .social-icon {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     fill: currentColor;
 }
 
@@ -553,15 +553,15 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 1rem 1.5rem;
+    gap: 1rem;
+    padding: 1.25rem 2rem;
     background: var(--dark-surface);
     border: 2px solid transparent;
     border-radius: 15px;
     text-decoration: none;
     color: var(--text-light);
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 1rem;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -596,8 +596,8 @@ body::before {
 }
 
 .contact-icon {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     stroke: currentColor;
 }
 
@@ -690,11 +690,11 @@ body::before {
     }
 
     .logo {
-        max-width: 220px;
+        max-width: 260px;
     }
 
     .logo-wrapper {
-        padding: 1rem;
+        padding: 1.5rem;
     }
 
     .main-content {
@@ -711,7 +711,7 @@ body::before {
     }
 
     .section-title {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
     }
 
     .social-links {
@@ -734,11 +734,11 @@ body::before {
 
 @media (max-width: 480px) {
     .logo {
-        max-width: 180px;
+        max-width: 200px;
     }
 
     .section-title {
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         letter-spacing: 1px;
     }
 
