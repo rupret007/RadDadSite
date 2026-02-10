@@ -50,9 +50,9 @@ body::before {
 .container {
     position: relative;
     z-index: 1;
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 1.5rem 1.5rem;
+    padding: 1rem 1.5rem;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -66,7 +66,7 @@ body::before {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     animation: fadeInDown 1s ease-out;
 }
 
@@ -85,7 +85,7 @@ body::before {
 }
 
 .logo {
-    max-width: 280px;
+    max-width: 240px;
     width: 100%;
     height: auto;
     display: block;
@@ -103,7 +103,7 @@ body::before {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 1.75rem;
+    gap: 1.25rem;
     animation: fadeInUp 1s ease-out 0.3s both;
 }
 
@@ -113,12 +113,12 @@ body::before {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .festival-poster-wrapper {
     width: 100%;
-    max-width: 800px;
+    max-width: 650px;
     position: relative;
     border-radius: 20px;
     overflow: hidden;
@@ -317,7 +317,7 @@ body::before {
 
 .video-wrapper {
     width: 100%;
-    max-width: 900px;
+    max-width: 750px;
     position: relative;
 }
 
@@ -427,16 +427,16 @@ body::before {
 /* Section Titles */
 .section-title {
     font-family: 'Oswald', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     text-align: center;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
     background: var(--gradient-1);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     position: relative;
 }
 
