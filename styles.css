@@ -118,7 +118,7 @@ body::before {
 
 .festival-poster-wrapper {
     width: 100%;
-    max-width: 800px;
+    max-width: 650px;
     position: relative;
     border-radius: 20px;
     overflow: hidden;
