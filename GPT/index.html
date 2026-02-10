@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0b10" />
+  <title>Rad Dad | Pop Punk Cover Band</title>
+
+  <!-- Primary Meta -->
+  <meta name="description" content="Rad Dad is a pop punk cover band. Book us, follow us, watch our latest video, and come hang." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Rad Dad | Pop Punk Cover Band" />
+  <meta property="og:description" content="Book us, follow us, watch our latest video, and come hang." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="RadDad_logo.jpg" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Rad Dad | Pop Punk Cover Band" />
+  <meta name="twitter:description" content="Book us, follow us, watch our latest video, and come hang." />
+  <meta name="twitter:image" content="RadDad_logo.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg: #0b0b10;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.09);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --border: rgba(255,255,255,.14);
+      --shadow: 0 20px 80px rgba(0,0,0,.55);
+
+      --cyan: #24d3ff;
+      --green: #72ff6a;
+      --pink: #ff4bd6;
+      --yellow: #ffe25a;
+      --orange: #ff8b3d;
+
+      --radius: 22px;
+      --radius2: 28px;
+    }
+
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
+    body{
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      overflow: auto;
+    }
+
+    /* Ambient neon glow background */
+    .bg{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(1100px 700px at 15% 25%, rgba(36,211,255,.20), transparent 55%),
+        radial-gradient(900px 650px at 80% 15%, rgba(255,75,214,.18), transparent 55%),
+        radial-gradient(1000px 700px at 75% 85%, rgba(114,255,106,.16), transparent 60%),
+        radial-gradient(700px 500px at 20% 80%, rgba(255,226,90,.12), transparent 55%),
+        radial-gradient(1200px 700px at 50% 50%, rgba(255,255,255,.06), transparent 60%);
+      filter: saturate(120%);
+      opacity: .95;
+      transform: translateZ(0);
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift{
+      from{ transform: scale(1) translate3d(0,0,0); }
+      to{ transform: scale(1.04) translate3d(0,-10px,0); }
+    }
+
+    /* Subtle noise */
+    .noise{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .06;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      animation: flicker 5s linear infinite;
+    }
+    @keyframes flicker{
+      0%{ opacity: .045; }
+      50%{ opacity: .07; }
+      100%{ opacity: .045; }
+    }
+
+    .wrap{
+      position: relative;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .shell{
+      width: min(1060px, 100%);
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 980px){
+      body{ overflow: auto; }
+      .wrap{ min-height: 100%; padding: 18px; align-items: start; }
+      .shell{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      border-radius: var(--radius2);
+      background: linear-gradient(180deg, var(--card), rgba(255,255,255,.03));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card::before{
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background:
+        radial-gradient(600px 160px at 20% 20%, rgba(36,211,255,.26), transparent 60%),
+        radial-gradient(520px 180px at 75% 0%, rgba(255,75,214,.22), transparent 58%),
+        radial-gradient(520px 200px at 80% 95%, rgba(114,255,106,.18), transparent 58%);
+      opacity: .55;
+      filter: blur(8px);
+      pointer-events: none;
+    }
+
+    .card > *{ position: relative; }
+
+    /* Left card content */
+    .brand{
+      padding: 22px 22px 18px 22px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .logo{
+      width: 120px;
+      height: 120px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.16);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      flex: 0 0 auto;
+      box-shadow: 0 14px 50px rgba(0,0,0,.35);
+    }
+
+    .logo img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: translateZ(0);
+    }
+
+    .headline{
+      display: grid;
+      gap: 8px;
+      align-content: center;
+      min-width: 0;
+    }
+
+    .title{
+      font-family: "Space Grotesk", Inter, system-ui, sans-serif;
+      font-size: clamp(26px, 3vw, 36px);
+      font-weight: 700;
+      letter-spacing: .4px;
+      margin: 0;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tagline{
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.25;
+      max-width: 46ch;
+    }
+
+    .pillrow{
+      padding: 0 22px 18px 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pill{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--text);
+      font-size: 13px;
+      text-decoration: none;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .pill:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.22);
+    }
+
+    .pill:focus-visible{
+      outline: 3px solid rgba(36,211,255,.55);
+      outline-offset: 3px;
+    }
+
+    .dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--cyan);
+      box-shadow: 0 0 0 4px rgba(36,211,255,.16), 0 0 24px rgba(36,211,255,.35);
+      flex: 0 0 auto;
+    }
+
+    .dot.pink{
+      background: var(--pink);
+      box-shadow: 0 0 0 4px rgba(255,75,214,.14), 0 0 24px rgba(255,75,214,.35);
+    }
+
+    .dot.green{
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(114,255,106,.12), 0 0 24px rgba(114,255,106,.32);
+    }
+
+    .grid{
+      padding: 0 22px 22px 22px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 520px){
+      .brand{ padding: 20px 18px 14px 18px; }
+      .pillrow{ padding: 0 18px 14px 18px; }
+      .grid{ padding: 0 18px 18px 18px; grid-template-columns: 1fr; }
+      .logo{ width: 100px; height: 100px; }
+      .title{ white-space: normal; }
+    }
+
+    .linkCard{
+      padding: 14px 14px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.14);
+      text-decoration: none;
+      color: var(--text);
+      position: relative;
+      overflow: hidden;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .linkCard:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.22);
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
+    }
+
+    .linkCard:focus-visible{
+      outline: 3px solid rgba(36,211,255,.55);
+      outline-offset: 3px;
+    }
+
+    .linkCard::before{
+      content:"";
+      position:absolute;
+      inset: -2px;
+      background: radial-gradient(220px 80px at 10% 50%, rgba(36,211,255,.22), transparent 60%),
+                  radial-gradient(220px 80px at 90% 50%, rgba(255,75,214,.20), transparent 60%);
+      opacity: .55;
+      filter: blur(6px);
+      pointer-events:none;
+    }
+
+    .linkCard .left{
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .linkCard .label{
+      font-family: "Space Grotesk", Inter, system-ui, sans-serif;
+      font-weight: 700;
+      letter-spacing: .2px;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .linkCard .sub{
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .arrow{
+      flex: 0 0 auto;
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.12);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 14px 35px rgba(0,0,0,.25);
+    }
+
+    .arrow svg{
+      width: 18px;
+      height: 18px;
+      opacity: .92;
+    }
+
+    /* Right card: video */
+    .videoWrap{
+      padding: 18px 18px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+      height: 100%;
+    }
+
+
+    .videoHeader{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .videoTitle{
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .videoTitle h2{
+      margin: 0;
+      font-family: "Space Grotesk", Inter, system-ui, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .videoTitle p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .miniBtn{
+      appearance: none;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      white-space: nowrap;
+    }
+
+    .miniBtn:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.22);
+    }
+
+    .miniBtn:focus-visible{
+      outline: 3px solid rgba(114,255,106,.55);
+      outline-offset: 3px;
+    }
+
+    .videoFrame{
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.35);
+      box-shadow: 0 16px 55px rgba(0,0,0,.35);
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: clamp(220px, 38vh, 460px);
+    }
+
+    .videoFrame::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(520px 240px at 20% 0%, rgba(255,226,90,.14), transparent 60%),
+                  radial-gradient(520px 240px at 80% 100%, rgba(36,211,255,.16), transparent 60%);
+      filter: blur(10px);
+      opacity: .65;
+      pointer-events:none;
+    }
+
+    \.videoFrame iframe\{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      border:0;
+    \}
+
+    .videoOverlay{
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      gap: 14px;
+      padding: 18px;
+      cursor: pointer;
+      user-select: none;
+      background:
+        radial-gradient(700px 300px at 50% 110%, rgba(114,255,106,.16), transparent 55%),
+        radial-gradient(700px 300px at 50% -10%, rgba(36,211,255,.16), transparent 55%),
+        linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.55));
+      z-index: 2;
+    }
+
+    .videoOverlay::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background-image: url("https://i.ytimg.com/vi/_IwRtmuTKBY/maxresdefault.jpg");
+      background-size: cover;
+      background-position: center;
+      filter: blur(12px) saturate(120%);
+      opacity: .22;
+      transform: scale(1.08);
+      z-index: -1;
+    }
+
+    .playBadge{
+      width: 78px;
+      height: 78px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 22px 70px rgba(0,0,0,.55);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .videoOverlay:hover .playBadge{
+      transform: translateY(-2px) scale(1.02);
+      background: rgba(255,255,255,.14);
+      border-color: rgba(255,255,255,.24);
+    }
+
+    .overlayText{
+      display: grid;
+      gap: 6px;
+      text-align: center;
+      max-width: 46ch;
+    }
+
+    .overlayTitle{
+      font-family: "Space Grotesk", Inter, system-ui, sans-serif;
+      font-weight: 800;
+      letter-spacing: .2px;
+      font-size: 16px;
+    }
+
+    .overlaySub{
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .overlayActions{
+      display: flex;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .overlayPill{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.16);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .overlayPill:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,.10);
+      border-color: rgba(255,255,255,.24);
+    }
+
+    .videoOverlay:focus-visible{
+      outline: 3px solid rgba(255,226,90,.55);
+      outline-offset: 3px;
+    }
+
+
+    .foot{
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .contact{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .tiny{
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(20,20,28,.80);
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 999px;
+      padding: 10px 14px;
+      box-shadow: 0 16px 50px rgba(0,0,0,.45);
+      color: var(--text);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s ease, transform .22s ease;
+    }
+
+    .toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    /* Better tap targets on mobile */
+    @media (hover: none) and (pointer: coarse){
+      .linkCard, .pill, .miniBtn{ transform: none !important; }
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .bg{ animation: none; }
+      .noise{ animation: none; }
+      .pill, .linkCard, .miniBtn{ transition: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg"></div>
+  <div class="noise"></div>
+
+  <div class="wrap">
+    <div class="shell">
+
+      <!-- LEFT: brand + links -->
+      <section class="card" aria-label="Rad Dad links">
+        <div class="brand">
+          <div class="logo" title="Rad Dad">
+            <img src="RadDad_logo.jpg" alt="Rad Dad logo" />
+          </div>
+
+          <div class="headline">
+            <h1 class="title">Rad Dad</h1>
+            <p class="tagline" id="tagline">
+              Pop punk covers, big hooks, bigger grins. Book us and come sing loud.
+            </p>
+          </div>
+        </div>
+
+        <div class="pillrow" aria-label="Quick actions">
+          <button class="pill" id="btnVcard" type="button" title="Save Rad Dad to your contacts">
+            <span class="dot green" aria-hidden="true"></span>
+            Save contact
+          </button>
+
+          <button class="pill" id="btnCopyPhone" type="button" title="Copy the band phone number">
+            <span class="dot" aria-hidden="true"></span>
+            Copy phone
+          </button>
+
+          <button class="pill" id="btnCopyEmail" type="button" title="Copy the band email address">
+            <span class="dot pink" aria-hidden="true"></span>
+            Copy email
+          </button>
+        </div>
+
+        <div class="grid" id="linkGrid" aria-label="Linktree links">
+          <!-- Links render here -->
+        </div>
+      </section>
+
+      <!-- RIGHT: video + contact -->
+      <section class="card videoCard" aria-label="Rad Dad video">
+        <div class="videoWrap">
+          <div class="videoHeader">
+            <div class="videoTitle">
+              <h2 id="videoHeading">Latest video</h2>
+              <p id="welcomeLine">Watch a clip, then follow the chaos.</p>
+            </div>
+
+            <button class="miniBtn" id="btnNewLine" type="button" title="Refresh the vibe">
+              New vibe
+            </button>
+          </div>
+
+          <div class="videoFrame" aria-label="Embedded video">
+            
+            <div class="videoOverlay" id="videoOverlay" role="button" tabindex="0" aria-label="Play video">
+              <div class="playBadge" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M10 8l6 4-6 4V8z" fill="currentColor"/>
+                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="currentColor" stroke-width="2" opacity=".35"/>
+                </svg>
+              </div>
+              <div class="overlayText">
+                <div class="overlayTitle">Play the clip</div>
+                <div class="overlaySub">Starts at 0:14 so it hits fast</div>
+                <div class="overlayActions">
+                  <a class="overlayPill" id="openOnYouTube" href="https://youtu.be/_IwRtmuTKBY" target="_blank" rel="noopener noreferrer">Open on YouTube</a>
+                </div>
+              </div>
+            </div>
+
+            <iframe
+              id="videoFrame"
+              src=""
+              title="Rad Dad video player"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen>
+            </iframe>
+
+          </div>
+
+          <div class="foot" aria-label="Contact">
+            <div class="contact">
+              <a class="pill" href="mailto:rad.dad.band@gmail.com?subject=Rad%20Dad%20Booking" title="Email Rad Dad">
+                <span class="dot green" aria-hidden="true"></span>
+                Email for booking
+              </a>
+
+              <span class="tiny" aria-label="Band phone number">Phone: (214) 697-0584</span>
+            </div>
+
+            <div class="tiny" id="footerTiny">
+              © <span id="year"></span> Rad Dad
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // ===========
+    // Easy edits
+    // ===========
+
+    // Add links here and they auto render into the Linktree grid.
+    // Tip: keep labels short and strong.
+    const LINKS = [
+      {
+        label: "Facebook",
+        sub: "Photos, events, chaos",
+        href: "https://www.facebook.com/share/1NJfLTm4fc/?mibextid=wwXIfr"
+      },
+      {
+        label: "Instagram",
+        sub: "Reels, posters, clips",
+        href: "https://www.instagram.com/rad.dad.band?igsh=dzBwODRpeTZpb2Fq"
+      }
+    ];
+
+    // Video embed options
+    // YouTube: use https://www.youtube-nocookie.com/embed/VIDEO_ID
+    // Google Drive: use https://drive.google.com/file/d/FILE_ID/preview
+    const VIDEO = {
+      heading: "Latest video",
+      subline: "Watch a clip, then follow the chaos.",
+      videoId: "_IwRtmuTKBY",
+      startSeconds: 14
+    };
+
+    // Taglines rotate to keep it fresh so visitors want to come back.
+    const TAGLINES = [
+      "Pop punk covers, big hooks, bigger grins. Book us and come sing loud.",
+      "All the classics you forgot you knew, played like the rent is due.",
+      "A nostalgia rush with fresh energy. Loud. Tight. Fun.",
+      "Crowd sing-alongs only. If you can talk tomorrow, we did it wrong.",
+      "Your favorite pop punk, served extra crispy with a side of chaos."
+    ];
+
+    // ===========
+    // App logic
+    // ===========
+
+    const els = {
+      grid: document.getElementById("linkGrid"),
+      year: document.getElementById("year"),
+      tagline: document.getElementById("tagline"),
+      toast: document.getElementById("toast"),
+      welcomeLine: document.getElementById("welcomeLine"),
+      videoHeading: document.getElementById("videoHeading"),
+      videoFrame: document.getElementById("videoFrame"),
+      footerTiny: document.getElementById("footerTiny"),
+      btnNewLine: document.getElementById("btnNewLine"),
+      btnCopyPhone: document.getElementById("btnCopyPhone"),
+      btnCopyEmail: document.getElementById("btnCopyEmail"),
+      btnVcard: document.getElementById("btnVcard"),
+      videoOverlay: document.getElementById("videoOverlay")
+    };
+
+    const PHONE_PRETTY = "(214) 697-0584";
+    const PHONE_DIGITS = "12146970584";
+    const EMAIL = "rad.dad.band@gmail.com";
+
+    function iconArrow(){
+      return `
+        <span class="arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M8 5h11v11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19 5 5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      `;
+    }
+
+    function renderLinks(){
+      els.grid.innerHTML = "";
+      LINKS.forEach((l) => {
+        const a = document.createElement("a");
+        a.className = "linkCard";
+        a.href = l.href;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.innerHTML = `
+          <div class="left">
+            <div class="label">${l.label}</div>
+            <div class="sub">${l.sub}</div>
+          </div>
+          ${iconArrow()}
+        `;
+        els.grid.appendChild(a);
+      });
+    }
+
+    function showToast(msg){
+      els.toast.textContent = msg;
+      els.toast.classList.add("show");
+      window.clearTimeout(showToast._t);
+      showToast._t = window.setTimeout(() => els.toast.classList.remove("show"), 1600);
+    }
+
+    async function copyText(text, okMsg){
+      try{
+        await navigator.clipboard.writeText(text);
+        showToast(okMsg);
+      }catch(e){
+        // Fallback for older browsers
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showToast(okMsg);
+      }
+    }
+
+    function pickTagline(){
+      const idx = Math.floor(Math.random() * TAGLINES.length);
+      els.tagline.textContent = TAGLINES[idx];
+    }
+
+    function welcomeBack(){
+      const key = "radDadVisits";
+      const n = Number(localStorage.getItem(key) || "0") + 1;
+      localStorage.setItem(key, String(n));
+
+      if(n === 1){
+        els.welcomeLine.textContent = VIDEO.subline;
+        return;
+      }
+
+      // Makes repeat visitors feel seen
+      const lines = [
+        `Welcome back. You have been here ${n} times. That is extremely rad.`,
+        `Back again. This is visit number ${n}. You have elite taste.`,
+        `You came back. Respect. This is visit number ${n}.`,
+        `Return of the Rad. Visit ${n}.`
+      ];
+      els.welcomeLine.textContent = lines[Math.floor(Math.random() * lines.length)];
+    }
+
+    function setVideo(){
+      els.videoHeading.textContent = VIDEO.heading;
+
+      // Do not load the player until the user clicks
+      els.videoFrame.src = "";
+    }
+
+    function makeVcard(){
+      const vcard = [
+        "BEGIN:VCARD",
+        "VERSION:3.0",
+        "FN:Rad Dad",
+        "ORG:Rad Dad",
+        `TEL;TYPE=CELL:${PHONE_DIGITS}`,
+        `EMAIL:${EMAIL}`,
+        "URL:https://www.instagram.com/rad.dad.band?igsh=dzBwODRpeTZpb2Fq",
+        "NOTE:Pop punk cover band",
+        "END:VCARD"
+      ].join("\n");
+
+      const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "RadDad.vcf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      showToast("Contact card downloaded");
+    }
+
+    // Init
+    els.year.textContent = new Date().getFullYear();
+    renderLinks();
+    setVideo();
+    pickTagline();
+    welcomeBack();
+
+    function buildYouTubeEmbedUrl(){
+      const base = `https://www.youtube.com/embed/${VIDEO.videoId}`;
+      const params = new URLSearchParams({
+        start: String(VIDEO.startSeconds || 0),
+        autoplay: "1",
+        rel: "0",
+        modestbranding: "1",
+        playsinline: "1"
+      });
+      return `${base}?${params.toString()}`;
+    }
+
+    function playVideo(){
+      if(els.videoFrame.src) return;
+      els.videoFrame.src = buildYouTubeEmbedUrl();
+      els.videoOverlay.style.display = "none";
+      showToast("Turning it up");
+    }
+
+    if(els.videoOverlay){
+      els.videoOverlay.addEventListener("click", playVideo);
+      els.videoOverlay.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          playVideo();
+        }
+      });
+    }
+
+
+    // Actions
+    els.btnNewLine.addEventListener("click", () => {
+      pickTagline();
+      welcomeBack();
+      showToast("Vibe refreshed");
+    });
+
+    els.btnCopyPhone.addEventListener("click", () => copyText(PHONE_PRETTY, "Phone copied"));
+    els.btnCopyEmail.addEventListener("click", () => copyText(EMAIL, "Email copied"));
+    els.btnVcard.addEventListener("click", makeVcard);
+  </script>
+</body>
+</html>
