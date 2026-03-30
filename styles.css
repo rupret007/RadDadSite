@@ -478,24 +478,24 @@ body::before {
 }
 
 .shows-grid {
-    width: 100%;
+    width: min(100%, 760px);
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.25rem;
+    gap: 0.85rem;
 }
 
 .show-card {
     display: grid;
-    grid-template-columns: minmax(110px, 132px) minmax(0, 1fr);
-    gap: 1.25rem;
+    grid-template-columns: minmax(76px, 92px) minmax(0, 1fr);
+    gap: 0.8rem;
     align-items: stretch;
-    padding: 1.35rem;
+    padding: 0.85rem;
     background:
         linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
         var(--dark-surface);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.32);
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
     position: relative;
     overflow: hidden;
 }
@@ -520,68 +520,68 @@ body::before {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 0.35rem;
-    padding: 1rem 0.85rem;
-    border-radius: 16px;
+    gap: 0.18rem;
+    padding: 0.7rem 0.55rem;
+    border-radius: 12px;
     background: linear-gradient(135deg, rgba(255, 0, 110, 0.18), rgba(58, 134, 255, 0.18));
     border: 1px solid rgba(255, 255, 255, 0.14);
     text-align: center;
 }
 
 .show-date-month {
-    font-size: 0.78rem;
+    font-size: 0.6rem;
     font-weight: 700;
-    letter-spacing: 2.4px;
+    letter-spacing: 1.8px;
     color: var(--text-muted);
     text-transform: uppercase;
 }
 
 .show-date-day {
     font-family: 'Oswald', sans-serif;
-    font-size: 3rem;
+    font-size: 2rem;
     line-height: 1;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     color: var(--text-light);
 }
 
 .show-date-full {
-    font-size: 0.72rem;
-    line-height: 1.4;
+    font-size: 0.58rem;
+    line-height: 1.3;
     color: rgba(255, 255, 255, 0.78);
 }
 
 .show-details {
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: 0.55rem;
 }
 
 .show-title {
     font-family: 'Oswald', sans-serif;
-    font-size: 1.7rem;
+    font-size: 1.15rem;
     line-height: 1.1;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     color: var(--text-light);
 }
 
 .show-meta {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 0.55rem;
+    gap: 0.35rem;
     align-items: baseline;
     color: var(--text-light);
 }
 
 .show-meta-label {
-    font-size: 0.76rem;
+    font-size: 0.58rem;
     font-weight: 700;
-    letter-spacing: 1.8px;
+    letter-spacing: 1.4px;
     text-transform: uppercase;
     color: var(--text-muted);
 }
 
 .show-meta-value {
-    font-size: 1rem;
+    font-size: 0.78rem;
     font-weight: 600;
     line-height: 1.4;
 }
@@ -591,15 +591,16 @@ body::before {
     align-items: center;
     justify-content: center;
     width: fit-content;
-    min-width: 160px;
+    min-width: 118px;
     margin-top: auto;
-    padding: 0.9rem 1.25rem;
+    padding: 0.6rem 0.9rem;
     background: rgba(255, 255, 255, 0.06);
     border: 2px solid rgba(255, 255, 255, 0.14);
     border-radius: 999px;
     color: var(--text-light);
     font-weight: 700;
-    letter-spacing: 0.3px;
+    font-size: 0.78rem;
+    letter-spacing: 0.2px;
     text-decoration: none;
     position: relative;
     overflow: hidden;
@@ -928,7 +929,7 @@ body::before {
     }
 
     .show-date-block {
-        max-width: 180px;
+        max-width: 132px;
         width: 100%;
         justify-self: center;
     }
@@ -982,7 +983,7 @@ body::before {
     }
 
     .show-title {
-        font-size: 1.45rem;
+        font-size: 1.1rem;
     }
 }
 
