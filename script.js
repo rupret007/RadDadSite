@@ -51,15 +51,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Add hover effect to video container
-    const videoContainer = document.querySelector('.video-container');
-    if (videoContainer) {
+    document.querySelectorAll('.video-container').forEach(function(videoContainer) {
         videoContainer.addEventListener('mouseenter', function() {
             this.style.transition = 'all 0.3s ease';
         });
-    }
+    });
 
     // Add ripple effect to all links
-    const links = document.querySelectorAll('.social-link, .contact-link, .festival-link');
+    const links = document.querySelectorAll('.social-link, .contact-link, .festival-link, .show-link');
     links.forEach(link => {
         link.addEventListener('click', function(e) {
             const ripple = document.createElement('span');
@@ -101,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, observerOptions);
 
     // Observe sections
-    const sections = document.querySelectorAll('.festival-section, .video-section, .social-section, .contact-section');
+    const sections = document.querySelectorAll('.festival-section, .video-section, .shows-section, .social-section, .contact-section');
     sections.forEach(section => {
         section.style.opacity = '0';
         section.style.transform = 'translateY(20px)';
