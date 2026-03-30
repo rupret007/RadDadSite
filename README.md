@@ -1,70 +1,90 @@
 # Rad Dad Band Website
 
-A stunning single-page website for Rad Dad, a pop punk cover band.
+Static one-page website for Rad Dad, a pop punk cover band.
 
-## Features
+## Local Preview
 
-- **Modern Design**: State-of-the-art UI with smooth animations and gradients
-- **Responsive**: Works perfectly on all devices (desktop, tablet, mobile)
-- **Interactive Elements**: Hover effects, animations, and smooth transitions
-- **Video Embed**: YouTube video integration
-- **Social Links**: Direct links to Facebook and Instagram
-- **Contact Information**: Email and phone number with clickable links
+1. Open [index.html](./index.html) directly in a browser for a quick preview.
+2. Use the automated test server when you want to exercise the site through Playwright.
 
-## Setup
+## Automated Testing
 
-1. Place your logo file (`RadDad_Logo.jpg`) in the root directory
-2. Open `index.html` in a web browser
-3. That's it! No build process required.
+The repo now includes a hybrid automated test suite:
+
+- `Vitest + JSDOM` for `script.js` behavior
+- `Playwright` for real-browser homepage smoke coverage in Chromium
+
+### Install
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Install the Playwright Chromium browser once:
+
+   ```bash
+   npm run test:install-browsers
+   ```
+
+If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead.
+
+### Test Commands
+
+- Run the full suite:
+
+  ```bash
+  npm test
+  ```
+
+- Run unit tests only:
+
+  ```bash
+  npm run test:unit
+  ```
+
+- Run browser smoke tests only:
+
+  ```bash
+  npm run test:e2e
+  ```
+
+### What The Suite Covers
+
+- Homepage loads with the expected section order
+- Upcoming shows content and links stay correct
+- The previous-video thumbnail remains while the old text stays removed
+- Mobile layout does not introduce horizontal overflow
+- `script.js` behaviors including:
+  - logo fallback on image error
+  - ripple creation and cleanup
+  - section animation initialization
+  - hover transition binding for all video containers
+
+## Continuous Integration
+
+GitHub Actions runs the same test suite on every push and pull request:
+
+- installs Node 24 dependencies with `npm ci`
+- installs Chromium for Playwright
+- runs `npm test`
+- uploads Playwright artifacts if the browser suite fails
 
 ## File Structure
 
-```
+```text
 RadDad Website/
-├── index.html          # Main HTML file
-├── styles.css          # All styling and animations
-├── script.js           # Interactive JavaScript features
-├── RadDad_Logo.jpg     # Your band logo (add this file)
-└── README.md           # This file
+|-- .github/workflows/test.yml
+|-- index.html
+|-- styles.css
+|-- script.js
+|-- tests/
+|   |-- e2e/homepage.spec.js
+|   |-- setup/vitest.setup.js
+|   `-- unit/homepage.test.js
+|-- playwright.config.js
+|-- vitest.config.js
+|-- package.json
+`-- README.md
 ```
-
-## Customization
-
-### Adding More Videos
-
-To add more videos, you can modify the video section in `index.html`. The current setup uses a single video, but you can easily add more by duplicating the video-wrapper structure.
-
-### Adding Artwork Images
-
-If you want to incorporate the additional artwork images from Travis's promotions, you can:
-
-1. Add them to the `decoration` elements in the HTML
-2. Use them as background images in CSS
-3. Create a gallery section (though the current design keeps it minimal)
-
-### Changing Colors
-
-Edit the CSS variables in `styles.css`:
-
-```css
-:root {
-    --primary-color: #ff006e;
-    --secondary-color: #8338ec;
-    --accent-color: #3a86ff;
-    /* ... */
-}
-```
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## Notes
-
-- The logo should be named `RadDad_Logo.jpg` and placed in the root directory
-- The YouTube video uses a clickable thumbnail that opens on YouTube (starts at 14 seconds)
-- All links open in new tabs for better user experience
-- The design is optimized for a single-page experience with no scrolling required

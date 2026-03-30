@@ -1,0 +1,19 @@
+{
+  "name": "raddad-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static site for the Rad Dad band homepage.",
+  "scripts": {
+    "serve:test": "http-server . -p 4173 -a 127.0.0.1 -c-1 --silent",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:install-browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "http-server": "^14.1.1",
+    "jsdom": "^29.0.1",
+    "vitest": "^4.1.2"
+  }
+}

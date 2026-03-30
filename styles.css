@@ -759,24 +759,24 @@ body::before {
 .contact-info {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.8rem;
     width: 100%;
-    max-width: 600px;
+    max-width: 430px;
 }
 
 .contact-link {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
-    padding: 1.25rem 2rem;
+    gap: 0.65rem;
+    padding: 0.75rem 1.2rem;
     background: var(--dark-surface);
     border: 2px solid transparent;
-    border-radius: 15px;
+    border-radius: 12px;
     text-decoration: none;
     color: var(--text-light);
     font-weight: 500;
-    font-size: 1rem;
+    font-size: 0.82rem;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -811,8 +811,8 @@ body::before {
 }
 
 .contact-icon {
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     stroke: currentColor;
 }
 
@@ -957,7 +957,7 @@ body::before {
     }
 
     .contact-info {
-        gap: 1rem;
+        gap: 0.7rem;
     }
 
     .decoration {
@@ -980,6 +980,17 @@ body::before {
     .show-link {
         padding: 1rem 1.5rem;
         font-size: 0.95rem;
+    }
+
+    .contact-link {
+        gap: 0.55rem;
+        padding: 0.65rem 1rem;
+        font-size: 0.78rem;
+    }
+
+    .contact-icon {
+        width: 16px;
+        height: 16px;
     }
 
     .show-title {
