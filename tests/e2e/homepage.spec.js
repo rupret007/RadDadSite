@@ -320,10 +320,11 @@ test('keeps the 2026 show history, all three videos, and stable contact links', 
     );
 });
 
-test('stacks three videos with both Wildflower performances larger than the earlier clip', async ({ page }) => {
+test('stacks three videos with equal-sized Wildflower features above the smaller earlier clip', async ({ page }) => {
     for (const viewport of [
         { width: 390, height: 844 },
-        { width: 1440, height: 900 }
+        { width: 1440, height: 900 },
+        { width: 2048, height: 1000 }
     ]) {
         await page.setViewportSize(viewport);
         await page.goto('/');
@@ -350,8 +351,10 @@ test('stacks three videos with both Wildflower performances larger than the earl
 
         expect(spotlight.card.top - featured.card.bottom).toBeGreaterThanOrEqual(16);
         expect(secondary.card.top - spotlight.card.bottom).toBeGreaterThanOrEqual(16);
-        expect(featured.image.width).toBeGreaterThan(spotlight.image.width);
-        expect(featured.image.height).toBeGreaterThan(spotlight.image.height);
+        expect(featured.image.width).toBeCloseTo(spotlight.image.width, 1);
+        expect(featured.image.height).toBeCloseTo(spotlight.image.height, 1);
+        expect(featured.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
+        expect(featured.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
         expect(spotlight.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
         expect(spotlight.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
 

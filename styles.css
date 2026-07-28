@@ -1120,13 +1120,9 @@ button:focus-visible {
     align-items: start;
 }
 
-.video-card--featured {
-    width: min(100%, 68rem);
-    justify-self: center;
-}
-
+.video-card--featured,
 .video-card--spotlight {
-    width: min(90%, 60rem);
+    width: min(100%, 68rem);
     justify-self: center;
 }
 
@@ -1675,10 +1671,6 @@ button:focus-visible {
         width: min(72%, 36rem);
     }
 
-    .video-card--spotlight {
-        width: min(90%, 42rem);
-    }
-
     .shows-layout {
         grid-template-columns: 1fr;
     }
@@ -1919,10 +1911,6 @@ button:focus-visible {
 
     .video-card--secondary {
         width: min(78%, 30rem);
-    }
-
-    .video-card--spotlight {
-        width: min(92%, 34rem);
     }
 
     .video-card figcaption strong {
