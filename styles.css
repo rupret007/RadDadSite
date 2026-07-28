@@ -547,258 +547,563 @@ button:focus-visible {
     position: relative;
     overflow: hidden;
     background:
-        radial-gradient(circle at 8% 50%, rgba(181, 220, 8, 0.08), transparent 27rem),
-        radial-gradient(circle at 94% 40%, rgba(237, 39, 101, 0.08), transparent 25rem),
+        radial-gradient(circle at 5% 26%, rgba(181, 220, 8, 0.11), transparent 24rem),
+        radial-gradient(circle at 96% 72%, rgba(237, 39, 101, 0.11), transparent 27rem),
+        linear-gradient(115deg, transparent 0 47%, rgba(0, 158, 232, 0.035) 47% 52%, transparent 52%),
         var(--ink);
 }
 
 .covers-section.content-section {
-    padding: clamp(4rem, 7vw, 6.5rem) 0;
+    padding: clamp(4.5rem, 8vw, 7rem) 0;
 }
 
 .covers-section::before {
     content: "";
     position: absolute;
     inset: 0;
-    opacity: 0.22;
+    opacity: 0.34;
     background-image:
-        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-    background-size: 38px 38px;
+        radial-gradient(circle, rgba(243, 242, 238, 0.11) 0 0.7px, transparent 0.8px),
+        repeating-linear-gradient(173deg, transparent 0 16px, rgba(255, 255, 255, 0.018) 17px 18px);
+    background-size: 6px 6px, auto;
     pointer-events: none;
 }
 
-.covers-panel {
+.covers-poster {
+    --poster-cream: #f4efdd;
     position: relative;
-    display: grid;
-    grid-template-columns: minmax(16rem, 0.62fr) minmax(0, 1.38fr);
-    align-items: center;
-    gap: clamp(2rem, 5vw, 5rem);
-    padding: clamp(2rem, 3.2vw, 3rem);
-    border: 1px solid rgba(0, 158, 232, 0.3);
+    padding: clamp(2.5rem, 4.6vw, 4.6rem) clamp(1.2rem, 4.5vw, 4.2rem) 1.25rem;
+    border: 2px solid rgba(243, 242, 238, 0.72);
     background:
-        linear-gradient(135deg, rgba(0, 158, 232, 0.07), transparent 34%),
-        linear-gradient(315deg, rgba(237, 39, 101, 0.06), transparent 36%),
-        rgba(9, 23, 37, 0.82);
-    box-shadow: var(--shadow);
+        linear-gradient(135deg, rgba(0, 158, 232, 0.09), transparent 32%),
+        linear-gradient(315deg, rgba(237, 39, 101, 0.1), transparent 34%),
+        #050a10;
+    box-shadow:
+        14px 14px 0 rgba(0, 158, 232, 0.22),
+        -10px -10px 0 rgba(237, 39, 101, 0.14),
+        var(--shadow);
     isolation: isolate;
 }
 
-.covers-panel::before {
+.covers-poster::before {
     content: "";
     position: absolute;
-    top: -0.55rem;
-    right: clamp(1.5rem, 5vw, 5rem);
-    width: 7.2rem;
-    height: 1.05rem;
-    background: repeating-linear-gradient(
-        90deg,
-        rgba(243, 242, 238, 0.9) 0 0.7rem,
-        transparent 0.7rem 1.12rem
-    );
-    transform: rotate(1.5deg);
-    opacity: 0.8;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.26;
+    background:
+        radial-gradient(circle at 20% 18%, rgba(243, 242, 238, 0.16) 0 0.7px, transparent 0.9px),
+        radial-gradient(circle at 78% 74%, rgba(243, 242, 238, 0.11) 0 0.8px, transparent 1px);
+    background-size: 5px 5px, 7px 7px;
     pointer-events: none;
 }
 
-.covers-panel__intro {
-    min-width: 0;
+.covers-poster::after {
+    content: "";
+    position: absolute;
+    inset: 0.7rem -0.75rem -0.75rem 0.7rem;
+    z-index: -2;
+    border: 1px solid rgba(181, 220, 8, 0.42);
+    transform: rotate(-0.18deg);
+    pointer-events: none;
 }
 
-.covers-panel__intro h2 {
-    max-width: 11ch;
+.covers-poster__header {
+    position: relative;
+    z-index: 5;
+    max-width: 54rem;
+    margin-inline: auto;
+    text-align: center;
+}
+
+.covers-poster__header .section-kicker {
+    margin-bottom: 0.9rem;
+}
+
+.covers-poster__header h2 {
     margin: 0;
     font-family: var(--display);
-    font-size: clamp(2.9rem, 4.4vw, 4.5rem);
+    font-size: clamp(4rem, 8vw, 7.25rem);
     font-weight: 700;
-    letter-spacing: -0.045em;
-    line-height: 0.93;
+    letter-spacing: -0.055em;
+    line-height: 0.82;
     text-transform: uppercase;
     text-wrap: balance;
+    text-shadow:
+        4px 4px 0 rgba(237, 39, 101, 0.68),
+        -3px -2px 0 rgba(0, 158, 232, 0.4);
 }
 
-.covers-panel__intro > p:not(.section-kicker) {
-    max-width: 31rem;
-    margin: 1.25rem 0 0;
+.covers-poster__header h2 span {
+    width: fit-content;
+    display: block;
+    margin: 0 auto 0.32em;
+    padding: 0.33em 1.25em 0.38em;
+    clip-path: polygon(1.5% 12%, 99% 0, 97.5% 88%, 0 100%);
+    background: var(--pink);
+    color: var(--ink);
+    font-size: 0.25em;
+    letter-spacing: 0.18em;
+    line-height: 1;
+    text-shadow: none;
+}
+
+.covers-poster__header > p:last-child {
+    max-width: 50rem;
+    margin: 1.55rem auto 0;
     color: #d6dee5;
-    font-weight: 600;
+    font-size: clamp(0.82rem, 1.3vw, 1rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
-.covers-panel__intro .covers-panel__note {
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--line);
-    color: var(--muted);
-    font-size: 0.82rem;
-    font-weight: 500;
-    line-height: 1.65;
+.covers-poster__stage {
+    position: relative;
+    margin-top: clamp(2rem, 4vw, 3.5rem);
+    border-top: 2px solid var(--poster-cream);
+    border-bottom: 2px solid var(--poster-cream);
+    background:
+        linear-gradient(90deg, rgba(0, 158, 232, 0.08), transparent 22% 78%, rgba(237, 39, 101, 0.08)),
+        rgba(2, 8, 16, 0.72);
+    isolation: isolate;
+}
+
+.covers-poster__stage::before,
+.covers-poster__stage::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    left: 50%;
+    width: 42%;
+    height: 0.42rem;
+    background: var(--lime);
+    clip-path: polygon(0 25%, 100% 0, 98% 100%, 2% 76%);
+    transform: translateX(-50%) rotate(-1deg);
+    opacity: 0.72;
+}
+
+.covers-poster__stage::before {
+    top: -0.3rem;
+}
+
+.covers-poster__stage::after {
+    bottom: -0.3rem;
+    background: var(--pink);
+    transform: translateX(-50%) rotate(1deg);
+}
+
+.artist-motif {
+    position: absolute;
+    z-index: 1;
+    display: block;
+    pointer-events: none;
+}
+
+.artist-motif--checker {
+    top: 0.8rem;
+    right: 1rem;
+    width: clamp(5rem, 10vw, 8rem);
+    height: 1.05rem;
+    background:
+        conic-gradient(
+            from 90deg,
+            var(--poster-cream) 0 25%,
+            transparent 0 50%,
+            var(--poster-cream) 0 75%,
+            transparent 0
+        );
+    background-size: 1.05rem 1.05rem;
+    transform: rotate(1.5deg);
+    opacity: 0.82;
+}
+
+.artist-motif--bolt-blue,
+.artist-motif--bolt-pink {
+    width: clamp(2.3rem, 4vw, 3.8rem);
+    height: clamp(4.8rem, 8vw, 7rem);
+    clip-path: polygon(44% 0, 100% 0, 65% 39%, 100% 39%, 22% 100%, 43% 52%, 0 52%);
+}
+
+.artist-motif--bolt-blue {
+    top: 14%;
+    left: 0.75rem;
+    background: var(--blue-bright);
+    transform: rotate(-11deg);
+    filter: drop-shadow(5px 5px 0 rgba(237, 39, 101, 0.5));
+}
+
+.artist-motif--bolt-pink {
+    right: 1rem;
+    bottom: 20%;
+    background: var(--pink);
+    transform: rotate(13deg) scaleX(-1);
+    filter: drop-shadow(5px 5px 0 rgba(181, 220, 8, 0.42));
+}
+
+.artist-motif--stars {
+    left: 1.25rem;
+    bottom: 1rem;
+    color: var(--lime);
+    font-size: clamp(0.8rem, 1.4vw, 1.15rem);
+    letter-spacing: 0.42em;
+    transform: rotate(-4deg);
+}
+
+.covers-poster__sticker {
+    position: absolute;
+    z-index: 4;
+    top: -2.2rem;
+    left: -1.25rem;
+    width: clamp(4.8rem, 8vw, 7.2rem);
+    height: auto;
+    aspect-ratio: 1;
+    border: 3px solid var(--poster-cream);
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow:
+        0 0 0 4px var(--pink),
+        8px 8px 0 rgba(0, 158, 232, 0.4);
+    transform: rotate(-8deg);
+}
+
+.covers-poster__stamp {
+    position: absolute;
+    z-index: 1;
+    right: 1.25rem;
+    bottom: 0.85rem;
+    width: clamp(5.25rem, 8vw, 7rem);
+    aspect-ratio: 1;
+    display: grid;
+    place-content: center;
+    border: 2px solid rgba(243, 242, 238, 0.72);
+    border-radius: 50%;
+    color: rgba(243, 242, 238, 0.78);
+    text-align: center;
+    text-transform: uppercase;
+    transform: rotate(8deg);
+}
+
+.covers-poster__stamp::before,
+.covers-poster__stamp::after {
+    content: "";
+    position: absolute;
+    border-radius: inherit;
+}
+
+.covers-poster__stamp::before {
+    inset: 0.32rem;
+    border: 1px dashed currentColor;
+}
+
+.covers-poster__stamp::after {
+    inset: 42% -0.35rem;
+    z-index: -1;
+    background: var(--pink);
+    transform: rotate(-5deg);
+}
+
+.covers-poster__stamp span {
+    font-size: clamp(0.42rem, 0.7vw, 0.57rem);
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+.covers-poster__stamp strong {
+    font-family: var(--display);
+    font-size: clamp(0.95rem, 1.6vw, 1.35rem);
+    line-height: 1;
 }
 
 .artist-wall {
-    min-width: 0;
+    position: relative;
+    z-index: 3;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: center;
+    gap: 0.45rem clamp(0.25rem, 1vw, 0.85rem);
     margin: 0;
-    padding: 0;
-    border-top: 1px solid rgba(243, 242, 238, 0.15);
-    border-left: 1px solid rgba(243, 242, 238, 0.15);
+    padding: clamp(3.75rem, 6vw, 5.25rem) clamp(2.8rem, 6.5vw, 6rem) clamp(4rem, 6.5vw, 5.25rem);
     list-style: none;
 }
 
-.artist-wall li {
+.artist-wall__item {
     --artist-accent: var(--blue);
     position: relative;
     min-width: 0;
-    min-height: 7.4rem;
+    min-height: clamp(4.7rem, 7vw, 6.35rem);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.65rem;
-    overflow: hidden;
-    padding: 1rem 0.75rem 1.15rem;
-    border-right: 1px solid rgba(243, 242, 238, 0.15);
-    border-bottom: 1px solid rgba(243, 242, 238, 0.15);
-    background: rgba(2, 8, 16, 0.33);
+    gap: 0.15rem;
+    padding: 0.75rem 0.35rem 1rem;
     text-align: center;
+    transform: rotate(var(--artist-rotate, 0deg));
 }
 
-.artist-wall li::after {
+.artist-wall__item::after {
     content: "";
     position: absolute;
     left: 50%;
-    bottom: 0.62rem;
-    width: 2.25rem;
-    height: 2px;
+    bottom: 0.42rem;
+    width: min(64%, 5.25rem);
+    height: 0.2rem;
     background: var(--artist-accent);
-    box-shadow: 0 0 14px color-mix(in srgb, var(--artist-accent) 58%, transparent);
-    transform: translateX(-50%);
+    clip-path: polygon(0 30%, 100% 0, 97% 100%, 2% 76%);
+    box-shadow: 0 0 15px color-mix(in srgb, var(--artist-accent) 55%, transparent);
+    transform: translateX(-50%) rotate(calc(var(--artist-rotate, 0deg) * -1));
 }
 
-.artist-wall li > span {
-    max-width: 22ch;
-    color: var(--muted);
-    font-size: 0.625rem;
-    font-weight: 700;
-    letter-spacing: 0.045em;
-    line-height: 1.4;
-    text-transform: uppercase;
-    text-wrap: balance;
-    overflow-wrap: anywhere;
-}
-
-.artist-wall li > small {
+.artist-wall__item > small {
     margin-bottom: -0.4rem;
     color: #ff8bb0;
-    font-size: 0.625rem;
+    font-size: clamp(0.52rem, 0.75vw, 0.64rem);
     font-weight: 800;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.19em;
     text-transform: uppercase;
 }
 
 .artist-name {
     max-width: 100%;
     display: block;
-    color: var(--cream);
+    color: var(--poster-cream);
     font-family: var(--display);
-    font-size: clamp(1.35rem, 2.2vw, 2.1rem);
+    font-size: clamp(1.5rem, 2.25vw, 2.25rem);
     font-weight: 700;
     letter-spacing: -0.035em;
     line-height: 0.95;
     text-transform: uppercase;
     text-wrap: balance;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
+    word-break: normal;
+    filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.72));
 }
 
-.artist-wall li:has(.artist-name--green-day) {
+.artist-wall__item--green-day,
+.artist-wall__item--blink,
+.artist-wall__item--jimmy,
+.artist-wall__item--nofx {
+    grid-column: span 3;
+}
+
+.artist-wall__item--mxpx,
+.artist-wall__item--blur,
+.artist-wall__item--pennywise,
+.artist-wall__item--sublime {
+    grid-column: span 2;
+}
+
+.artist-wall__item--rancid,
+.artist-wall__item--taylor,
+.artist-wall__item--beatles,
+.artist-wall__item--me-first {
+    grid-column: span 3;
+}
+
+.artist-wall__item--nirvana {
+    grid-column: span 4;
+}
+
+.artist-wall__item--green-day {
     --artist-accent: var(--lime);
+    --artist-rotate: -1deg;
 }
 
 .artist-name--green-day {
     color: #d5f143;
+    font-size: clamp(1.7rem, 2.75vw, 2.75rem);
     font-style: italic;
-    text-shadow: 3px 3px 0 rgba(0, 158, 232, 0.28);
+    text-shadow: 4px 4px 0 rgba(0, 158, 232, 0.42);
 }
 
-.artist-wall li:has(.artist-name--blink) {
+.artist-wall__item--blink {
     --artist-accent: var(--blue-bright);
+    --artist-rotate: 0.5deg;
 }
 
 .artist-name--blink {
     font-family: var(--body);
-    font-size: clamp(1.25rem, 2vw, 1.9rem);
+    font-size: clamp(1.45rem, 2.5vw, 2.45rem);
     font-weight: 800;
     letter-spacing: -0.075em;
     text-transform: lowercase;
 }
 
-.artist-wall li:has(.artist-name--jimmy) {
+.artist-wall__item--jimmy {
     --artist-accent: var(--cream);
+    --artist-rotate: -0.5deg;
 }
 
 .artist-name--jimmy {
-    font-size: clamp(1.15rem, 1.7vw, 1.7rem);
+    max-width: 9ch;
+    font-size: clamp(1.2rem, 1.8vw, 1.8rem);
     letter-spacing: 0.01em;
 }
 
-.artist-wall li:has(.artist-name--nofx) {
+.artist-wall__item--nofx {
     --artist-accent: #ff5d8d;
+    --artist-rotate: 1.5deg;
 }
 
 .artist-name--nofx {
     color: #ff5d8d;
-    font-size: clamp(1.75rem, 2.8vw, 2.7rem);
+    font-size: clamp(2rem, 3.4vw, 3.4rem);
     font-style: italic;
     letter-spacing: 0.02em;
 }
 
-.artist-wall li:has(.artist-name--mxpx) {
+.artist-wall__item--mxpx {
     --artist-accent: var(--blue-bright);
+    --artist-rotate: 1deg;
 }
 
 .artist-name--mxpx {
     color: var(--blue-bright);
     font-family: var(--body);
-    font-size: clamp(1.55rem, 2.5vw, 2.35rem);
+    font-size: clamp(1.7rem, 2.75vw, 2.7rem);
     font-weight: 800;
     letter-spacing: -0.07em;
     text-transform: none;
 }
 
-.artist-wall li:has(.artist-name--rancid) {
+.artist-wall__item--rancid {
     --artist-accent: var(--amber);
+    --artist-rotate: -1.4deg;
 }
 
 .artist-name--rancid {
     color: #f0c36d;
+    font-size: clamp(1.7rem, 2.6vw, 2.55rem);
     letter-spacing: 0.035em;
 }
 
-.artist-wall li:has(.artist-name--nirvana) {
+.artist-wall__item--nirvana {
     --artist-accent: #f1d85b;
+    --artist-rotate: 0.5deg;
 }
 
 .artist-name--nirvana {
     color: #f1d85b;
     font-family: Georgia, serif;
-    font-size: clamp(1.2rem, 1.9vw, 1.8rem);
-    letter-spacing: 0.075em;
+    font-size: clamp(1.55rem, 2.55vw, 2.55rem);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    text-wrap: nowrap;
 }
 
-.artist-wall li.artist-wall__surprise {
+.artist-wall__item--taylor {
     --artist-accent: #ff73a0;
+    --artist-rotate: 1deg;
     background:
-        linear-gradient(145deg, rgba(237, 39, 101, 0.12), transparent 68%),
-        rgba(2, 8, 16, 0.33);
+        linear-gradient(145deg, rgba(237, 39, 101, 0.22), transparent 72%);
+    clip-path: polygon(4% 10%, 98% 0, 94% 92%, 0 100%);
 }
 
 .artist-name--taylor {
     color: #ff8bb0;
     font-family: Georgia, serif;
-    font-size: clamp(1.15rem, 1.8vw, 1.75rem);
+    font-size: clamp(1.15rem, 1.9vw, 1.9rem);
     font-style: italic;
     font-weight: 700;
     letter-spacing: -0.02em;
     text-transform: none;
+}
+
+.artist-wall__item--blur {
+    --artist-accent: var(--pink);
+    --artist-rotate: -2deg;
+}
+
+.artist-name--blur {
+    font-family: var(--body);
+    font-size: clamp(2rem, 3.2vw, 3.15rem);
+    font-weight: 800;
+    letter-spacing: -0.08em;
+    text-transform: lowercase;
+    text-shadow:
+        3px 2px 0 var(--pink),
+        -3px -2px 0 rgba(0, 158, 232, 0.75);
+}
+
+.artist-wall__item--beatles {
+    --artist-accent: var(--cream);
+    --artist-rotate: 0.5deg;
+}
+
+.artist-name--beatles {
+    font-family: Georgia, serif;
+    font-size: clamp(1.4rem, 2.15vw, 2.15rem);
+    letter-spacing: -0.045em;
+    text-transform: none;
+}
+
+.artist-wall__item--pennywise {
+    --artist-accent: var(--lime);
+    --artist-rotate: 1.6deg;
+}
+
+.artist-name--pennywise {
+    color: var(--lime);
+    font-size: clamp(1.35rem, 2vw, 2rem);
+    font-style: italic;
+    letter-spacing: 0.015em;
+    text-shadow: 3px 3px 0 rgba(237, 39, 101, 0.45);
+}
+
+.artist-wall__item--me-first {
+    --artist-accent: var(--blue-bright);
+    --artist-rotate: -0.7deg;
+}
+
+.artist-name--me-first {
+    color: var(--blue-bright);
+    font-family: var(--body);
+    font-size: clamp(1.12rem, 1.75vw, 1.72rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
+}
+
+.artist-name--me-first span {
+    display: block;
+    margin-top: 0.2em;
+    color: var(--poster-cream);
+    font-family: var(--display);
+    font-size: 0.6em;
+    letter-spacing: 0.035em;
+}
+
+.artist-wall__item--sublime {
+    --artist-accent: #f2cb3c;
+    --artist-rotate: 1.8deg;
+}
+
+.artist-name--sublime {
+    color: #f2cb3c;
+    font-family: Georgia, serif;
+    font-size: clamp(1.4rem, 2.25vw, 2.2rem);
+    font-style: italic;
+    letter-spacing: -0.04em;
+    text-transform: none;
+}
+
+.covers-poster__footer {
+    min-height: 3.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--muted);
+    font-family: var(--display);
+    font-size: clamp(0.68rem, 1vw, 0.82rem);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.covers-poster__footer span:last-child {
+    color: var(--lime);
 }
 
 /* Shared section layout */
@@ -1256,16 +1561,25 @@ button:focus-visible {
         font-size: clamp(3.7rem, 7vw, 5.5rem);
     }
 
-    .covers-panel {
-        grid-template-columns: 1fr;
+    .covers-poster {
+        padding-inline: 2rem;
     }
 
-    .covers-panel__intro {
-        max-width: 46rem;
+    .artist-wall {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        padding-inline: clamp(2.5rem, 6vw, 4.5rem);
     }
 
-    .covers-panel__intro h2 {
-        max-width: 14ch;
+    .artist-wall__item {
+        grid-column: span 2;
+    }
+
+    .artist-wall__item--jimmy,
+    .artist-wall__item--nirvana,
+    .artist-wall__item--taylor,
+    .artist-wall__item--beatles,
+    .artist-wall__item--me-first {
+        grid-column: span 3;
     }
 
     .shows-layout {
@@ -1534,42 +1848,79 @@ button:focus-visible {
         padding: 5.5rem 0;
     }
 
-    .covers-panel {
-        gap: 2.25rem;
-        padding: 2rem 1rem 1rem;
+    .covers-poster {
+        padding: 2.5rem 0.85rem 0.8rem;
+        box-shadow:
+            7px 8px 0 rgba(0, 158, 232, 0.2),
+            -5px -6px 0 rgba(237, 39, 101, 0.12),
+            var(--shadow);
     }
 
-    .covers-panel::before {
-        right: 1.5rem;
-        width: 5.6rem;
+    .covers-poster__header {
+        padding-inline: 0.65rem;
     }
 
-    .covers-panel__intro {
-        padding-inline: 0.35rem;
+    .covers-poster__header h2 {
+        font-size: clamp(3.7rem, 17vw, 5.5rem);
     }
 
-    .covers-panel__intro h2 {
-        font-size: clamp(2.8rem, 13vw, 4.4rem);
+    .covers-poster__header > p:last-child {
+        font-size: 0.72rem;
+        line-height: 1.65;
+    }
+
+    .covers-poster__stage {
+        margin-top: 2.4rem;
     }
 
     .artist-wall {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.35rem 0.1rem;
+        padding: 6.5rem 0.6rem 4.5rem;
     }
 
-    .artist-wall li {
-        min-height: 7rem;
-        padding-inline: 0.65rem;
+    .artist-wall__item {
+        grid-column: span 1;
+        min-height: 5rem;
+        padding: 0.65rem 0.3rem 0.9rem;
     }
 
-    .artist-name {
-        font-size: clamp(1.4rem, 6.5vw, 2rem);
+    .artist-wall__item--jimmy,
+    .artist-wall__item--nirvana,
+    .artist-wall__item--taylor,
+    .artist-wall__item--beatles,
+    .artist-wall__item--me-first {
+        grid-column: span 2;
     }
 
-    .artist-name--blink,
-    .artist-name--jimmy,
-    .artist-name--nirvana,
-    .artist-name--taylor {
-        font-size: clamp(1.15rem, 5vw, 1.65rem);
+    .covers-poster__sticker {
+        top: 0.7rem;
+        left: 50%;
+        width: 4.1rem;
+        transform: translateX(-50%) rotate(-8deg);
+    }
+
+    .covers-poster__stamp {
+        right: 0.35rem;
+        bottom: 0.5rem;
+        width: 4.8rem;
+        opacity: 0.68;
+    }
+
+    .artist-motif--bolt-blue {
+        left: 0.25rem;
+    }
+
+    .artist-motif--bolt-pink {
+        right: 0.25rem;
+    }
+
+    .covers-poster__footer {
+        min-height: 4.4rem;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0;
+        text-align: center;
     }
 
     .section-heading {
@@ -1682,33 +2033,47 @@ button:focus-visible {
         border-top: 1px solid var(--line);
     }
 
-    .covers-panel {
-        padding-inline: 0.7rem;
+    .covers-poster {
+        padding-inline: 0.55rem;
     }
 
-    .covers-panel__intro {
-        padding-inline: 0.25rem;
+    .covers-poster__header h2 {
+        font-size: clamp(3.25rem, 17vw, 4.2rem);
     }
 
-    .artist-wall li {
-        min-height: 7.4rem;
-        padding: 0.85rem 0.45rem 1.1rem;
+    .artist-wall {
+        padding-inline: 0.2rem;
     }
 
-    .artist-wall li > span {
-        font-size: 0.625rem;
-        letter-spacing: 0.02em;
+    .artist-wall__item {
+        min-height: 4.75rem;
+        padding-inline: 0.15rem;
     }
 
     .artist-name {
-        font-size: 1.35rem;
+        font-size: 1.25rem;
     }
 
+    .artist-name--green-day,
     .artist-name--blink,
+    .artist-name--nofx,
+    .artist-name--mxpx,
+    .artist-name--rancid,
+    .artist-name--blur {
+        font-size: 1.55rem;
+    }
+
     .artist-name--jimmy,
     .artist-name--nirvana,
-    .artist-name--taylor {
-        font-size: 1.08rem;
+    .artist-name--taylor,
+    .artist-name--beatles,
+    .artist-name--pennywise,
+    .artist-name--sublime {
+        font-size: 1.2rem;
+    }
+
+    .artist-name--me-first {
+        font-size: 1rem;
     }
 
     .show-card {
