@@ -156,10 +156,20 @@ test('keeps the 2026 show history, both videos, and stable contact links', async
 
     const videos = page.locator('#watch .video-card');
     await expect(videos).toHaveCount(2);
-    await expect(videos.nth(0)).toContainText('Rad Dad Rock Show');
-    await expect(videos.nth(0)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=lcRYxjsrzr0');
+    await expect(videos.nth(0)).toContainText('She — Green Day cover');
+    await expect(videos.nth(0)).toContainText('Wildflower 2026 · New release');
+    await expect(videos.nth(0)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=GCy4nHIqV5k');
+    await expect(videos.nth(0).locator('img')).toHaveAttribute(
+        'src',
+        'https://img.youtube.com/vi/GCy4nHIqV5k/maxresdefault.jpg'
+    );
     await expect(videos.nth(1)).toContainText('Tomorrow');
     await expect(videos.nth(1)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
+
+    await expect(page.locator('#watch .section-heading > .text-link')).toHaveAttribute(
+        'href',
+        'https://www.youtube.com/@RadDadBand'
+    );
 
     const contact = page.locator('#contact');
     await expect(contact.getByRole('link', { name: 'Email Rad Dad' })).toHaveAttribute(
@@ -182,7 +192,7 @@ test('keeps the 2026 show history, both videos, and stable contact links', async
     );
     await expect(socialLinks.getByRole('link', { name: 'YouTube' })).toHaveAttribute(
         'href',
-        'https://www.youtube.com/@RadLikeDad'
+        'https://www.youtube.com/@RadDadBand'
     );
 });
 
