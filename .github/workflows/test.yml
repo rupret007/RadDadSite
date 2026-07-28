@@ -1,19 +1,36 @@
-name: Test Site
+name: Test, Package, and Deploy Site
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      production_action:
+        description: Validate, prepare without activation, or deploy the tested release
+        required: true
+        default: dry-run
+        type: choice
+        options:
+          - dry-run
+          - prepare
+          - deploy
+
+permissions:
+  contents: read
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: test
+    runs-on: ubuntu-24.04
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - name: Check out exact workflow commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.sha }}
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: npm
@@ -27,12 +44,220 @@ jobs:
       - name: Run automated tests
         run: npm test
 
+      - name: Lint deployment shell
+        run: |
+          shellcheck --version
+          npm run lint:deploy
+
+      - name: Build and verify clean production artifact
+        env:
+          DEPLOY_COMMIT_SHA: ${{ github.sha }}
+        run: |
+          BUILD_TIMESTAMP="$(git show -s --format=%cI "$DEPLOY_COMMIT_SHA")"
+          export BUILD_TIMESTAMP
+          npm run build:production
+          npm run verify:production -- --expected-sha "$DEPLOY_COMMIT_SHA"
+
+      - name: Upload exact production artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: production-site-${{ github.sha }}
+          path: dist/client/
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 7
+
       - name: Upload Playwright artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: playwright-artifacts
+          name: playwright-artifacts-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             playwright-report/
             test-results/
           if-no-files-found: ignore
+          retention-days: 7
+
+  deploy-production:
+    name: ${{ github.event_name == 'workflow_dispatch' && inputs.production_action == 'dry-run' && 'Validate production release' || github.event_name == 'workflow_dispatch' && inputs.production_action == 'prepare' && 'Prepare production release' || 'Deploy production release' }}
+    needs: test
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'push' && vars.PROD_AUTO_DEPLOY_ENABLED == 'true')
+      )
+    runs-on: ubuntu-24.04
+    environment:
+      name: production
+      url: ${{ vars.PROD_SITE_URL }}
+    concurrency:
+      group: raddad-production
+      cancel-in-progress: false
+      queue: max
+
+    steps:
+      - name: Check out deployment verifier and helper source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Download artifact from this workflow run
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: production-site-${{ github.sha }}
+          path: production-site
+
+      - name: Set up the tested Node.js runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+
+      - name: Re-verify downloaded artifact
+        env:
+          DEPLOY_COMMIT_SHA: ${{ github.sha }}
+        run: >-
+          npm run verify:production --
+          --artifact-dir production-site
+          --expected-sha "$DEPLOY_COMMIT_SHA"
+
+      - name: Validate, prepare, or deploy exact artifact
+        shell: bash
+        env:
+          PRODUCTION_ACTION: ${{ github.event_name == 'workflow_dispatch' && inputs.production_action || 'deploy' }}
+          PROD_HOST: ${{ vars.PROD_HOST }}
+          PROD_PORT: ${{ vars.PROD_PORT || '22' }}
+          PROD_USER: ${{ vars.PROD_USER }}
+          PROD_STAGE_ROOT: ${{ vars.PROD_STAGE_ROOT }}
+          PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          PROD_SSH_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
+        run: |
+          set -Eeuo pipefail
+
+          fail() {
+            echo "::error::$1"
+            exit 1
+          }
+
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]] ||
+            fail "GITHUB_SHA is not a full lowercase commit SHA."
+          [[ "$GITHUB_RUN_ID" =~ ^[0-9]+$ && "$GITHUB_RUN_ATTEMPT" =~ ^[0-9]+$ ]] ||
+            fail "GitHub run identity is invalid."
+          [[ "$PRODUCTION_ACTION" == "dry-run" ||
+             "$PRODUCTION_ACTION" == "prepare" ||
+             "$PRODUCTION_ACTION" == "deploy" ]] ||
+            fail "Unsupported production action."
+          [[ "$PROD_HOST" =~ ^[A-Za-z0-9.-]+$ ]] ||
+            fail "PROD_HOST contains unsupported characters."
+          if [[ ! "$PROD_PORT" =~ ^[0-9]{1,5}$ ]] ||
+            ((PROD_PORT < 1 || PROD_PORT > 65535)); then
+            fail "PROD_PORT must be between 1 and 65535."
+          fi
+          [[ "$PROD_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] ||
+            fail "PROD_USER is not a safe Unix account name."
+          [[ "$PROD_STAGE_ROOT" =~ ^/[A-Za-z0-9._/-]+$ ]] ||
+            fail "PROD_STAGE_ROOT must be a simple absolute path."
+          stage_root="${PROD_STAGE_ROOT%/}"
+          [[ "$stage_root" =~ ^/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$ &&
+             "$stage_root" != *"/../"* &&
+             "$stage_root" != *"/./"* &&
+             "$stage_root" != */.. &&
+             "$stage_root" != */. &&
+             "$stage_root" != *"//"* ]] ||
+            fail "PROD_STAGE_ROOT is too broad or contains traversal."
+          PROD_STAGE_ROOT="$stage_root"
+          [[ -n "$PROD_SSH_PRIVATE_KEY" ]] ||
+            fail "PROD_SSH_PRIVATE_KEY is not configured."
+          [[ -n "$PROD_SSH_KNOWN_HOSTS" ]] ||
+            fail "PROD_SSH_KNOWN_HOSTS is not configured."
+
+          ssh_dir="$RUNNER_TEMP/raddad-ssh"
+          archive="$RUNNER_TEMP/raddad-${GITHUB_SHA}.tar.gz"
+          remote_archive="${PROD_STAGE_ROOT%/}/${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.tar.gz"
+          remote_helper="/usr/local/libexec/raddad-deploy"
+          remote_config="/etc/raddad-deploy.conf"
+          target="${PROD_USER}@${PROD_HOST}"
+          remote_cleanup_needed=0
+          ssh_options=(
+            -i "$ssh_dir/id"
+            -p "$PROD_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o "UserKnownHostsFile=$ssh_dir/known_hosts"
+            -o ConnectTimeout=15
+          )
+          scp_options=(
+            -i "$ssh_dir/id"
+            -P "$PROD_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o "UserKnownHostsFile=$ssh_dir/known_hosts"
+            -o ConnectTimeout=15
+          )
+
+          cleanup() {
+            if [[ "$remote_cleanup_needed" == "1" ]]; then
+              # shellcheck disable=SC2029 # Variables are validated before client-side expansion.
+              ssh "${ssh_options[@]}" "$target" "rm -f '$remote_archive'" >/dev/null 2>&1 || true
+            fi
+            rm -f "$ssh_dir/id" "$ssh_dir/known_hosts" "$archive"
+            rmdir "$ssh_dir" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          mkdir -m 700 "$ssh_dir"
+          printf '%s\n' "$PROD_SSH_PRIVATE_KEY" > "$ssh_dir/id"
+          printf '%s\n' "$PROD_SSH_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
+          chmod 600 "$ssh_dir/id" "$ssh_dir/known_hosts"
+          ssh-keygen -y -P '' -f "$ssh_dir/id" > /dev/null ||
+            fail "The production SSH private key is invalid or encrypted."
+
+          tar \
+            --sort=name \
+            --mtime="@$(git show -s --format=%ct "$GITHUB_SHA")" \
+            --owner=0 \
+            --group=0 \
+            --numeric-owner \
+            -C production-site \
+            -czf "$archive" \
+            .
+
+          local_helper_sha="$(sha256sum scripts/deploy/server-deploy.sh | cut -d ' ' -f 1)"
+          remote_helper_sha="$(
+            # shellcheck disable=SC2029 # The fixed helper path is expanded locally by design.
+            ssh "${ssh_options[@]}" "$target" \
+              "test -x '$remote_helper' && sha256sum '$remote_helper' | cut -d ' ' -f 1"
+          )"
+          [[ "$remote_helper_sha" == "$local_helper_sha" ]] ||
+            fail "The installed server helper does not match this tested commit."
+
+          # shellcheck disable=SC2029 # PROD_STAGE_ROOT passed a restrictive path allowlist.
+          ssh "${ssh_options[@]}" "$target" \
+            "test -d '$PROD_STAGE_ROOT' && test -w '$PROD_STAGE_ROOT'" ||
+            fail "The private production staging directory is unavailable."
+
+          remote_cleanup_needed=1
+          scp "${scp_options[@]}" "$archive" "$target:$remote_archive"
+
+          helper_mode="check"
+          case "$PRODUCTION_ACTION" in
+            prepare|deploy)
+              helper_mode="$PRODUCTION_ACTION"
+              ;;
+          esac
+
+          if [[ "$helper_mode" != "check" ]]; then
+            latest_main_sha="$(
+              git ls-remote --exit-code origin refs/heads/main | cut -f 1
+            )"
+            [[ "$latest_main_sha" =~ ^[0-9a-f]{40}$ ]] ||
+              fail "Could not resolve the current origin/main commit."
+            [[ "$latest_main_sha" == "$GITHUB_SHA" ]] ||
+              fail "A newer main commit exists; refusing to activate a stale workflow run."
+          fi
+
+          # shellcheck disable=SC2029 # Every expanded argument is fixed or strictly validated.
+          ssh "${ssh_options[@]}" "$target" \
+            "'$remote_helper' '$helper_mode' --sha '$GITHUB_SHA' --artifact '$remote_archive' --config '$remote_config'"

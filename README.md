@@ -12,6 +12,7 @@ Static one-page website for Rad Dad, a pop punk cover band.
 The repo now includes a hybrid automated test suite:
 
 - `Vitest + JSDOM` for `script.js` behavior
+- artifact and deployment-helper safety tests for clean releases and rollback
 - `Playwright` for real-browser homepage smoke coverage in Chromium
 
 ### Install
@@ -38,6 +39,13 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
   npm run build:sites
   ```
 
+- Build and verify the clean production-only package:
+
+  ```bash
+  npm run build:production
+  npm run verify:production -- --expected-sha YOUR_40_CHARACTER_GIT_SHA
+  ```
+
 - Run the full suite:
 
   ```bash
@@ -56,6 +64,18 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
   npm run test:e2e
   ```
 
+- Run the server deployment-helper tests only:
+
+  ```bash
+  npm run test:deploy
+  ```
+
+- Lint the deployment helper and its shell test harness (requires ShellCheck):
+
+  ```bash
+  npm run lint:deploy
+  ```
+
 ### What The Suite Covers
 
 - Event-first section and focus order, page metadata, and structured event data
@@ -72,7 +92,30 @@ GitHub Actions runs the same test suite on every push and pull request:
 - installs Node 24 dependencies with `npm ci`
 - installs Chromium for Playwright
 - runs `npm test`
+- runs ShellCheck against the deployment helper and its shell test harness
+- builds and verifies a clean, commit-identified production artifact
 - uploads Playwright artifacts if the browser suite fails
+
+Pull requests cannot deploy and do not receive production credentials. A
+protected production job can deploy the exact artifact tested on `main`; it is
+manual by default and automatic only after the controlled rollout has been
+validated.
+
+## Production Deployment
+
+Che can clone the source repository without downloading a ZIP:
+
+```bash
+git clone https://github.com/rupret007/RadDadSite.git
+```
+
+The clone must remain outside Apache's public `DocumentRoot`. Production
+publishes only the verified `dist/client` artifact, never the complete
+repository.
+
+See [the production deployment runbook](docs/production-deployment.md) for the
+server layout, GitHub Environment settings, pinned SSH host key, first rollout,
+health verification, rollback drill, and auto-deploy enablement.
 
 ## File Structure
 
@@ -87,15 +130,25 @@ RadDad Website/
 |   |-- rad-dad-friends-guitars-growlers-2026-full.png
 |   |-- rad-dad-friends-guitars-growlers-2026.ics
 |   |-- rad-dad-social-2026.png
+|   |-- the-middle-jimmy-eat-world-thumbnail.webp
 |   `-- wildflower-2026-poster-720.webp
 |-- index.html
 |-- styles.css
 |-- script.js
-|-- scripts/build-sites.mjs
+|-- docs/
+|   |-- production-deployment.md
+|   `-- raddad-deploy.conf.example
+|-- scripts/
+|   |-- build-sites.mjs
+|   |-- deploy/server-deploy.sh
+|   |-- lib/production-artifact.mjs
+|   `-- verify-production-artifact.mjs
 |-- tests/
+|   |-- deploy/server-deploy.test.sh
 |   |-- e2e/homepage.spec.js
 |   |-- setup/vitest.setup.js
-|   `-- unit/homepage.test.js
+|   |-- unit/homepage.test.js
+|   `-- unit/production-artifact.test.js
 |-- playwright.config.js
 |-- vitest.config.js
 |-- package.json
