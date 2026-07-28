@@ -1,0 +1,7 @@
+# Non-secret example for /etc/raddad-deploy.conf.
+# Confirm every path and value with the server owner before installation.
+RADDAD_RELEASE_ROOT=/srv/raddad
+RADDAD_SITE_URL=https://raddadband.com
+RADDAD_RETENTION_COUNT=5
+RADDAD_HEALTH_ATTEMPTS=5
+RADDAD_HEALTH_DELAY_SECONDS=2
