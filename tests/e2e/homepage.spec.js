@@ -117,7 +117,7 @@ test('presents the September event, flyer, and useful event actions', async ({ p
     expect(flyerResponse.headers()['content-type']).toContain('image/png');
 });
 
-test('shows an accessible artist wall grounded in the recent setlist', async ({ page }) => {
+test('shows an accessible graphic artist wall without song titles', async ({ page }) => {
     await page.goto('/');
 
     const covers = page.locator('#covers');
@@ -125,11 +125,10 @@ test('shows an accessible artist wall grounded in the recent setlist', async ({ 
     const artistNames = await artistItems.locator('.artist-name').allTextContents();
 
     await expect(covers).toHaveAttribute('aria-labelledby', 'covers-title');
-    await expect(covers.getByRole('heading', { level: 2, name: 'Songs by artists you know.' })).toBeVisible();
-    await expect(covers).toContainText('Recent Rad Dad sets have included:');
-    await expect(covers).toContainText('Selections vary by show.');
+    await expect(covers.getByRole('heading', { level: 2, name: 'Playing hits from bands like' })).toBeVisible();
+    await expect(covers).toContainText('Selections vary by show');
     await expect(covers.locator('.artist-wall')).toHaveAttribute('role', 'list');
-    await expect(artistItems).toHaveCount(8);
+    await expect(artistItems).toHaveCount(13);
     expect(artistNames.map((name) => name.trim())).toEqual([
         'Green Day',
         'blink-182',
@@ -138,15 +137,41 @@ test('shows an accessible artist wall grounded in the recent setlist', async ({ 
         'MxPx',
         'Rancid',
         'Nirvana',
-        'Taylor Swift'
+        'Taylor Swift',
+        'Blur',
+        'The Beatles',
+        'Pennywise',
+        'Me First & the Gimme Gimmes',
+        'Sublime'
     ]);
-    await expect(covers).toContainText('Basket Case · When I Come Around · She');
-    await expect(covers).toContainText('Tomorrow’s Another Day');
-    await expect(covers).toContainText('The Story of Us');
+
+    for (const removedSong of [
+        'Basket Case',
+        'The Rock Show',
+        'The Middle',
+        'Linoleum',
+        'Tomorrow’s Another Day',
+        'Ruby Soho',
+        'In Bloom',
+        'The Story of Us'
+    ]) {
+        await expect(covers).not.toContainText(removedSong);
+    }
+
+    await expect(covers).not.toContainText('Little Richard');
+    await expect(covers).not.toContainText('Willie Nelson');
+
+    const motifs = covers.locator('.artist-motif');
+    await expect(motifs).toHaveCount(4);
+    for (const motif of await motifs.all()) {
+        await expect(motif).toHaveAttribute('aria-hidden', 'true');
+    }
 
     for (const viewport of [
         { width: 320, height: 568 },
-        { width: 390, height: 844 }
+        { width: 390, height: 844 },
+        { width: 1440, height: 900 },
+        { width: 2048, height: 943 }
     ]) {
         await page.setViewportSize(viewport);
         await page.goto('/');
@@ -156,9 +181,13 @@ test('shows an accessible artist wall grounded in the recent setlist', async ({ 
             documentScrollWidth: document.documentElement.scrollWidth,
             items: items.map((item) => {
                 const rect = item.getBoundingClientRect();
+                const nameRect = item.querySelector('.artist-name').getBoundingClientRect();
+
                 return {
                     clientWidth: item.clientWidth,
                     left: rect.left,
+                    nameLeft: nameRect.left,
+                    nameRight: nameRect.right,
                     right: rect.right,
                     scrollWidth: item.scrollWidth,
                     width: rect.width
@@ -173,9 +202,23 @@ test('shows an accessible artist wall grounded in the recent setlist', async ({ 
         for (const item of layout.items) {
             expect(item.left).toBeGreaterThanOrEqual(-1);
             expect(item.right).toBeLessThanOrEqual(layout.viewportWidth + 1);
+            expect(item.nameLeft).toBeGreaterThanOrEqual(-1);
+            expect(item.nameRight).toBeLessThanOrEqual(layout.viewportWidth + 1);
             expect(item.width).toBeGreaterThan(0);
-            expect(item.scrollWidth).toBeLessThanOrEqual(item.clientWidth + 1);
         }
+
+        const nirvanaLineCount = await page
+            .locator('.artist-name--nirvana')
+            .evaluate((element) => {
+                const range = document.createRange();
+                range.selectNodeContents(element);
+
+                return new Set(
+                    [...range.getClientRects()].map((rect) => Math.round(rect.top))
+                ).size;
+            });
+
+        expect(nirvanaLineCount).toBe(1);
     }
 });
 
