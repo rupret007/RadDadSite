@@ -39,6 +39,7 @@ test('loads the event-first homepage with the expected title and section order',
     await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute('content', '1200');
     await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute('content', '630');
     await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Green Day/);
 
     const sectionOrder = await page.locator('main > section').evaluateAll((sections) =>
         sections.map((section) => section.id)
@@ -50,7 +51,7 @@ test('loads the event-first homepage with the expected title and section order',
         await page.locator('script[type="application/ld+json"]').textContent()
     );
 
-    expect(sectionOrder).toEqual(['show', 'watch', 'shows', 'contact']);
+    expect(sectionOrder).toEqual(['show', 'covers', 'watch', 'shows', 'contact']);
     expect(heroOrder).toEqual(['flyer-stage', 'hero-copy']);
     expect(eventData).toMatchObject({
         '@type': 'MusicEvent',
@@ -116,6 +117,68 @@ test('presents the September event, flyer, and useful event actions', async ({ p
     expect(flyerResponse.headers()['content-type']).toContain('image/png');
 });
 
+test('shows an accessible artist wall grounded in the recent setlist', async ({ page }) => {
+    await page.goto('/');
+
+    const covers = page.locator('#covers');
+    const artistItems = covers.locator('.artist-wall > li');
+    const artistNames = await artistItems.locator('.artist-name').allTextContents();
+
+    await expect(covers).toHaveAttribute('aria-labelledby', 'covers-title');
+    await expect(covers.getByRole('heading', { level: 2, name: 'Songs by artists you know.' })).toBeVisible();
+    await expect(covers).toContainText('Recent Rad Dad sets have included:');
+    await expect(covers).toContainText('Selections vary by show.');
+    await expect(covers.locator('.artist-wall')).toHaveAttribute('role', 'list');
+    await expect(artistItems).toHaveCount(8);
+    expect(artistNames.map((name) => name.trim())).toEqual([
+        'Green Day',
+        'blink-182',
+        'Jimmy Eat World',
+        'NOFX',
+        'MxPx',
+        'Rancid',
+        'Nirvana',
+        'Taylor Swift'
+    ]);
+    await expect(covers).toContainText('Basket Case · When I Come Around · She');
+    await expect(covers).toContainText('Tomorrow’s Another Day');
+    await expect(covers).toContainText('The Story of Us');
+
+    for (const viewport of [
+        { width: 320, height: 568 },
+        { width: 390, height: 844 }
+    ]) {
+        await page.setViewportSize(viewport);
+        await page.goto('/');
+
+        const layout = await page.locator('#covers .artist-wall > li').evaluateAll((items) => ({
+            bodyScrollWidth: document.body.scrollWidth,
+            documentScrollWidth: document.documentElement.scrollWidth,
+            items: items.map((item) => {
+                const rect = item.getBoundingClientRect();
+                return {
+                    clientWidth: item.clientWidth,
+                    left: rect.left,
+                    right: rect.right,
+                    scrollWidth: item.scrollWidth,
+                    width: rect.width
+                };
+            }),
+            viewportWidth: window.innerWidth
+        }));
+
+        expect(layout.documentScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+        expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+
+        for (const item of layout.items) {
+            expect(item.left).toBeGreaterThanOrEqual(-1);
+            expect(item.right).toBeLessThanOrEqual(layout.viewportWidth + 1);
+            expect(item.width).toBeGreaterThan(0);
+            expect(item.scrollWidth).toBeLessThanOrEqual(item.clientWidth + 1);
+        }
+    }
+});
+
 test('keeps the 2026 show history, both videos, and stable contact links', async ({ page }) => {
     await page.goto('/');
 
@@ -163,7 +226,7 @@ test('keeps the 2026 show history, both videos, and stable contact links', async
         'src',
         'https://img.youtube.com/vi/GCy4nHIqV5k/maxresdefault.jpg'
     );
-    await expect(videos.nth(1)).toContainText('Tomorrow');
+    await expect(videos.nth(1)).toContainText('Tomorrow’s Another Day');
     await expect(videos.nth(1)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
 
     await expect(page.locator('#watch .section-heading > .text-link')).toHaveAttribute(
