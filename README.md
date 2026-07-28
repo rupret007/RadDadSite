@@ -32,6 +32,12 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 
 ### Test Commands
 
+- Build the deployable Sites package:
+
+  ```bash
+  npm run build:sites
+  ```
+
 - Run the full suite:
 
   ```bash
@@ -74,6 +80,7 @@ GitHub Actions runs the same test suite on every push and pull request:
 RadDad Website/
 |-- .gitattributes
 |-- .github/workflows/test.yml
+|-- .openai/hosting.json
 |-- assets/
 |   |-- rad-dad-friends-guitars-growlers-2026-561.webp
 |   |-- rad-dad-friends-guitars-growlers-2026-1122.webp
@@ -84,6 +91,7 @@ RadDad Website/
 |-- index.html
 |-- styles.css
 |-- script.js
+|-- scripts/build-sites.mjs
 |-- tests/
 |   |-- e2e/homepage.spec.js
 |   |-- setup/vitest.setup.js
@@ -91,5 +99,6 @@ RadDad Website/
 |-- playwright.config.js
 |-- vitest.config.js
 |-- package.json
+|-- worker/index.js
 `-- README.md
 ```
