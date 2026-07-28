@@ -1177,18 +1177,9 @@ button:focus-visible {
     transition: transform 350ms ease, filter 350ms ease;
 }
 
-.video-card__image img.video-card__fallback {
-    object-position: center 18%;
-    filter: saturate(0.82) brightness(0.68);
-}
-
 .video-card:hover .video-card__image img {
     filter: saturate(1.12);
     transform: scale(1.025);
-}
-
-.video-card:hover .video-card__image img.video-card__fallback {
-    filter: saturate(0.95) brightness(0.76);
 }
 
 .play-button {

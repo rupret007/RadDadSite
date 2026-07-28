@@ -273,10 +273,20 @@ test('keeps the 2026 show history, all three videos, and stable contact links', 
     await expect(videos.nth(1)).toContainText('The Middle — Jimmy Eat World cover');
     await expect(videos.nth(1)).toContainText('Wildflower 2026 · Featured performance');
     await expect(videos.nth(1)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=iMrxzCQ7lVs');
-    await expect(videos.nth(1).locator('img')).toHaveAttribute(
-        'data-youtube-thumbnail',
-        'https://img.youtube.com/vi/iMrxzCQ7lVs/maxresdefault.jpg'
-    );
+    const middleThumbnail = videos.nth(1).locator('img');
+    await expect(middleThumbnail).toHaveAttribute('src', 'assets/the-middle-jimmy-eat-world-thumbnail.webp');
+    await expect(middleThumbnail).toHaveAttribute('width', '1280');
+    await expect(middleThumbnail).toHaveAttribute('height', '720');
+    await expect(middleThumbnail).not.toHaveClass(/video-card__fallback/);
+    await middleThumbnail.scrollIntoViewIfNeeded();
+    await expect.poll(() => middleThumbnail.evaluate((image) => [
+        image.naturalWidth,
+        image.naturalHeight
+    ])).toEqual([1280, 720]);
+
+    const middleThumbnailResponse = await page.request.get('/assets/the-middle-jimmy-eat-world-thumbnail.webp');
+    expect(middleThumbnailResponse.ok()).toBe(true);
+    expect(middleThumbnailResponse.headers()['content-type']).toContain('image/webp');
     await expect(videos.nth(2)).toContainText('Tomorrow’s Another Day');
     await expect(videos.nth(2)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
 
