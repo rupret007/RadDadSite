@@ -4,6 +4,7 @@
   "private": true,
   "description": "Static site for the Rad Dad band homepage.",
   "scripts": {
+    "build:sites": "node scripts/build-sites.mjs",
     "serve:test": "http-server . -p 4173 -a 127.0.0.1 -c-1 --silent",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run",
