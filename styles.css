@@ -542,6 +542,265 @@ button:focus-visible {
     border-right: 1px solid rgba(2, 8, 16, 0.28);
 }
 
+/* Covered artists */
+.covers-section {
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 8% 50%, rgba(181, 220, 8, 0.08), transparent 27rem),
+        radial-gradient(circle at 94% 40%, rgba(237, 39, 101, 0.08), transparent 25rem),
+        var(--ink);
+}
+
+.covers-section.content-section {
+    padding: clamp(4rem, 7vw, 6.5rem) 0;
+}
+
+.covers-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.22;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 38px 38px;
+    pointer-events: none;
+}
+
+.covers-panel {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(16rem, 0.62fr) minmax(0, 1.38fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 5rem);
+    padding: clamp(2rem, 3.2vw, 3rem);
+    border: 1px solid rgba(0, 158, 232, 0.3);
+    background:
+        linear-gradient(135deg, rgba(0, 158, 232, 0.07), transparent 34%),
+        linear-gradient(315deg, rgba(237, 39, 101, 0.06), transparent 36%),
+        rgba(9, 23, 37, 0.82);
+    box-shadow: var(--shadow);
+    isolation: isolate;
+}
+
+.covers-panel::before {
+    content: "";
+    position: absolute;
+    top: -0.55rem;
+    right: clamp(1.5rem, 5vw, 5rem);
+    width: 7.2rem;
+    height: 1.05rem;
+    background: repeating-linear-gradient(
+        90deg,
+        rgba(243, 242, 238, 0.9) 0 0.7rem,
+        transparent 0.7rem 1.12rem
+    );
+    transform: rotate(1.5deg);
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.covers-panel__intro {
+    min-width: 0;
+}
+
+.covers-panel__intro h2 {
+    max-width: 11ch;
+    margin: 0;
+    font-family: var(--display);
+    font-size: clamp(2.9rem, 4.4vw, 4.5rem);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 0.93;
+    text-transform: uppercase;
+    text-wrap: balance;
+}
+
+.covers-panel__intro > p:not(.section-kicker) {
+    max-width: 31rem;
+    margin: 1.25rem 0 0;
+    color: #d6dee5;
+    font-weight: 600;
+}
+
+.covers-panel__intro .covers-panel__note {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.65;
+}
+
+.artist-wall {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid rgba(243, 242, 238, 0.15);
+    border-left: 1px solid rgba(243, 242, 238, 0.15);
+    list-style: none;
+}
+
+.artist-wall li {
+    --artist-accent: var(--blue);
+    position: relative;
+    min-width: 0;
+    min-height: 7.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    overflow: hidden;
+    padding: 1rem 0.75rem 1.15rem;
+    border-right: 1px solid rgba(243, 242, 238, 0.15);
+    border-bottom: 1px solid rgba(243, 242, 238, 0.15);
+    background: rgba(2, 8, 16, 0.33);
+    text-align: center;
+}
+
+.artist-wall li::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0.62rem;
+    width: 2.25rem;
+    height: 2px;
+    background: var(--artist-accent);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--artist-accent) 58%, transparent);
+    transform: translateX(-50%);
+}
+
+.artist-wall li > span {
+    max-width: 22ch;
+    color: var(--muted);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.045em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
+
+.artist-wall li > small {
+    margin-bottom: -0.4rem;
+    color: #ff8bb0;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.artist-name {
+    max-width: 100%;
+    display: block;
+    color: var(--cream);
+    font-family: var(--display);
+    font-size: clamp(1.35rem, 2.2vw, 2.1rem);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+    text-transform: uppercase;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
+
+.artist-wall li:has(.artist-name--green-day) {
+    --artist-accent: var(--lime);
+}
+
+.artist-name--green-day {
+    color: #d5f143;
+    font-style: italic;
+    text-shadow: 3px 3px 0 rgba(0, 158, 232, 0.28);
+}
+
+.artist-wall li:has(.artist-name--blink) {
+    --artist-accent: var(--blue-bright);
+}
+
+.artist-name--blink {
+    font-family: var(--body);
+    font-size: clamp(1.25rem, 2vw, 1.9rem);
+    font-weight: 800;
+    letter-spacing: -0.075em;
+    text-transform: lowercase;
+}
+
+.artist-wall li:has(.artist-name--jimmy) {
+    --artist-accent: var(--cream);
+}
+
+.artist-name--jimmy {
+    font-size: clamp(1.15rem, 1.7vw, 1.7rem);
+    letter-spacing: 0.01em;
+}
+
+.artist-wall li:has(.artist-name--nofx) {
+    --artist-accent: #ff5d8d;
+}
+
+.artist-name--nofx {
+    color: #ff5d8d;
+    font-size: clamp(1.75rem, 2.8vw, 2.7rem);
+    font-style: italic;
+    letter-spacing: 0.02em;
+}
+
+.artist-wall li:has(.artist-name--mxpx) {
+    --artist-accent: var(--blue-bright);
+}
+
+.artist-name--mxpx {
+    color: var(--blue-bright);
+    font-family: var(--body);
+    font-size: clamp(1.55rem, 2.5vw, 2.35rem);
+    font-weight: 800;
+    letter-spacing: -0.07em;
+    text-transform: none;
+}
+
+.artist-wall li:has(.artist-name--rancid) {
+    --artist-accent: var(--amber);
+}
+
+.artist-name--rancid {
+    color: #f0c36d;
+    letter-spacing: 0.035em;
+}
+
+.artist-wall li:has(.artist-name--nirvana) {
+    --artist-accent: #f1d85b;
+}
+
+.artist-name--nirvana {
+    color: #f1d85b;
+    font-family: Georgia, serif;
+    font-size: clamp(1.2rem, 1.9vw, 1.8rem);
+    letter-spacing: 0.075em;
+}
+
+.artist-wall li.artist-wall__surprise {
+    --artist-accent: #ff73a0;
+    background:
+        linear-gradient(145deg, rgba(237, 39, 101, 0.12), transparent 68%),
+        rgba(2, 8, 16, 0.33);
+}
+
+.artist-name--taylor {
+    color: #ff8bb0;
+    font-family: Georgia, serif;
+    font-size: clamp(1.15rem, 1.8vw, 1.75rem);
+    font-style: italic;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-transform: none;
+}
+
 /* Shared section layout */
 .content-section {
     padding: clamp(5rem, 9vw, 8.5rem) 0;
@@ -997,6 +1256,18 @@ button:focus-visible {
         font-size: clamp(3.7rem, 7vw, 5.5rem);
     }
 
+    .covers-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .covers-panel__intro {
+        max-width: 46rem;
+    }
+
+    .covers-panel__intro h2 {
+        max-width: 14ch;
+    }
+
     .shows-layout {
         grid-template-columns: minmax(0, 1.08fr) minmax(18rem, 0.72fr);
         gap: 2rem;
@@ -1263,6 +1534,44 @@ button:focus-visible {
         padding: 5.5rem 0;
     }
 
+    .covers-panel {
+        gap: 2.25rem;
+        padding: 2rem 1rem 1rem;
+    }
+
+    .covers-panel::before {
+        right: 1.5rem;
+        width: 5.6rem;
+    }
+
+    .covers-panel__intro {
+        padding-inline: 0.35rem;
+    }
+
+    .covers-panel__intro h2 {
+        font-size: clamp(2.8rem, 13vw, 4.4rem);
+    }
+
+    .artist-wall {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .artist-wall li {
+        min-height: 7rem;
+        padding-inline: 0.65rem;
+    }
+
+    .artist-name {
+        font-size: clamp(1.4rem, 6.5vw, 2rem);
+    }
+
+    .artist-name--blink,
+    .artist-name--jimmy,
+    .artist-name--nirvana,
+    .artist-name--taylor {
+        font-size: clamp(1.15rem, 5vw, 1.65rem);
+    }
+
     .section-heading {
         display: block;
     }
@@ -1371,6 +1680,35 @@ button:focus-visible {
 
     .event-facts > div:nth-child(n + 2) {
         border-top: 1px solid var(--line);
+    }
+
+    .covers-panel {
+        padding-inline: 0.7rem;
+    }
+
+    .covers-panel__intro {
+        padding-inline: 0.25rem;
+    }
+
+    .artist-wall li {
+        min-height: 7.4rem;
+        padding: 0.85rem 0.45rem 1.1rem;
+    }
+
+    .artist-wall li > span {
+        font-size: 0.625rem;
+        letter-spacing: 0.02em;
+    }
+
+    .artist-name {
+        font-size: 1.35rem;
+    }
+
+    .artist-name--blink,
+    .artist-name--jimmy,
+    .artist-name--nirvana,
+    .artist-name--taylor {
+        font-size: 1.08rem;
     }
 
     .show-card {
