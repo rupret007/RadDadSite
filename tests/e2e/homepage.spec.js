@@ -160,6 +160,7 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
 
     await expect(covers).not.toContainText('Little Richard');
     await expect(covers).not.toContainText('Willie Nelson');
+    await expect(covers).not.toContainText('Pop • Punk • Alt');
 
     const motifs = covers.locator('.artist-motif');
     await expect(motifs).toHaveCount(4);
@@ -347,4 +348,27 @@ test('gives the flyer a strong side-by-side desktop presentation', async ({ page
     expect(heroCopy.left - flyer.right).toBeGreaterThan(16);
     expect(flyer.right).toBeLessThanOrEqual(viewport.width + 4);
     expect(flyer.offsetWidth / flyer.offsetHeight).toBeCloseTo(FLYER_ASPECT_RATIO, 2);
+
+    const flyerFrame = page.locator('.flyer-link');
+    const alignment = await flyerFrame.evaluate((element) => ({
+        flyerTransform: getComputedStyle(element).transform,
+        outlineTransform: getComputedStyle(element.parentElement, '::before').transform
+    }));
+    const beforeHover = await flyerFrame.boundingBox();
+
+    expect(alignment.flyerTransform).toBe('none');
+    expect(alignment.outlineTransform).toBe('none');
+    expect(beforeHover).not.toBeNull();
+
+    await flyerFrame.hover();
+    await flyerFrame.evaluate(async (element) => {
+        await Promise.all(element.getAnimations().map((animation) => animation.finished));
+    });
+
+    const afterHover = await flyerFrame.boundingBox();
+    expect(afterHover).not.toBeNull();
+
+    for (const key of ['x', 'y', 'width', 'height']) {
+        expect(afterHover[key]).toBeCloseTo(beforeHover[key], 1);
+    }
 });
