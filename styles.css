@@ -1115,9 +1115,24 @@ button:focus-visible {
 
 .video-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.65fr) minmax(17rem, 0.85fr);
-    gap: clamp(1rem, 2.4vw, 2rem);
-    align-items: end;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2rem, 4vw, 3.5rem);
+    align-items: start;
+}
+
+.video-card--featured {
+    width: min(100%, 68rem);
+    justify-self: center;
+}
+
+.video-card--spotlight {
+    width: min(90%, 60rem);
+    justify-self: center;
+}
+
+.video-card--secondary {
+    width: min(66%, 42rem);
+    justify-self: center;
 }
 
 .video-card {
@@ -1162,9 +1177,18 @@ button:focus-visible {
     transition: transform 350ms ease, filter 350ms ease;
 }
 
+.video-card__image img.video-card__fallback {
+    object-position: center 18%;
+    filter: saturate(0.82) brightness(0.68);
+}
+
 .video-card:hover .video-card__image img {
     filter: saturate(1.12);
     transform: scale(1.025);
+}
+
+.video-card:hover .video-card__image img.video-card__fallback {
+    filter: saturate(0.95) brightness(0.76);
 }
 
 .play-button {
@@ -1214,6 +1238,14 @@ button:focus-visible {
     color: var(--muted);
     font-size: 0.72rem;
     font-weight: 700;
+}
+
+.video-card--secondary figcaption {
+    padding: 1rem 1.15rem 1.15rem;
+}
+
+.video-card--secondary figcaption strong {
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
 }
 
 .video-card__label {
@@ -1645,7 +1677,15 @@ button:focus-visible {
     }
 
     .video-grid {
-        grid-template-columns: 1fr 0.78fr;
+        gap: 2.75rem;
+    }
+
+    .video-card--secondary {
+        width: min(72%, 36rem);
+    }
+
+    .video-card--spotlight {
+        width: min(90%, 42rem);
     }
 
     .shows-layout {
@@ -1883,7 +1923,15 @@ button:focus-visible {
     }
 
     .video-grid {
-        grid-template-columns: 1fr;
+        gap: 2.2rem;
+    }
+
+    .video-card--secondary {
+        width: min(78%, 30rem);
+    }
+
+    .video-card--spotlight {
+        width: min(92%, 34rem);
     }
 
     .video-card figcaption strong {
