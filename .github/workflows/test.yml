@@ -21,7 +21,7 @@ permissions:
 jobs:
   test:
     name: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out exact workflow commit
@@ -43,6 +43,11 @@ jobs:
 
       - name: Run automated tests
         run: npm test
+
+      - name: Lint deployment shell
+        run: |
+          shellcheck --version
+          npm run lint:deploy
 
       - name: Build and verify clean production artifact
         env:
@@ -82,7 +87,7 @@ jobs:
         github.event_name == 'workflow_dispatch' ||
         (github.event_name == 'push' && vars.PROD_AUTO_DEPLOY_ENABLED == 'true')
       )
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: production
       url: ${{ vars.PROD_SITE_URL }}

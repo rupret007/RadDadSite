@@ -6,6 +6,7 @@
   "scripts": {
     "build:production": "node scripts/build-sites.mjs --client-only",
     "build:sites": "node scripts/build-sites.mjs",
+    "lint:deploy": "shellcheck scripts/deploy/server-deploy.sh tests/deploy/server-deploy.test.sh",
     "serve:test": "http-server . -p 4173 -a 127.0.0.1 -c-1 --silent",
     "test": "npm run test:unit && npm run test:deploy && npm run test:e2e",
     "test:artifact": "vitest run tests/unit/production-artifact.test.js",

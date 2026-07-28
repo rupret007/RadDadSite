@@ -70,6 +70,12 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
   npm run test:deploy
   ```
 
+- Lint the deployment helper and its shell test harness (requires ShellCheck):
+
+  ```bash
+  npm run lint:deploy
+  ```
+
 ### What The Suite Covers
 
 - Event-first section and focus order, page metadata, and structured event data
@@ -86,6 +92,7 @@ GitHub Actions runs the same test suite on every push and pull request:
 - installs Node 24 dependencies with `npm ci`
 - installs Chromium for Playwright
 - runs `npm test`
+- runs ShellCheck against the deployment helper and its shell test harness
 - builds and verifies a clean, commit-identified production artifact
 - uploads Playwright artifacts if the browser suite fails
 

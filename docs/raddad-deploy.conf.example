@@ -1,7 +1,29 @@
-# Non-secret example for /etc/raddad-deploy.conf.
-# Confirm every path and value with the server owner before installation.
+# Non-secret template for the root-owned /etc/raddad-deploy.conf.
+#
+# These values are representative, not discovered production facts. Confirm the
+# literal release root, public HTTPS health-check origin, and retention policy
+# in the dated discovery record before installing this file. Stop if either
+# path/domain relationship, ownership, backup recovery, Apache, or SELinux
+# behavior remains uncertain.
+#
+# Keep this file root:root 0644, a regular file, and not a symlink. Do not add
+# SSH hosts, usernames, private keys, tokens, credentials, shell expansions,
+# quotes, or comments after values. The deployment helper manages the private
+# RADDAD_RELEASE_ROOT/.known-good ledger; never create or edit it manually.
+#
+# RADDAD_RELEASE_ROOT must be a dedicated absolute directory outside every old
+# public DocumentRoot and outside the deployment user's home. Apache serves only
+# its current symlink; incoming and staging remain private.
 RADDAD_RELEASE_ROOT=/srv/raddad
+
+# Public HTTPS origin used for post-activation SHA health checks. Use no path,
+# query, credentials, or trailing content.
 RADDAD_SITE_URL=https://raddadband.com
+
+# Keep at least the current and previous known-good releases. The runbook uses
+# five unless the approved rollback window and independent backup require more.
 RADDAD_RETENTION_COUNT=5
+
+# Bounded public health-check retry policy.
 RADDAD_HEALTH_ATTEMPTS=5
 RADDAD_HEALTH_DELAY_SECONDS=2

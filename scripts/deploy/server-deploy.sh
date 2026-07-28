@@ -6,6 +6,13 @@ IFS=$'\n\t'
 LOCK_HELD=0
 LOCK_DIR=""
 STAGING_DIR=""
+HEALTH_TEMP=""
+ACTIVATION_PENDING=0
+ACTIVATION_CANDIDATE_SHA=""
+SAFE_PREVIOUS_SHA=""
+LAST_RESTORE_RESULT=""
+CLEANUP_RUNNING=0
+RETENTION_TEMP=""
 
 log() {
     printf '[raddad-deploy] %s\n' "$*"
@@ -23,18 +30,54 @@ Usage:
   server-deploy.sh prepare  --sha <40-char-sha> --artifact <archive> [--config <file>]
   server-deploy.sh deploy   --sha <40-char-sha> --artifact <archive> [--config <file>]
   server-deploy.sh rollback --sha <40-char-sha> [--config <file>]
+  server-deploy.sh list     [--config <file>]
 
 Modes:
   check       Validate configuration, layout, and an artifact without changing releases.
   prepare     Install a verified release without changing the current symlink.
   deploy      Install a verified artifact, atomically activate it, and health-check it.
-  rollback    Atomically activate an already retained, verified release.
+  rollback    Atomically activate a retained release recorded as known-good.
+  list        Show retained releases and their known-good/current status.
 EOF
 }
 
 # shellcheck disable=SC2329 # Invoked indirectly by the EXIT trap.
 cleanup() {
     local status=$?
+
+    if [[ "$CLEANUP_RUNNING" == "1" ]]; then
+        exit "$status"
+    fi
+    CLEANUP_RUNNING=1
+    trap - EXIT
+    trap '' HUP INT TERM PIPE
+    set +e
+
+    if [[ "$ACTIVATION_PENDING" == "1" ]] &&
+       declare -F restore_activation_after_failure >/dev/null 2>&1; then
+        if ! restore_activation_after_failure "abnormal helper exit (status $status)"; then
+            log "ERROR: abnormal exit could not safely restore production state." >&2
+        fi
+    fi
+
+    if [[ -n "$HEALTH_TEMP" && -n "${STAGING_ROOT:-}" ]]; then
+        python3 - "$STAGING_ROOT" "$HEALTH_TEMP" <<'PY' || true
+import os
+import re
+import sys
+
+staging_root, candidate = sys.argv[1:]
+name = os.path.basename(candidate)
+if (
+    os.path.dirname(candidate) == staging_root
+    and re.fullmatch(r"\.health\.[0-9a-f]{40}\.[A-Za-z0-9]+", name)
+    and os.path.isfile(candidate)
+    and not os.path.islink(candidate)
+):
+    os.unlink(candidate)
+PY
+        HEALTH_TEMP=""
+    fi
 
     if [[ -n "$STAGING_DIR" && -e "$STAGING_DIR" ]]; then
         python3 - "$RADDAD_RELEASE_ROOT" "$STAGING_DIR" <<'PY' || true
@@ -57,6 +100,25 @@ if (
 PY
     fi
 
+    if [[ -n "$RETENTION_TEMP" && -n "${STAGING_ROOT:-}" ]]; then
+        python3 - "$STAGING_ROOT" "$RETENTION_TEMP" <<'PY' || true
+import os
+import re
+import sys
+
+staging_root, candidate = sys.argv[1:]
+name = os.path.basename(candidate)
+if (
+    os.path.dirname(candidate) == staging_root
+    and re.fullmatch(r"\.retention\.[A-Za-z0-9]+", name)
+    and os.path.isfile(candidate)
+    and not os.path.islink(candidate)
+):
+    os.unlink(candidate)
+PY
+        RETENTION_TEMP=""
+    fi
+
     if [[ "$LOCK_HELD" == "1" && -n "$LOCK_DIR" ]]; then
         rm -f -- "$LOCK_DIR/owner"
         rmdir -- "$LOCK_DIR" 2>/dev/null || true
@@ -66,9 +128,20 @@ PY
 }
 
 trap cleanup EXIT
-trap 'exit 129' HUP
-trap 'exit 130' INT
-trap 'exit 143' TERM
+
+# Ignore follow-on termination signals before EXIT cleanup begins. This keeps a
+# second signal from interrupting restoration after the first one is accepted.
+# shellcheck disable=SC2329 # Invoked indirectly by the signal traps.
+handle_signal() {
+    local status="$1"
+
+    trap '' HUP INT TERM PIPE
+    exit "$status"
+}
+
+trap 'handle_signal 129' HUP
+trap 'handle_signal 130' INT
+trap 'handle_signal 143' TERM
 
 MODE="${1:-}"
 if [[ -z "$MODE" || "$MODE" == "-h" || "$MODE" == "--help" ]]; then
@@ -79,7 +152,7 @@ fi
 shift
 
 case "$MODE" in
-    check|prepare|deploy|rollback)
+    check|prepare|deploy|rollback|list)
         ;;
     *)
         usage >&2
@@ -118,16 +191,35 @@ while (($#)); do
     esac
 done
 
-[[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] ||
-    fail "--sha must be an exact 40-character lowercase Git commit SHA."
 [[ "$CONFIG_PATH" == /* ]] ||
     fail "--config must be an absolute path."
 [[ -f "$CONFIG_PATH" && ! -L "$CONFIG_PATH" && -r "$CONFIG_PATH" ]] ||
     fail "Config must be a readable regular file, not a symlink: $CONFIG_PATH"
+python3 - "$CONFIG_PATH" <<'PY' ||
+import os
+import stat
+import sys
 
-if [[ "$MODE" == "rollback" ]]; then
+path = sys.argv[1]
+details = os.lstat(path)
+if details.st_uid not in (0, os.geteuid()):
+    raise SystemExit("config owner must be root or the deployment user")
+if details.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+    raise SystemExit("config must not be group- or world-writable")
+PY
+    fail "Config ownership or permissions are unsafe: $CONFIG_PATH"
+
+if [[ "$MODE" == "list" ]]; then
+    [[ -z "$EXPECTED_SHA" && -z "$ARTIFACT_PATH" ]] ||
+        fail "list does not accept --sha or --artifact."
+else
+    [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] ||
+        fail "--sha must be an exact 40-character lowercase Git commit SHA."
+fi
+
+if [[ "$MODE" == "rollback" || "$MODE" == "list" ]]; then
     [[ -z "$ARTIFACT_PATH" ]] ||
-        fail "rollback does not accept --artifact."
+        fail "$MODE does not accept --artifact."
 else
     [[ -n "$ARTIFACT_PATH" ]] ||
         fail "$MODE requires --artifact."
@@ -151,29 +243,19 @@ load_config() {
 
         case "$key" in
             RADDAD_RELEASE_ROOT)
-                if [[ "${RADDAD_RELEASE_ROOT+x}" != "x" ]]; then
-                    RADDAD_RELEASE_ROOT="$value"
-                fi
+                RADDAD_RELEASE_ROOT="$value"
                 ;;
             RADDAD_SITE_URL)
-                if [[ "${RADDAD_SITE_URL+x}" != "x" ]]; then
-                    RADDAD_SITE_URL="$value"
-                fi
+                RADDAD_SITE_URL="$value"
                 ;;
             RADDAD_RETENTION_COUNT)
-                if [[ "${RADDAD_RETENTION_COUNT+x}" != "x" ]]; then
-                    RADDAD_RETENTION_COUNT="$value"
-                fi
+                RADDAD_RETENTION_COUNT="$value"
                 ;;
             RADDAD_HEALTH_ATTEMPTS)
-                if [[ "${RADDAD_HEALTH_ATTEMPTS+x}" != "x" ]]; then
-                    RADDAD_HEALTH_ATTEMPTS="$value"
-                fi
+                RADDAD_HEALTH_ATTEMPTS="$value"
                 ;;
             RADDAD_HEALTH_DELAY_SECONDS)
-                if [[ "${RADDAD_HEALTH_DELAY_SECONDS+x}" != "x" ]]; then
-                    RADDAD_HEALTH_DELAY_SECONDS="$value"
-                fi
+                RADDAD_HEALTH_DELAY_SECONDS="$value"
                 ;;
             *)
                 fail "Unknown config key: $key"
@@ -182,6 +264,12 @@ load_config() {
     done < "$CONFIG_PATH"
 }
 
+unset \
+    RADDAD_RELEASE_ROOT \
+    RADDAD_SITE_URL \
+    RADDAD_RETENTION_COUNT \
+    RADDAD_HEALTH_ATTEMPTS \
+    RADDAD_HEALTH_DELAY_SECONDS
 load_config
 
 : "${RADDAD_RETENTION_COUNT:=5}"
@@ -225,17 +313,37 @@ RELEASES_DIR="$RADDAD_RELEASE_ROOT/releases"
 STAGING_ROOT="$RADDAD_RELEASE_ROOT/.staging"
 CURRENT_LINK="$RADDAD_RELEASE_ROOT/current"
 LOCK_DIR="$RADDAD_RELEASE_ROOT/.deploy.lock"
+KNOWN_GOOD_FILE="$RADDAD_RELEASE_ROOT/.known-good"
 
 validate_layout() {
-    python3 - "$RADDAD_RELEASE_ROOT" "${HOME:-}" <<'PY'
+    python3 - "$RADDAD_RELEASE_ROOT" "${HOME:-}" "$KNOWN_GOOD_FILE" "$MODE" <<'PY'
 import os
 import re
+import stat
 import sys
 
-root, home = sys.argv[1:]
+root, home, known_good, mode = sys.argv[1:]
+euid = os.geteuid()
+sha_pattern = re.compile(r"[0-9a-f]{40}")
 
 def stop(message):
     raise SystemExit(message)
+
+def require_owned_directory(path, label):
+    try:
+        details = os.lstat(path)
+    except FileNotFoundError:
+        stop(f"{label} must be a pre-created directory")
+    if not stat.S_ISDIR(details.st_mode) or stat.S_ISLNK(details.st_mode):
+        stop(f"{label} must be a pre-created real directory")
+    if details.st_uid != euid:
+        stop(f"{label} must be owned by the deployment user")
+    if details.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+        stop(f"{label} must not be group- or world-writable")
+    if os.path.realpath(path) != path:
+        stop(f"{label} or one of its parents resolves through a symlink")
+    if not os.access(path, os.W_OK | os.X_OK):
+        stop(f"{label} is not writable by the deployment user")
 
 if os.path.normpath(root) != root:
     stop("release root is not normalized")
@@ -247,39 +355,57 @@ if home:
             stop("release root must not be the deployment user's home directory")
     except ValueError:
         pass
-if not os.path.isdir(root) or os.path.islink(root):
-    stop("release root must be a pre-created real directory")
-if os.path.realpath(root) != root:
-    stop("release root or one of its parents resolves through a symlink")
-if not os.access(root, os.W_OK | os.X_OK):
-    stop("release root is not writable by the deployment user")
+require_owned_directory(root, "release root")
 
 releases = os.path.join(root, "releases")
 staging = os.path.join(root, ".staging")
 for path, label in ((releases, "releases"), (staging, "staging")):
-    if not os.path.isdir(path) or os.path.islink(path):
-        stop(f"{label} must be a pre-created real directory")
-    if os.path.realpath(path) != path:
-        stop(f"{label} resolves through a symlink")
-    if not os.access(path, os.W_OK | os.X_OK):
-        stop(f"{label} is not writable by the deployment user")
+    require_owned_directory(path, label)
 
 current = os.path.join(root, "current")
 if os.path.lexists(current):
     if not os.path.islink(current):
-        stop("current must be a symlink")
-    target = os.path.realpath(current)
-    if (
-        os.path.dirname(target) != releases
-        or not re.fullmatch(r"[0-9a-f]{40}", os.path.basename(target))
-        or not os.path.isdir(target)
-        or os.path.islink(target)
-    ):
-        stop("current must resolve to one direct, versioned release directory")
+        if mode != "list":
+            stop("current must be a symlink")
+    else:
+        current_details = os.lstat(current)
+        if current_details.st_uid != euid:
+            stop("current symlink must be owned by the deployment user")
+        raw_target = os.readlink(current)
+        target = os.path.normpath(
+            raw_target if os.path.isabs(raw_target) else os.path.join(root, raw_target)
+        )
+        direct_release = (
+            os.path.dirname(target) == releases
+            and sha_pattern.fullmatch(os.path.basename(target))
+        )
+        if not direct_release and mode not in ("list", "rollback"):
+            stop("current must point directly to one versioned release path")
 
 lock = os.path.join(root, ".deploy.lock")
-if os.path.lexists(lock) and not os.path.isdir(lock):
-    stop("deployment lock path exists but is not a directory")
+if os.path.lexists(lock):
+    details = os.lstat(lock)
+    if not stat.S_ISDIR(details.st_mode) or stat.S_ISLNK(details.st_mode):
+        stop("deployment lock path exists but is not a real directory")
+    if details.st_uid != euid or details.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+        stop("deployment lock ownership or permissions are unsafe")
+
+if os.path.lexists(known_good):
+    details = os.lstat(known_good)
+    if not stat.S_ISREG(details.st_mode) or stat.S_ISLNK(details.st_mode):
+        stop("known-good state must be a regular file, not a symlink")
+    if details.st_uid != euid:
+        stop("known-good state must be owned by the deployment user")
+    if stat.S_IMODE(details.st_mode) != 0o600:
+        stop("known-good state must have mode 0600")
+    try:
+        lines = open(known_good, encoding="ascii").read().splitlines()
+    except (OSError, UnicodeDecodeError) as error:
+        stop(f"known-good state is unreadable: {error}")
+    if len(lines) > 1000 or len(lines) != len(set(lines)):
+        stop("known-good state contains too many or duplicate entries")
+    if any(not sha_pattern.fullmatch(line) for line in lines):
+        stop("known-good state contains an invalid release identifier")
 PY
 }
 
@@ -305,7 +431,23 @@ kind, source, expected_sha, extract_root = sys.argv[1:]
 MAX_FILE_BYTES = 64 * 1024 * 1024
 MAX_TOTAL_BYTES = 128 * 1024 * 1024
 MAX_FILES = 1000
-ROOT_FILES = {
+CURRENT_PRODUCTION_FILES = {
+    "RadDad_Logo.jpg",
+    "SHA256SUMS",
+    "artifact-manifest.json",
+    "assets/rad-dad-friends-guitars-growlers-2026-1122.webp",
+    "assets/rad-dad-friends-guitars-growlers-2026-561.webp",
+    "assets/rad-dad-friends-guitars-growlers-2026-full.png",
+    "assets/rad-dad-friends-guitars-growlers-2026.ics",
+    "assets/rad-dad-social-2026.png",
+    "assets/the-middle-jimmy-eat-world-thumbnail.webp",
+    "assets/wildflower-2026-poster-720.webp",
+    "index.html",
+    "script.js",
+    "styles.css",
+    "version.json",
+}
+RETAINED_REQUIRED_FILES = {
     "RadDad_Logo.jpg",
     "SHA256SUMS",
     "artifact-manifest.json",
@@ -314,11 +456,13 @@ ROOT_FILES = {
     "styles.css",
     "version.json",
 }
-ASSET_EXTENSIONS = {
+RETAINED_ASSET_EXTENSIONS = {
     ".avif", ".gif", ".ico", ".ics", ".jpeg", ".jpg", ".png",
     ".svg", ".webp", ".woff", ".woff2",
 }
-REQUIRED_FILES = ROOT_FILES
+REQUIRED_FILES = (
+    CURRENT_PRODUCTION_FILES if kind == "archive" else RETAINED_REQUIRED_FILES
+)
 SHA_RE = re.compile(r"[0-9a-f]{40}")
 HASH_RE = re.compile(r"[0-9a-f]{64}")
 TIMESTAMP_RE = re.compile(
@@ -342,21 +486,28 @@ def canonical_path(raw_name):
     return str(path)
 
 def allowed_file(path):
-    if path in ROOT_FILES:
+    if kind == "archive":
+        return path in CURRENT_PRODUCTION_FILES
+    if path in RETAINED_REQUIRED_FILES:
         return True
-    if not path.startswith("assets/"):
-        return False
-    suffix = PurePosixPath(path).suffix.lower()
-    return suffix in ASSET_EXTENSIONS
+    return (
+        re.fullmatch(r"assets/[A-Za-z0-9][A-Za-z0-9._-]*", path) is not None
+        and PurePosixPath(path).suffix.lower() in RETAINED_ASSET_EXTENSIONS
+    )
 
 def allowed_directory(path):
-    return path == "assets" or path.startswith("assets/")
+    return path == "assets"
 
 def read_directory(path):
     if not os.path.isabs(path):
         stop("release directory must be absolute")
     if not os.path.isdir(path) or os.path.islink(path):
         stop("release directory must be a real directory")
+    root_details = os.lstat(path)
+    if root_details.st_uid != os.geteuid():
+        stop("release directory must be owned by the deployment user")
+    if root_details.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+        stop("release directory must not be group- or world-writable")
 
     files = {}
     directories = set()
@@ -368,6 +519,10 @@ def read_directory(path):
             relative = f"{relative_prefix}/{entry.name}" if relative_prefix else entry.name
             canonical = canonical_path(relative)
             details = entry.stat(follow_symlinks=False)
+            if details.st_uid != os.geteuid():
+                stop(f"release entry has the wrong owner: {canonical}")
+            if details.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+                stop(f"release entry is group- or world-writable: {canonical}")
             if stat.S_ISLNK(details.st_mode):
                 stop(f"symlink is forbidden: {relative}")
             if stat.S_ISDIR(details.st_mode):
@@ -396,9 +551,25 @@ def read_directory(path):
 def read_archive(path):
     if not os.path.isabs(path):
         stop("artifact path must be absolute")
+    parent = os.path.dirname(path)
+    parent_details = os.lstat(parent)
+    if (
+        not stat.S_ISDIR(parent_details.st_mode)
+        or stat.S_ISLNK(parent_details.st_mode)
+        or os.path.realpath(parent) != parent
+    ):
+        stop("artifact parent must be a real directory")
+    if parent_details.st_uid != os.geteuid():
+        stop("artifact parent must be owned by the deployment user")
+    if parent_details.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+        stop("artifact parent must not be group- or world-writable")
     details = os.lstat(path)
     if not stat.S_ISREG(details.st_mode):
         stop("artifact must be a regular file, not a symlink")
+    if details.st_uid != os.geteuid():
+        stop("artifact must be owned by the deployment user")
+    if details.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+        stop("artifact must not be group- or world-writable")
     if details.st_size > MAX_TOTAL_BYTES:
         stop("compressed artifact exceeds the safety limit")
     if os.path.realpath(path) != os.path.normpath(path):
@@ -587,28 +758,193 @@ print(
 PY
 }
 
-current_sha() {
-    python3 - "$CURRENT_LINK" "$RELEASES_DIR" <<'PY'
+current_snapshot() {
+    python3 - "$CURRENT_LINK" "$RADDAD_RELEASE_ROOT" "$RELEASES_DIR" <<'PY'
+import hashlib
 import os
 import re
+import stat
 import sys
 
-current, releases = sys.argv[1:]
+current, root, releases = sys.argv[1:]
 if not os.path.lexists(current):
-    print("")
+    print("absent")
     raise SystemExit(0)
-if not os.path.islink(current):
-    raise SystemExit("current is not a symlink")
-target = os.path.realpath(current)
-if (
-    os.path.dirname(target) != releases
-    or not re.fullmatch(r"[0-9a-f]{40}", os.path.basename(target))
-    or not os.path.isdir(target)
-    or os.path.islink(target)
+details = os.lstat(current)
+if not stat.S_ISLNK(details.st_mode):
+    print(f"unsafe:{details.st_dev}:{details.st_ino}:{details.st_mode}:{details.st_uid}")
+    raise SystemExit(0)
+raw_target = os.readlink(current)
+target = os.path.normpath(
+    raw_target if os.path.isabs(raw_target) else os.path.join(root, raw_target)
+)
+identity = f"{details.st_dev}:{details.st_ino}:{details.st_uid}"
+if os.path.dirname(target) == releases and re.fullmatch(
+    r"[0-9a-f]{40}", os.path.basename(target)
 ):
-    raise SystemExit("current does not resolve to a valid release")
-print(os.path.basename(target))
+    print(f"direct:{os.path.basename(target)}:{identity}")
+else:
+    digest = hashlib.sha256(os.fsencode(raw_target)).hexdigest()
+    print(f"invalid:{identity}:{digest}")
 PY
+}
+
+snapshot_sha() {
+    local snapshot="$1"
+    local value
+
+    case "$snapshot" in
+        direct:*)
+            value="${snapshot#direct:}"
+            printf '%s\n' "${value%%:*}"
+            ;;
+        *)
+            printf '\n'
+            ;;
+    esac
+}
+
+snapshot_label() {
+    local snapshot="$1"
+
+    case "$snapshot" in
+        absent)
+            printf 'none\n'
+            ;;
+        direct:*)
+            snapshot_sha "$snapshot"
+            ;;
+        invalid:*)
+            printf 'invalid-symlink\n'
+            ;;
+        *)
+            printf 'unsafe-current\n'
+            ;;
+    esac
+}
+
+is_known_good() {
+    local sha="$1"
+
+    python3 - "$KNOWN_GOOD_FILE" "$sha" <<'PY'
+import os
+import sys
+
+path, sha = sys.argv[1:]
+if not os.path.exists(path):
+    raise SystemExit(1)
+with open(path, encoding="ascii") as handle:
+    entries = handle.read().splitlines()
+raise SystemExit(0 if sha in entries else 1)
+PY
+}
+
+record_known_good() {
+    local sha="$1"
+
+    python3 - "$RADDAD_RELEASE_ROOT" "$KNOWN_GOOD_FILE" "$sha" <<'PY'
+import os
+import re
+import stat
+import sys
+import tempfile
+
+root, state_path, sha = sys.argv[1:]
+euid = os.geteuid()
+if not re.fullmatch(r"[0-9a-f]{40}", sha):
+    raise SystemExit("refusing invalid known-good release identifier")
+
+entries = []
+if os.path.exists(state_path):
+    details = os.lstat(state_path)
+    if (
+        not stat.S_ISREG(details.st_mode)
+        or stat.S_ISLNK(details.st_mode)
+        or details.st_uid != euid
+        or stat.S_IMODE(details.st_mode) != 0o600
+    ):
+        raise SystemExit("known-good state ownership or permissions are unsafe")
+    with open(state_path, encoding="ascii") as handle:
+        entries = handle.read().splitlines()
+
+entries = [sha, *(entry for entry in entries if entry != sha)]
+descriptor, temporary = tempfile.mkstemp(prefix=".known-good.", dir=root)
+try:
+    os.fchmod(descriptor, 0o600)
+    with os.fdopen(descriptor, "w", encoding="ascii") as handle:
+        handle.write("".join(f"{entry}\n" for entry in entries))
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temporary, state_path)
+    os.chmod(state_path, 0o600)
+finally:
+    if os.path.exists(temporary):
+        os.unlink(temporary)
+PY
+}
+
+list_releases() {
+    local current="$1"
+    local current_label="$2"
+    local sha recorded active installed status position
+
+    printf 'CURRENT\t%s\n' "$current_label"
+    while IFS=$'\t' read -r sha recorded active installed; do
+        status="BROKEN"
+        if [[ "$installed" == "1" ]] &&
+           validate_source directory "$RELEASES_DIR/$sha" "$sha" >/dev/null 2>&1; then
+            if [[ "$recorded" == "1" ]]; then
+                status="HEALTHY"
+            else
+                status="INSTALLED-UNHEALTHY"
+            fi
+        fi
+        position="INACTIVE"
+        [[ "$active" != "1" ]] || position="CURRENT"
+        printf '%s\t%s\t%s\n' "$sha" "$status" "$position"
+    done < <(
+        python3 - "$RELEASES_DIR" "$KNOWN_GOOD_FILE" "$current" <<'PY'
+import os
+import re
+import stat
+import sys
+
+releases, state_path, current = sys.argv[1:]
+sha_pattern = re.compile(r"[0-9a-f]{40}")
+
+known = []
+if os.path.exists(state_path):
+    with open(state_path, encoding="ascii") as handle:
+        known = handle.read().splitlines()
+
+installed = {}
+for entry in os.scandir(releases):
+    details = entry.stat(follow_symlinks=False)
+    if (
+        sha_pattern.fullmatch(entry.name)
+        and stat.S_ISDIR(details.st_mode)
+        and not entry.is_symlink()
+    ):
+        installed[entry.name] = entry.path
+
+ordered = [*known]
+ordered.extend(sorted(set(installed) - set(known)))
+if current and current not in ordered:
+    ordered.append(current)
+
+for sha in ordered:
+    print(
+        "\t".join(
+            (
+                sha,
+                "1" if sha in known else "0",
+                "1" if sha == current else "0",
+                "1" if sha in installed else "0",
+            )
+        )
+    )
+PY
+    )
 }
 
 acquire_lock() {
@@ -626,24 +962,51 @@ acquire_lock() {
 
 atomic_activate() {
     local sha="$1"
+    local expected_current_snapshot="$2"
 
-    python3 - "$RADDAD_RELEASE_ROOT" "$sha" <<'PY'
+    python3 - "$RADDAD_RELEASE_ROOT" "$sha" "$expected_current_snapshot" <<'PY'
+import hashlib
 import os
 import re
+import stat
 import sys
 
-root, sha = sys.argv[1:]
+root, sha, expected_snapshot = sys.argv[1:]
 if not re.fullmatch(r"[0-9a-f]{40}", sha):
     raise SystemExit("refusing unsafe release identifier")
 release = os.path.join(root, "releases", sha)
 if not os.path.isdir(release) or os.path.islink(release):
     raise SystemExit("release target is not a real directory")
 current = os.path.join(root, "current")
+releases = os.path.join(root, "releases")
+
+def snapshot():
+    if not os.path.lexists(current):
+        return "absent"
+    details = os.lstat(current)
+    if not stat.S_ISLNK(details.st_mode):
+        return f"unsafe:{details.st_dev}:{details.st_ino}:{details.st_mode}:{details.st_uid}"
+    raw_target = os.readlink(current)
+    target = os.path.normpath(
+        raw_target if os.path.isabs(raw_target) else os.path.join(root, raw_target)
+    )
+    identity = f"{details.st_dev}:{details.st_ino}:{details.st_uid}"
+    if os.path.dirname(target) == releases and re.fullmatch(
+        r"[0-9a-f]{40}", os.path.basename(target)
+    ):
+        return f"direct:{os.path.basename(target)}:{identity}"
+    digest = hashlib.sha256(os.fsencode(raw_target)).hexdigest()
+    return f"invalid:{identity}:{digest}"
+
+if snapshot() != expected_snapshot:
+    raise SystemExit("current changed before activation; refusing to overwrite it")
 temporary = os.path.join(root, f".current.{os.getpid()}.tmp")
 if os.path.lexists(temporary):
     raise SystemExit("temporary current link already exists")
 os.symlink(os.path.join("releases", sha), temporary)
 try:
+    if snapshot() != expected_snapshot:
+        raise SystemExit("current changed during activation; refusing to overwrite it")
     os.replace(temporary, current)
 finally:
     if os.path.lexists(temporary):
@@ -651,56 +1014,218 @@ finally:
 PY
 }
 
-remove_current_if_matches() {
-    local sha="$1"
+restore_current_if_candidate() {
+    local candidate="$1"
+    local replacement="${2:-}"
 
-    python3 - "$CURRENT_LINK" "$RELEASES_DIR" "$sha" <<'PY'
+    python3 - "$RADDAD_RELEASE_ROOT" "$candidate" "$replacement" <<'PY'
 import os
+import re
+import stat
 import sys
 
-current, releases, sha = sys.argv[1:]
-if not os.path.lexists(current):
+root, candidate, replacement = sys.argv[1:]
+sha_pattern = re.compile(r"[0-9a-f]{40}")
+if not sha_pattern.fullmatch(candidate):
+    raise SystemExit("refusing unsafe candidate identifier")
+if replacement and not sha_pattern.fullmatch(replacement):
+    raise SystemExit("refusing unsafe replacement identifier")
+
+releases = os.path.join(root, "releases")
+current = os.path.join(root, "current")
+
+def target_sha():
+    if not os.path.lexists(current) or not os.path.islink(current):
+        return None
+    raw_target = os.readlink(current)
+    target = os.path.normpath(
+        raw_target if os.path.isabs(raw_target) else os.path.join(root, raw_target)
+    )
+    if os.path.dirname(target) != releases:
+        return None
+    value = os.path.basename(target)
+    return value if sha_pattern.fullmatch(value) else None
+
+if target_sha() != candidate:
+    print("changed")
     raise SystemExit(0)
-if not os.path.islink(current):
-    raise SystemExit("current is not a symlink")
-if os.path.realpath(current) != os.path.join(releases, sha):
-    raise SystemExit("current changed unexpectedly; refusing to remove it")
-os.unlink(current)
+
+before = os.lstat(current)
+if replacement:
+    release = os.path.join(releases, replacement)
+    release_details = os.lstat(release)
+    if not stat.S_ISDIR(release_details.st_mode) or stat.S_ISLNK(release_details.st_mode):
+        raise SystemExit("replacement release is not a real directory")
+    temporary = os.path.join(root, f".current.restore.{os.getpid()}.tmp")
+    if os.path.lexists(temporary):
+        raise SystemExit("temporary restore link already exists")
+    os.symlink(os.path.join("releases", replacement), temporary)
+    try:
+        latest = os.lstat(current)
+        if (
+            latest.st_dev != before.st_dev
+            or latest.st_ino != before.st_ino
+            or target_sha() != candidate
+        ):
+            print("changed")
+            raise SystemExit(0)
+        os.replace(temporary, current)
+        print(f"restored:{replacement}")
+    finally:
+        if os.path.lexists(temporary):
+            os.unlink(temporary)
+else:
+    latest = os.lstat(current)
+    if (
+        latest.st_dev != before.st_dev
+        or latest.st_ino != before.st_ino
+        or target_sha() != candidate
+    ):
+        print("changed")
+        raise SystemExit(0)
+    os.unlink(current)
+    print("removed")
 PY
+}
+
+restore_activation_after_failure() {
+    local reason="$1"
+    local replacement=""
+
+    [[ "$ACTIVATION_PENDING" == "1" ]] || return 0
+    log "Activation of $ACTIVATION_CANDIDATE_SHA did not commit: $reason." >&2
+
+    if [[ -n "$SAFE_PREVIOUS_SHA" ]] &&
+       validate_source directory \
+           "$RELEASES_DIR/$SAFE_PREVIOUS_SHA" \
+           "$SAFE_PREVIOUS_SHA" >/dev/null &&
+       is_known_good "$SAFE_PREVIOUS_SHA"; then
+        replacement="$SAFE_PREVIOUS_SHA"
+    elif [[ -n "$SAFE_PREVIOUS_SHA" ]]; then
+        log "Prior release $SAFE_PREVIOUS_SHA is no longer valid and will not be restored." >&2
+    fi
+
+    if ! LAST_RESTORE_RESULT="$(
+        restore_current_if_candidate "$ACTIVATION_CANDIDATE_SHA" "$replacement"
+    )"; then
+        return 1
+    fi
+    ACTIVATION_PENDING=0
+
+    case "$LAST_RESTORE_RESULT" in
+        restored:*)
+            log "Restored known-good release ${LAST_RESTORE_RESULT#restored:}."
+            ;;
+        removed)
+            log "Removed the unverified first-release current link."
+            ;;
+        changed)
+            log "Current changed after activation; refusing to overwrite the concurrent change."
+            ;;
+        *)
+            return 1
+            ;;
+    esac
 }
 
 health_check() {
     local sha="$1"
-    local attempt response
+    local attempt path url_path
+    local attempt_ok
+    local -a public_paths=()
 
     command -v curl >/dev/null 2>&1 ||
         fail "curl is required for deployment and rollback health checks."
 
+    while IFS= read -r path; do
+        public_paths[${#public_paths[@]}]="$path"
+    done < <(
+        python3 - "$RELEASES_DIR/$sha" <<'PY'
+import os
+import sys
+
+root = sys.argv[1]
+paths = []
+for directory, _, filenames in os.walk(root):
+    for filename in filenames:
+        absolute = os.path.join(directory, filename)
+        paths.append(os.path.relpath(absolute, root).replace(os.sep, "/"))
+for path in sorted(paths):
+    print(path)
+PY
+    )
+    ((${#public_paths[@]} > 0)) || return 1
+
     for ((attempt = 1; attempt <= RADDAD_HEALTH_ATTEMPTS; attempt += 1)); do
-        if response="$(
-            curl \
+        attempt_ok=1
+
+        for path in "${public_paths[@]}"; do
+            HEALTH_TEMP="$(mktemp "$STAGING_ROOT/.health.${sha}.XXXXXX")"
+            url_path="/$path"
+            [[ "$path" != "index.html" ]] || url_path="/"
+
+            if ! curl \
                 --fail \
                 --silent \
                 --show-error \
                 --proto '=https' \
                 --connect-timeout 5 \
                 --max-time 15 \
-                -H 'Accept: application/json' \
                 -H 'Cache-Control: no-cache' \
-                "${RADDAD_SITE_URL}/version.json?v=${sha}"
-        )" && printf '%s' "$response" | python3 -c '
+                --output "$HEALTH_TEMP" \
+                "${RADDAD_SITE_URL}${url_path}?v=${sha}"; then
+                attempt_ok=0
+            elif ! python3 - \
+                "$RELEASES_DIR/$sha/$path" \
+                "$HEALTH_TEMP" \
+                "$sha" \
+                "$path" <<'PY'
+import hashlib
 import json
+import re
 import sys
 
-expected = sys.argv[1]
-try:
-    value = json.load(sys.stdin)
-except (UnicodeDecodeError, json.JSONDecodeError):
-    raise SystemExit(1)
-if not isinstance(value, dict) or value.get("commitSha") != expected:
-    raise SystemExit(1)
-' "$sha"; then
-            log "Public health check reports expected commit $sha."
+expected_path, observed_path, expected_sha, public_path = sys.argv[1:]
+
+def digest(path):
+    value = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            value.update(block)
+    return value.digest()
+
+if digest(expected_path) != digest(observed_path):
+    raise SystemExit(f"public bytes differ from verified release: {public_path}")
+
+if public_path == "version.json":
+    try:
+        with open(observed_path, encoding="utf-8") as handle:
+            version = json.load(handle)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        raise SystemExit("public version.json is invalid")
+    if not isinstance(version, dict) or version.get("commitSha") != expected_sha:
+        raise SystemExit("public version.json reports the wrong commit")
+
+if public_path == "index.html":
+    try:
+        with open(observed_path, encoding="utf-8") as handle:
+            homepage = handle.read()
+    except (OSError, UnicodeDecodeError):
+        raise SystemExit("public homepage is not valid UTF-8")
+    if not re.search(r"<title>[^<]*Rad Dad", homepage, re.IGNORECASE):
+        raise SystemExit("public homepage lacks the expected Rad Dad title marker")
+PY
+            then
+                attempt_ok=0
+            fi
+
+            rm -f -- "$HEALTH_TEMP"
+            HEALTH_TEMP=""
+            [[ "$attempt_ok" == "1" ]] || break
+        done
+
+        if [[ "$attempt_ok" == "1" ]]; then
+            log "Public health check verified every published file for $sha."
             return 0
         fi
 
@@ -713,6 +1238,7 @@ if not isinstance(value, dict) or value.get("commitSha") != expected:
 }
 
 install_release() {
+    local expected_current_snapshot="$1"
     local release_path="$RELEASES_DIR/$EXPECTED_SHA"
 
     if [[ -e "$release_path" || -L "$release_path" ]]; then
@@ -729,12 +1255,20 @@ install_release() {
         fail "Artifact validation or safe extraction failed."
     chmod 0755 "$STAGING_DIR"
 
-    python3 - "$STAGING_DIR" "$release_path" "$RELEASES_DIR" "$EXPECTED_SHA" <<'PY'
+    python3 - \
+        "$STAGING_DIR" \
+        "$release_path" \
+        "$RADDAD_RELEASE_ROOT" \
+        "$RELEASES_DIR" \
+        "$EXPECTED_SHA" \
+        "$expected_current_snapshot" <<'PY'
+import hashlib
 import os
 import re
+import stat
 import sys
 
-staging, release, releases, sha = sys.argv[1:]
+staging, release, root, releases, sha, expected_snapshot = sys.argv[1:]
 if (
     not re.fullmatch(r"[0-9a-f]{40}", sha)
     or os.path.dirname(staging) != os.path.join(os.path.dirname(releases), ".staging")
@@ -744,7 +1278,44 @@ if (
     or os.path.lexists(release)
 ):
     raise SystemExit("refusing unsafe release move")
+
+current = os.path.join(root, "current")
+
+def snapshot():
+    if not os.path.lexists(current):
+        return "absent"
+    details = os.lstat(current)
+    if not stat.S_ISLNK(details.st_mode):
+        return f"unsafe:{details.st_dev}:{details.st_ino}:{details.st_mode}:{details.st_uid}"
+    try:
+        raw_target = os.readlink(current)
+    except FileNotFoundError:
+        return "raced"
+    target = os.path.normpath(
+        raw_target if os.path.isabs(raw_target) else os.path.join(root, raw_target)
+    )
+    identity = f"{details.st_dev}:{details.st_ino}:{details.st_uid}"
+    if os.path.dirname(target) == releases and re.fullmatch(
+        r"[0-9a-f]{40}", os.path.basename(target)
+    ):
+        return f"direct:{os.path.basename(target)}:{identity}"
+    digest = hashlib.sha256(os.fsencode(raw_target)).hexdigest()
+    return f"invalid:{identity}:{digest}"
+
+if snapshot() != expected_snapshot:
+    raise SystemExit("current changed before release publication; refusing the release move")
+
+staging_details = os.lstat(staging)
 os.rename(staging, release)
+if snapshot() != expected_snapshot:
+    release_details = os.lstat(release)
+    if (
+        release_details.st_dev != staging_details.st_dev
+        or release_details.st_ino != staging_details.st_ino
+    ):
+        raise SystemExit("published release identity changed during current-state verification")
+    os.rename(release, staging)
+    raise SystemExit("current changed during release publication; reverted the release move")
 PY
     STAGING_DIR=""
     validate_source directory "$release_path" "$EXPECTED_SHA" ||
@@ -755,49 +1326,166 @@ PY
 prune_releases() {
     local current="$1"
     local previous="${2:-}"
+    local expected_current_snapshot="$3"
+    local known_sha
 
-    python3 - "$RELEASES_DIR" "$RADDAD_RETENTION_COUNT" "$current" "$previous" <<'PY'
+    RETENTION_TEMP="$(mktemp "$STAGING_ROOT/.retention.XXXXXX")"
+    while IFS= read -r known_sha; do
+        if validate_source \
+            directory \
+            "$RELEASES_DIR/$known_sha" \
+            "$known_sha" >/dev/null 2>&1; then
+            printf '%s\n' "$known_sha" >>"$RETENTION_TEMP" || return 1
+        else
+            log "Known-good record $known_sha is broken and will not consume retention." >&2
+        fi
+    done <"$KNOWN_GOOD_FILE"
+
+    if ! python3 - \
+        "$RADDAD_RELEASE_ROOT" \
+        "$RELEASES_DIR" \
+        "$KNOWN_GOOD_FILE" \
+        "$RETENTION_TEMP" \
+        "$RADDAD_RETENTION_COUNT" \
+        "$current" \
+        "$previous" \
+        "$expected_current_snapshot" <<'PY'
+import hashlib
 import os
 import re
 import shutil
+import stat
 import sys
+import tempfile
 
-releases, retention_raw, current, previous = sys.argv[1:]
+(
+    root,
+    releases,
+    state_path,
+    valid_state_path,
+    retention_raw,
+    current,
+    previous,
+    expected_current_snapshot,
+) = sys.argv[1:]
 retention = int(retention_raw)
 sha_pattern = re.compile(r"[0-9a-f]{40}")
-entries = []
+euid = os.geteuid()
+entries = {}
+current_path = os.path.join(root, "current")
+
+if not re.fullmatch(
+    rf"direct:{re.escape(current)}:[0-9]+:[0-9]+:[0-9]+",
+    expected_current_snapshot,
+):
+    raise SystemExit("refusing an invalid expected current snapshot for retention")
+
+def current_snapshot():
+    if not os.path.lexists(current_path):
+        return "absent"
+    details = os.lstat(current_path)
+    if not stat.S_ISLNK(details.st_mode):
+        return f"unsafe:{details.st_dev}:{details.st_ino}:{details.st_mode}:{details.st_uid}"
+    try:
+        raw_target = os.readlink(current_path)
+    except FileNotFoundError:
+        return "raced"
+    target = os.path.normpath(
+        raw_target if os.path.isabs(raw_target) else os.path.join(root, raw_target)
+    )
+    identity = f"{details.st_dev}:{details.st_ino}:{details.st_uid}"
+    if os.path.dirname(target) == releases and sha_pattern.fullmatch(
+        os.path.basename(target)
+    ):
+        return f"direct:{os.path.basename(target)}:{identity}"
+    digest = hashlib.sha256(os.fsencode(raw_target)).hexdigest()
+    return f"invalid:{identity}:{digest}"
+
+def require_expected_current():
+    if current_snapshot() != expected_current_snapshot:
+        raise SystemExit("current changed before retention; refusing all further cleanup")
+
+require_expected_current()
 
 for entry in os.scandir(releases):
+    details = entry.stat(follow_symlinks=False)
     if (
         sha_pattern.fullmatch(entry.name)
-        and entry.is_dir(follow_symlinks=False)
+        and stat.S_ISDIR(details.st_mode)
         and not entry.is_symlink()
     ):
-        entries.append((entry.stat(follow_symlinks=False).st_mtime_ns, entry.name, entry.path))
+        if details.st_uid != euid:
+            raise SystemExit(f"release has the wrong owner: {entry.name}")
+        if details.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+            raise SystemExit(f"release is group- or world-writable: {entry.name}")
+        entries[entry.name] = entry.path
 
-entries.sort(reverse=True)
-protected = {value for value in (current, previous) if sha_pattern.fullmatch(value or "")}
+with open(valid_state_path, encoding="ascii") as handle:
+    known = handle.read().splitlines()
+
+protected = {
+    value
+    for value in (current, previous)
+    if value in entries and value in known
+}
 keep = set(protected)
-for _, name, _ in entries:
+for name in known:
     if len(keep) >= retention:
         break
-    keep.add(name)
+    if name in entries:
+        keep.add(name)
 
-for _, name, path in entries:
+require_expected_current()
+for name, path in entries.items():
     if name in keep:
         continue
     if os.path.dirname(path) != releases or not sha_pattern.fullmatch(name):
         raise SystemExit("refusing unsafe retention cleanup")
+    require_expected_current()
     shutil.rmtree(path)
     print(f"[raddad-deploy] Removed expired inactive release {name}.")
+
+retained_known = [name for name in known if name in keep]
+require_expected_current()
+descriptor, temporary = tempfile.mkstemp(prefix=".known-good.", dir=root)
+try:
+    os.fchmod(descriptor, 0o600)
+    with os.fdopen(descriptor, "w", encoding="ascii") as handle:
+        handle.write("".join(f"{name}\n" for name in retained_known))
+        handle.flush()
+        os.fsync(handle.fileno())
+    require_expected_current()
+    os.replace(temporary, state_path)
+    os.chmod(state_path, 0o600)
+finally:
+    if os.path.exists(temporary):
+        os.unlink(temporary)
 PY
+    then
+        rm -f -- "$RETENTION_TEMP"
+        RETENTION_TEMP=""
+        return 1
+    fi
+    rm -f -- "$RETENTION_TEMP"
+    RETENTION_TEMP=""
 }
+
+if [[ "$MODE" == "list" ]]; then
+    listed_snapshot="$(current_snapshot)" ||
+        fail "Could not inspect the active release entry."
+    listed_current="$(snapshot_sha "$listed_snapshot")"
+    listed_label="$(snapshot_label "$listed_snapshot")"
+    list_releases "$listed_current" "$listed_label" ||
+        fail "Could not list retained releases."
+    exit 0
+fi
 
 if [[ "$MODE" == "check" ]]; then
     validate_source archive "$ARTIFACT_PATH" "$EXPECTED_SHA" ||
         fail "Artifact verification failed."
-    previous="$(current_sha)" ||
-        fail "Could not identify the active release."
+    checked_snapshot="$(current_snapshot)" ||
+        fail "Could not inspect the active release."
+    previous="$(snapshot_sha "$checked_snapshot")"
     log "Dry run passed for $EXPECTED_SHA."
     log "Release root: $RADDAD_RELEASE_ROOT"
     log "Current release: ${previous:-none}"
@@ -806,23 +1494,26 @@ if [[ "$MODE" == "check" ]]; then
 fi
 
 acquire_lock
-previous_sha="$(current_sha)" ||
-    fail "Could not identify the active release."
-if [[ -n "$previous_sha" && "$MODE" != "prepare" ]]; then
-    validate_source directory "$RELEASES_DIR/$previous_sha" "$previous_sha" ||
-        fail "The active release failed verification; refusing to change current."
-fi
+previous_snapshot="$(current_snapshot)" ||
+    fail "Could not inspect the active release entry."
+previous_sha="$(snapshot_sha "$previous_snapshot")"
 
 if [[ "$MODE" == "deploy" || "$MODE" == "prepare" ]]; then
+    if [[ "$previous_sha" == "$EXPECTED_SHA" ]] &&
+       [[ ! -d "$RELEASES_DIR/$EXPECTED_SHA" || -L "$RELEASES_DIR/$EXPECTED_SHA" ]]; then
+        fail "Current points to the missing candidate release; refusing to publish it during $MODE."
+    fi
     validate_source archive "$ARTIFACT_PATH" "$EXPECTED_SHA" ||
         fail "Artifact verification failed."
-    install_release
+    install_release "$previous_snapshot"
 else
     rollback_path="$RELEASES_DIR/$EXPECTED_SHA"
     [[ -d "$rollback_path" && ! -L "$rollback_path" ]] ||
         fail "Rollback target is not a retained release: $EXPECTED_SHA"
     validate_source directory "$rollback_path" "$EXPECTED_SHA" ||
         fail "Rollback target failed verification."
+    is_known_good "$EXPECTED_SHA" ||
+        fail "Rollback target was never recorded as passing public health: $EXPECTED_SHA"
 fi
 
 if [[ "$MODE" == "prepare" ]]; then
@@ -830,29 +1521,79 @@ if [[ "$MODE" == "prepare" ]]; then
     exit 0
 fi
 
+SAFE_PREVIOUS_SHA=""
+if [[ -n "$previous_sha" ]]; then
+    if [[ "$MODE" == "deploy" ]]; then
+        validate_source directory "$RELEASES_DIR/$previous_sha" "$previous_sha" ||
+            fail "The active release failed verification; use rollback recovery instead."
+        if ! is_known_good "$previous_sha"; then
+            log "Active release $previous_sha has no known-good record; verifying it before activation."
+            health_check "$previous_sha" ||
+                fail "The active release did not pass public health and cannot be used as rollback protection."
+            record_known_good "$previous_sha" ||
+                fail "Could not record the active release as known-good."
+        fi
+        SAFE_PREVIOUS_SHA="$previous_sha"
+    elif [[ "$previous_sha" != "$EXPECTED_SHA" ]]; then
+        if validate_source directory "$RELEASES_DIR/$previous_sha" "$previous_sha" &&
+           is_known_good "$previous_sha"; then
+            SAFE_PREVIOUS_SHA="$previous_sha"
+        else
+            log "Active release $previous_sha is not a valid known-good fallback; rollback will not restore it." >&2
+        fi
+    fi
+fi
+
 if [[ "$previous_sha" != "$EXPECTED_SHA" ]]; then
-    atomic_activate "$EXPECTED_SHA" ||
+    ACTIVATION_CANDIDATE_SHA="$EXPECTED_SHA"
+    ACTIVATION_PENDING=1
+    atomic_activate "$EXPECTED_SHA" "$previous_snapshot" ||
         fail "Atomic current-symlink activation failed."
 fi
 
 if health_check "$EXPECTED_SHA"; then
+    retained_current_snapshot="$(current_snapshot)" ||
+        fail "Public health passed, but current could not be inspected before retention."
+    case "$retained_current_snapshot" in
+        direct:"$EXPECTED_SHA":*)
+            ;;
+        *)
+            fail "Public health passed, but current changed before retention."
+            ;;
+    esac
+    record_known_good "$EXPECTED_SHA" ||
+        fail "Public health passed, but known-good state could not be committed."
+    ACTIVATION_PENDING=0
+    prune_releases \
+        "$EXPECTED_SHA" \
+        "$SAFE_PREVIOUS_SHA" \
+        "$retained_current_snapshot" ||
+        fail "Activation succeeded, but safe release retention failed."
     log "$MODE succeeded for $EXPECTED_SHA."
-    if [[ "$MODE" == "deploy" ]]; then
-        prune_releases "$EXPECTED_SHA" "$previous_sha"
-    fi
     exit 0
 fi
 
 log "Health check failed for $EXPECTED_SHA; restoring the previous release." >&2
-if [[ -n "$previous_sha" ]]; then
-    atomic_activate "$previous_sha" ||
-        fail "Health failed and automatic restoration of $previous_sha also failed."
-    if health_check "$previous_sha"; then
-        fail "Health failed for $EXPECTED_SHA; previous release $previous_sha was restored."
-    fi
-    fail "Health failed for $EXPECTED_SHA; previous release $previous_sha was restored but did not pass its health check."
+if [[ "$ACTIVATION_PENDING" != "1" ]]; then
+    fail "Health failed for $EXPECTED_SHA; current was not changed by this invocation."
 fi
-
-remove_current_if_matches "$EXPECTED_SHA" ||
-    fail "Health failed and the first-release current link could not be removed safely."
-fail "Health failed for $EXPECTED_SHA; there was no previous release to restore."
+restore_activation_after_failure "public health check failure" ||
+    fail "Health failed and production state could not be restored safely."
+case "$LAST_RESTORE_RESULT" in
+    restored:*)
+        restored_sha="${LAST_RESTORE_RESULT#restored:}"
+        if health_check "$restored_sha"; then
+            fail "Health failed for $EXPECTED_SHA; known-good release $restored_sha was restored."
+        fi
+        fail "Health failed for $EXPECTED_SHA; $restored_sha was restored but public health is still failing."
+        ;;
+    removed)
+        fail "Health failed for $EXPECTED_SHA; no valid prior release existed, so current was removed."
+        ;;
+    changed)
+        fail "Health failed for $EXPECTED_SHA; current changed concurrently and was not overwritten."
+        ;;
+    *)
+        fail "Health failed for $EXPECTED_SHA and restoration returned an unknown state."
+        ;;
+esac
