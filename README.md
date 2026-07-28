@@ -60,7 +60,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 
 - Event-first section and focus order, page metadata, and structured event data
 - September 19 event facts, flyer assets, calendar download, and directions
-- 2026 show history, accessible dates, videos, and stable contact/social links
+- Flyer-style recent-set artist wall, 2026 show history, videos, and stable contact/social links
 - Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention
 - Desktop flyer-and-event-copy presentation
 - Logo fallback behavior when the brand image cannot load

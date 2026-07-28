@@ -39,6 +39,7 @@ test('loads the event-first homepage with the expected title and section order',
     await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute('content', '1200');
     await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute('content', '630');
     await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Green Day/);
 
     const sectionOrder = await page.locator('main > section').evaluateAll((sections) =>
         sections.map((section) => section.id)
@@ -50,7 +51,7 @@ test('loads the event-first homepage with the expected title and section order',
         await page.locator('script[type="application/ld+json"]').textContent()
     );
 
-    expect(sectionOrder).toEqual(['show', 'watch', 'shows', 'contact']);
+    expect(sectionOrder).toEqual(['show', 'covers', 'watch', 'shows', 'contact']);
     expect(heroOrder).toEqual(['flyer-stage', 'hero-copy']);
     expect(eventData).toMatchObject({
         '@type': 'MusicEvent',
@@ -116,7 +117,113 @@ test('presents the September event, flyer, and useful event actions', async ({ p
     expect(flyerResponse.headers()['content-type']).toContain('image/png');
 });
 
-test('keeps the 2026 show history, both videos, and stable contact links', async ({ page }) => {
+test('shows an accessible graphic artist wall without song titles', async ({ page }) => {
+    await page.goto('/');
+
+    const covers = page.locator('#covers');
+    const artistItems = covers.locator('.artist-wall > li');
+    const artistNames = await artistItems.locator('.artist-name').allTextContents();
+
+    await expect(covers).toHaveAttribute('aria-labelledby', 'covers-title');
+    await expect(covers.getByRole('heading', { level: 2, name: 'Playing hits from bands like' })).toBeVisible();
+    await expect(covers).toContainText('Selections vary by show');
+    await expect(covers.locator('.artist-wall')).toHaveAttribute('role', 'list');
+    await expect(artistItems).toHaveCount(13);
+    expect(artistNames.map((name) => name.trim())).toEqual([
+        'Green Day',
+        'blink-182',
+        'Jimmy Eat World',
+        'NOFX',
+        'MxPx',
+        'Rancid',
+        'Nirvana',
+        'Taylor Swift',
+        'Blur',
+        'The Beatles',
+        'Pennywise',
+        'Me First & the Gimme Gimmes',
+        'Sublime'
+    ]);
+
+    for (const removedSong of [
+        'Basket Case',
+        'The Rock Show',
+        'The Middle',
+        'Linoleum',
+        'Tomorrow’s Another Day',
+        'Ruby Soho',
+        'In Bloom',
+        'The Story of Us'
+    ]) {
+        await expect(covers).not.toContainText(removedSong);
+    }
+
+    await expect(covers).not.toContainText('Little Richard');
+    await expect(covers).not.toContainText('Willie Nelson');
+    await expect(covers).not.toContainText('Pop • Punk • Alt');
+
+    const motifs = covers.locator('.artist-motif');
+    await expect(motifs).toHaveCount(4);
+    for (const motif of await motifs.all()) {
+        await expect(motif).toHaveAttribute('aria-hidden', 'true');
+    }
+
+    for (const viewport of [
+        { width: 320, height: 568 },
+        { width: 390, height: 844 },
+        { width: 1440, height: 900 },
+        { width: 2048, height: 943 }
+    ]) {
+        await page.setViewportSize(viewport);
+        await page.goto('/');
+
+        const layout = await page.locator('#covers .artist-wall > li').evaluateAll((items) => ({
+            bodyScrollWidth: document.body.scrollWidth,
+            documentScrollWidth: document.documentElement.scrollWidth,
+            items: items.map((item) => {
+                const rect = item.getBoundingClientRect();
+                const nameRect = item.querySelector('.artist-name').getBoundingClientRect();
+
+                return {
+                    clientWidth: item.clientWidth,
+                    left: rect.left,
+                    nameLeft: nameRect.left,
+                    nameRight: nameRect.right,
+                    right: rect.right,
+                    scrollWidth: item.scrollWidth,
+                    width: rect.width
+                };
+            }),
+            viewportWidth: window.innerWidth
+        }));
+
+        expect(layout.documentScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+        expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+
+        for (const item of layout.items) {
+            expect(item.left).toBeGreaterThanOrEqual(-1);
+            expect(item.right).toBeLessThanOrEqual(layout.viewportWidth + 1);
+            expect(item.nameLeft).toBeGreaterThanOrEqual(-1);
+            expect(item.nameRight).toBeLessThanOrEqual(layout.viewportWidth + 1);
+            expect(item.width).toBeGreaterThan(0);
+        }
+
+        const nirvanaLineCount = await page
+            .locator('.artist-name--nirvana')
+            .evaluate((element) => {
+                const range = document.createRange();
+                range.selectNodeContents(element);
+
+                return new Set(
+                    [...range.getClientRects()].map((rect) => Math.round(rect.top))
+                ).size;
+            });
+
+        expect(nirvanaLineCount).toBe(1);
+    }
+});
+
+test('keeps the 2026 show history, all three videos, and stable contact links', async ({ page }) => {
     await page.goto('/');
 
     const showCards = page.locator('#shows .show-card');
@@ -155,7 +262,7 @@ test('keeps the 2026 show history, both videos, and stable contact links', async
     await expect(pastShows.nth(1)).toContainText('11');
 
     const videos = page.locator('#watch .video-card');
-    await expect(videos).toHaveCount(2);
+    await expect(videos).toHaveCount(3);
     await expect(videos.nth(0)).toContainText('She — Green Day cover');
     await expect(videos.nth(0)).toContainText('Wildflower 2026 · New release');
     await expect(videos.nth(0)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=GCy4nHIqV5k');
@@ -163,8 +270,25 @@ test('keeps the 2026 show history, both videos, and stable contact links', async
         'src',
         'https://img.youtube.com/vi/GCy4nHIqV5k/maxresdefault.jpg'
     );
-    await expect(videos.nth(1)).toContainText('Tomorrow');
-    await expect(videos.nth(1)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
+    await expect(videos.nth(1)).toContainText('The Middle — Jimmy Eat World cover');
+    await expect(videos.nth(1)).toContainText('Wildflower 2026 · Featured performance');
+    await expect(videos.nth(1)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=iMrxzCQ7lVs');
+    const middleThumbnail = videos.nth(1).locator('img');
+    await expect(middleThumbnail).toHaveAttribute('src', 'assets/the-middle-jimmy-eat-world-thumbnail.webp');
+    await expect(middleThumbnail).toHaveAttribute('width', '1280');
+    await expect(middleThumbnail).toHaveAttribute('height', '720');
+    await expect(middleThumbnail).not.toHaveClass(/video-card__fallback/);
+    await middleThumbnail.scrollIntoViewIfNeeded();
+    await expect.poll(() => middleThumbnail.evaluate((image) => [
+        image.naturalWidth,
+        image.naturalHeight
+    ])).toEqual([1280, 720]);
+
+    const middleThumbnailResponse = await page.request.get('/assets/the-middle-jimmy-eat-world-thumbnail.webp');
+    expect(middleThumbnailResponse.ok()).toBe(true);
+    expect(middleThumbnailResponse.headers()['content-type']).toContain('image/webp');
+    await expect(videos.nth(2)).toContainText('Tomorrow’s Another Day');
+    await expect(videos.nth(2)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
 
     await expect(page.locator('#watch .section-heading > .text-link')).toHaveAttribute(
         'href',
@@ -194,6 +318,48 @@ test('keeps the 2026 show history, both videos, and stable contact links', async
         'href',
         'https://www.youtube.com/@RadDadBand'
     );
+});
+
+test('stacks three videos with both Wildflower performances larger than the earlier clip', async ({ page }) => {
+    for (const viewport of [
+        { width: 390, height: 844 },
+        { width: 1440, height: 900 }
+    ]) {
+        await page.setViewportSize(viewport);
+        await page.goto('/');
+
+        const [featured, spotlight, secondary] = await page
+            .locator('#watch .video-card')
+            .evaluateAll((cards) => cards.map((card) => {
+                const cardRect = card.getBoundingClientRect();
+                const imageRect = card.querySelector('.video-card__image').getBoundingClientRect();
+
+                return {
+                    card: {
+                        bottom: cardRect.bottom,
+                        left: cardRect.left,
+                        right: cardRect.right,
+                        top: cardRect.top
+                    },
+                    image: {
+                        height: imageRect.height,
+                        width: imageRect.width
+                    }
+                };
+            }));
+
+        expect(spotlight.card.top - featured.card.bottom).toBeGreaterThanOrEqual(16);
+        expect(secondary.card.top - spotlight.card.bottom).toBeGreaterThanOrEqual(16);
+        expect(featured.image.width).toBeGreaterThan(spotlight.image.width);
+        expect(featured.image.height).toBeGreaterThan(spotlight.image.height);
+        expect(spotlight.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
+        expect(spotlight.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
+
+        for (const video of [featured, spotlight, secondary]) {
+            expect(video.card.left).toBeGreaterThanOrEqual(-1);
+            expect(video.card.right).toBeLessThanOrEqual(viewport.width + 1);
+        }
+    }
 });
 
 test('keeps the mobile page overflow-free with a prominent, uncropped flyer', async ({ page }) => {
@@ -241,4 +407,27 @@ test('gives the flyer a strong side-by-side desktop presentation', async ({ page
     expect(heroCopy.left - flyer.right).toBeGreaterThan(16);
     expect(flyer.right).toBeLessThanOrEqual(viewport.width + 4);
     expect(flyer.offsetWidth / flyer.offsetHeight).toBeCloseTo(FLYER_ASPECT_RATIO, 2);
+
+    const flyerFrame = page.locator('.flyer-link');
+    const alignment = await flyerFrame.evaluate((element) => ({
+        flyerTransform: getComputedStyle(element).transform,
+        outlineTransform: getComputedStyle(element.parentElement, '::before').transform
+    }));
+    const beforeHover = await flyerFrame.boundingBox();
+
+    expect(alignment.flyerTransform).toBe('none');
+    expect(alignment.outlineTransform).toBe('none');
+    expect(beforeHover).not.toBeNull();
+
+    await flyerFrame.hover();
+    await flyerFrame.evaluate(async (element) => {
+        await Promise.all(element.getAnimations().map((animation) => animation.finished));
+    });
+
+    const afterHover = await flyerFrame.boundingBox();
+    expect(afterHover).not.toBeNull();
+
+    for (const key of ['x', 'y', 'width', 'height']) {
+        expect(afterHover[key]).toBeCloseTo(beforeHover[key], 1);
+    }
 });
