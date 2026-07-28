@@ -52,15 +52,12 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 
 ### What The Suite Covers
 
-- Homepage loads with the expected section order
-- Upcoming shows content and links stay correct
-- The previous-video thumbnail remains while the old text stays removed
-- Mobile layout does not introduce horizontal overflow
-- `script.js` behaviors including:
-  - logo fallback on image error
-  - ripple creation and cleanup
-  - section animation initialization
-  - hover transition binding for all video containers
+- Event-first section and focus order, page metadata, and structured event data
+- September 19 event facts, flyer assets, calendar download, and directions
+- 2026 show history, accessible dates, videos, and stable contact/social links
+- Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention
+- Desktop flyer-and-event-copy presentation
+- Logo fallback behavior when the brand image cannot load
 
 ## Continuous Integration
 
@@ -75,7 +72,15 @@ GitHub Actions runs the same test suite on every push and pull request:
 
 ```text
 RadDad Website/
+|-- .gitattributes
 |-- .github/workflows/test.yml
+|-- assets/
+|   |-- rad-dad-friends-guitars-growlers-2026-561.webp
+|   |-- rad-dad-friends-guitars-growlers-2026-1122.webp
+|   |-- rad-dad-friends-guitars-growlers-2026-full.png
+|   |-- rad-dad-friends-guitars-growlers-2026.ics
+|   |-- rad-dad-social-2026.png
+|   `-- wildflower-2026-poster-720.webp
 |-- index.html
 |-- styles.css
 |-- script.js
