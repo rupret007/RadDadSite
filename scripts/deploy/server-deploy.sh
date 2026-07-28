@@ -41,7 +41,7 @@ Modes:
 EOF
 }
 
-# shellcheck disable=SC2329 # Invoked indirectly by the EXIT trap.
+# shellcheck disable=SC2317,SC2329 # Invoked indirectly by the EXIT trap.
 cleanup() {
     local status=$?
 
@@ -131,7 +131,7 @@ trap cleanup EXIT
 
 # Ignore follow-on termination signals before EXIT cleanup begins. This keeps a
 # second signal from interrupting restoration after the first one is accepted.
-# shellcheck disable=SC2329 # Invoked indirectly by the signal traps.
+# shellcheck disable=SC2317,SC2329 # Invoked indirectly by the signal traps.
 handle_signal() {
     local status="$1"
 
