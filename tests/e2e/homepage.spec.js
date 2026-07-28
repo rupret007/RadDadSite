@@ -223,7 +223,7 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
     }
 });
 
-test('keeps the 2026 show history, both videos, and stable contact links', async ({ page }) => {
+test('keeps the 2026 show history, all three videos, and stable contact links', async ({ page }) => {
     await page.goto('/');
 
     const showCards = page.locator('#shows .show-card');
@@ -262,7 +262,7 @@ test('keeps the 2026 show history, both videos, and stable contact links', async
     await expect(pastShows.nth(1)).toContainText('11');
 
     const videos = page.locator('#watch .video-card');
-    await expect(videos).toHaveCount(2);
+    await expect(videos).toHaveCount(3);
     await expect(videos.nth(0)).toContainText('She — Green Day cover');
     await expect(videos.nth(0)).toContainText('Wildflower 2026 · New release');
     await expect(videos.nth(0)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=GCy4nHIqV5k');
@@ -270,8 +270,15 @@ test('keeps the 2026 show history, both videos, and stable contact links', async
         'src',
         'https://img.youtube.com/vi/GCy4nHIqV5k/maxresdefault.jpg'
     );
-    await expect(videos.nth(1)).toContainText('Tomorrow’s Another Day');
-    await expect(videos.nth(1)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
+    await expect(videos.nth(1)).toContainText('The Middle — Jimmy Eat World cover');
+    await expect(videos.nth(1)).toContainText('Wildflower 2026 · Featured performance');
+    await expect(videos.nth(1)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=iMrxzCQ7lVs');
+    await expect(videos.nth(1).locator('img')).toHaveAttribute(
+        'data-youtube-thumbnail',
+        'https://img.youtube.com/vi/iMrxzCQ7lVs/maxresdefault.jpg'
+    );
+    await expect(videos.nth(2)).toContainText('Tomorrow’s Another Day');
+    await expect(videos.nth(2)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
 
     await expect(page.locator('#watch .section-heading > .text-link')).toHaveAttribute(
         'href',
@@ -301,6 +308,48 @@ test('keeps the 2026 show history, both videos, and stable contact links', async
         'href',
         'https://www.youtube.com/@RadDadBand'
     );
+});
+
+test('stacks three videos with both Wildflower performances larger than the earlier clip', async ({ page }) => {
+    for (const viewport of [
+        { width: 390, height: 844 },
+        { width: 1440, height: 900 }
+    ]) {
+        await page.setViewportSize(viewport);
+        await page.goto('/');
+
+        const [featured, spotlight, secondary] = await page
+            .locator('#watch .video-card')
+            .evaluateAll((cards) => cards.map((card) => {
+                const cardRect = card.getBoundingClientRect();
+                const imageRect = card.querySelector('.video-card__image').getBoundingClientRect();
+
+                return {
+                    card: {
+                        bottom: cardRect.bottom,
+                        left: cardRect.left,
+                        right: cardRect.right,
+                        top: cardRect.top
+                    },
+                    image: {
+                        height: imageRect.height,
+                        width: imageRect.width
+                    }
+                };
+            }));
+
+        expect(spotlight.card.top - featured.card.bottom).toBeGreaterThanOrEqual(16);
+        expect(secondary.card.top - spotlight.card.bottom).toBeGreaterThanOrEqual(16);
+        expect(featured.image.width).toBeGreaterThan(spotlight.image.width);
+        expect(featured.image.height).toBeGreaterThan(spotlight.image.height);
+        expect(spotlight.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
+        expect(spotlight.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
+
+        for (const video of [featured, spotlight, secondary]) {
+            expect(video.card.left).toBeGreaterThanOrEqual(-1);
+            expect(video.card.right).toBeLessThanOrEqual(viewport.width + 1);
+        }
+    }
 });
 
 test('keeps the mobile page overflow-free with a prominent, uncropped flyer', async ({ page }) => {
