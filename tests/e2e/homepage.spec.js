@@ -74,7 +74,11 @@ test('presents the September event, flyer, and useful event actions', async ({ p
     await page.goto('/');
 
     const hero = page.locator('#show');
-    await expect(hero.getByRole('heading', { level: 1, name: 'Rad Dad + Friends' })).toBeVisible();
+    const eventTitle = hero.getByRole('heading', { level: 1, name: 'Rad Dad + Friends' });
+    await expect(eventTitle).toBeVisible();
+    await expect(eventTitle.locator('.event-title__friends')).toHaveAttribute('aria-hidden', 'true');
+    await expect(eventTitle.locator('.event-title__friends > span')).toHaveCount(7);
+    await expect(eventTitle.locator('.event-title__friends-row .sr-only')).toHaveText('+ Friends');
     await expect(hero).toContainText('Guitars & Growlers');
     await expect(hero).toContainText('Richardson, Texas');
     await expect(hero).toContainText('September 19, 2026');
