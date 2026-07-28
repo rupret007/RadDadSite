@@ -835,22 +835,23 @@ button:focus-visible {
 
 .artist-wall__item--green-day,
 .artist-wall__item--blink,
+.artist-wall__item--bowling,
 .artist-wall__item--jimmy,
 .artist-wall__item--nofx {
     grid-column: span 3;
 }
 
 .artist-wall__item--mxpx,
+.artist-wall__item--taylor,
 .artist-wall__item--blur,
+.artist-wall__item--beatles,
 .artist-wall__item--pennywise,
+.artist-wall__item--me-first,
 .artist-wall__item--sublime {
     grid-column: span 2;
 }
 
-.artist-wall__item--rancid,
-.artist-wall__item--taylor,
-.artist-wall__item--beatles,
-.artist-wall__item--me-first {
+.artist-wall__item--rancid {
     grid-column: span 3;
 }
 
@@ -1039,6 +1040,37 @@ button:focus-visible {
     font-style: italic;
     letter-spacing: -0.04em;
     text-transform: none;
+}
+
+.artist-wall__item--bowling {
+    --artist-accent: #ff5d3d;
+    --artist-rotate: -0.8deg;
+    background:
+        linear-gradient(135deg, rgba(255, 93, 61, 0.18), transparent 72%);
+    clip-path: polygon(3% 9%, 98% 0, 95% 92%, 0 100%);
+}
+
+.artist-name--bowling {
+    color: var(--poster-cream);
+    font-family: var(--body);
+    font-size: clamp(1.5rem, 2.55vw, 2.5rem);
+    font-weight: 900;
+    letter-spacing: -0.07em;
+    line-height: 0.82;
+}
+
+.artist-name--bowling span {
+    width: max-content;
+    display: block;
+    margin: 0.2em auto 0;
+    padding: 0.08em 0.42em 0.12em;
+    color: #080d14;
+    background: #ff6a48;
+    font-family: var(--display);
+    font-size: 0.62em;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    transform: rotate(1.5deg);
 }
 
 .covers-poster__footer {
@@ -1547,6 +1579,7 @@ button:focus-visible {
     }
 
     .artist-wall__item--jimmy,
+    .artist-wall__item--bowling,
     .artist-wall__item--nirvana,
     .artist-wall__item--taylor,
     .artist-wall__item--beatles,
@@ -1862,6 +1895,7 @@ button:focus-visible {
     }
 
     .artist-wall__item--jimmy,
+    .artist-wall__item--bowling,
     .artist-wall__item--nirvana,
     .artist-wall__item--taylor,
     .artist-wall__item--beatles,
@@ -2047,6 +2081,10 @@ button:focus-visible {
 
     .artist-name--me-first {
         font-size: 1rem;
+    }
+
+    .artist-name--bowling {
+        font-size: 1.35rem;
     }
 
     .show-card {

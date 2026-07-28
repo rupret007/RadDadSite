@@ -128,10 +128,11 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
     await expect(covers.getByRole('heading', { level: 2, name: 'Playing hits from bands like' })).toBeVisible();
     await expect(covers).toContainText('Selections vary by show');
     await expect(covers.locator('.artist-wall')).toHaveAttribute('role', 'list');
-    await expect(artistItems).toHaveCount(13);
+    await expect(artistItems).toHaveCount(14);
     expect(artistNames.map((name) => name.trim())).toEqual([
         'Green Day',
         'blink-182',
+        'Bowling for Soup',
         'Jimmy Eat World',
         'NOFX',
         'MxPx',
