@@ -1480,7 +1480,8 @@ a {
 
 /* Photorealistic Story of Us cassette hero */
 .cassette-render {
-    width: min(122%, 52rem);
+    width: min(100%, 52rem);
+    max-width: 100%;
     margin: 0 auto;
     transform: rotate(0.45deg);
     filter: drop-shadow(0 1.35rem 1.8rem rgba(0, 0, 0, 0.42));
@@ -1494,8 +1495,8 @@ a {
 
 @media (max-width: 900px) {
     .cassette-render {
-        width: min(108%, 44rem);
-        margin-inline: -4%;
+        width: min(100%, 44rem);
+        margin-inline: 0;
         justify-self: center;
         transform: rotate(0.2deg);
     }
@@ -1503,7 +1504,7 @@ a {
 
 @media (max-width: 640px) {
     .cassette-render {
-        width: 112%;
-        margin-inline: -6%;
+        width: 100%;
+        margin-inline: 0;
     }
 }
