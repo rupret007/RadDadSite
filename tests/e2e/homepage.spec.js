@@ -228,7 +228,7 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
     }
 });
 
-test('keeps the 2026 show history, all three videos, and stable contact links', async ({ page }) => {
+test('keeps the 2026 show history, all four videos, and stable contact links', async ({ page }) => {
     await page.goto('/');
 
     const showCards = page.locator('#shows .show-card');
@@ -267,7 +267,7 @@ test('keeps the 2026 show history, all three videos, and stable contact links', 
     await expect(pastShows.nth(1)).toContainText('11');
 
     const videos = page.locator('#watch .video-card');
-    await expect(videos).toHaveCount(3);
+    await expect(videos).toHaveCount(4);
     await expect(videos.nth(0)).toContainText('She — Green Day cover');
     await expect(videos.nth(0)).toContainText('Wildflower 2026 · New release');
     await expect(videos.nth(0)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=GCy4nHIqV5k');
@@ -292,8 +292,15 @@ test('keeps the 2026 show history, all three videos, and stable contact links', 
     const middleThumbnailResponse = await page.request.get('/assets/the-middle-jimmy-eat-world-thumbnail.webp');
     expect(middleThumbnailResponse.ok()).toBe(true);
     expect(middleThumbnailResponse.headers()['content-type']).toContain('image/webp');
-    await expect(videos.nth(2)).toContainText('Tomorrow’s Another Day');
-    await expect(videos.nth(2)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
+    await expect(videos.nth(2)).toContainText('Linoleum — NOFX cover');
+    await expect(videos.nth(2)).toContainText('Wildflower 2026 · Latest performance');
+    await expect(videos.nth(2)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=e9mR2sgnJ00');
+    await expect(videos.nth(2).locator('img')).toHaveAttribute(
+        'src',
+        'https://img.youtube.com/vi/e9mR2sgnJ00/maxresdefault.jpg'
+    );
+    await expect(videos.nth(3)).toContainText('Tomorrow’s Another Day');
+    await expect(videos.nth(3)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
 
     await expect(page.locator('#watch .section-heading > .text-link')).toHaveAttribute(
         'href',
@@ -325,7 +332,7 @@ test('keeps the 2026 show history, all three videos, and stable contact links', 
     );
 });
 
-test('stacks three videos with equal-sized Wildflower features above the smaller earlier clip', async ({ page }) => {
+test('stacks four videos with equal-sized Wildflower features above the smaller earlier clip', async ({ page }) => {
     for (const viewport of [
         { width: 390, height: 844 },
         { width: 1440, height: 900 },
@@ -334,7 +341,7 @@ test('stacks three videos with equal-sized Wildflower features above the smaller
         await page.setViewportSize(viewport);
         await page.goto('/');
 
-        const [featured, spotlight, secondary] = await page
+        const [featured, spotlight, latest, secondary] = await page
             .locator('#watch .video-card')
             .evaluateAll((cards) => cards.map((card) => {
                 const cardRect = card.getBoundingClientRect();
@@ -355,15 +362,20 @@ test('stacks three videos with equal-sized Wildflower features above the smaller
             }));
 
         expect(spotlight.card.top - featured.card.bottom).toBeGreaterThanOrEqual(16);
-        expect(secondary.card.top - spotlight.card.bottom).toBeGreaterThanOrEqual(16);
+        expect(latest.card.top - spotlight.card.bottom).toBeGreaterThanOrEqual(16);
+        expect(secondary.card.top - latest.card.bottom).toBeGreaterThanOrEqual(16);
         expect(featured.image.width).toBeCloseTo(spotlight.image.width, 1);
         expect(featured.image.height).toBeCloseTo(spotlight.image.height, 1);
+        expect(featured.image.width).toBeCloseTo(latest.image.width, 1);
+        expect(featured.image.height).toBeCloseTo(latest.image.height, 1);
         expect(featured.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
         expect(featured.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
         expect(spotlight.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
         expect(spotlight.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
+        expect(latest.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
+        expect(latest.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
 
-        for (const video of [featured, spotlight, secondary]) {
+        for (const video of [featured, spotlight, latest, secondary]) {
             expect(video.card.left).toBeGreaterThanOrEqual(-1);
             expect(video.card.right).toBeLessThanOrEqual(viewport.width + 1);
         }
