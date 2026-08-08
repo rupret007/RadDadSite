@@ -17,7 +17,8 @@ await Promise.all([
     copyFile(resolve(projectRoot, 'script.js'), resolve(clientRoot, 'script.js')),
     copyFile(resolve(projectRoot, 'RadDad_Logo.jpg'), resolve(clientRoot, 'RadDad_Logo.jpg')),
     copyFile(resolve(projectRoot, 'worker/index.js'), resolve(serverRoot, 'index.js')),
-    cp(resolve(projectRoot, 'assets'), resolve(clientRoot, 'assets'), { recursive: true })
+    cp(resolve(projectRoot, 'assets'), resolve(clientRoot, 'assets'), { recursive: true }),
+    cp(resolve(projectRoot, 'tap'), resolve(clientRoot, 'tap'), { recursive: true })
 ]);
 
 console.log('Sites build ready in dist/');

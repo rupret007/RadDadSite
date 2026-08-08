@@ -1,5 +1,12 @@
 const worker = {
     async fetch(request, env) {
+        const requestUrl = new URL(request.url);
+
+        if (request.method === 'GET' && (requestUrl.pathname === '/tap' || requestUrl.pathname === '/nfc' || requestUrl.pathname === '/nfc/')) {
+            requestUrl.pathname = '/tap/';
+            return Response.redirect(requestUrl.toString(), 302);
+        }
+
         const response = await env.ASSETS.fetch(request);
 
         if (
