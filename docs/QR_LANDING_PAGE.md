@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`https://raddadband.com/tap/` is the destination for the QR code attached to
+`https://raddadband.com/qr/` is the destination for the QR code attached to
 Rad Dad's physical promotional pieces. Visitors have already scanned the code
 before this page opens, so the experience should immediately reward them with
 the band's personality, featured song, live performances, show information,
@@ -18,7 +18,7 @@ already scanned.
 - Apply one `25.4 mm / 1 inch` round QR sticker to its protected rear or
   underside landing.
 - Use matte-white permanent adhesive stock with pure black QR modules.
-- Encode only the canonical HTTPS URL: `https://raddadband.com/tap/`.
+- Encode only the canonical HTTPS URL: `https://raddadband.com/qr/`.
 - Preserve the complete white quiet zone around the QR matrix.
 - Scan-test every batch before installation and test a sample again after
   installation.
@@ -50,10 +50,10 @@ For temporary local production, use the black 48-up FedEx Office sheet or the
 
 ## Routing
 
-- Canonical destination: `/tap/`
-- QR payload: `https://raddadband.com/tap/`
-- Legacy aliases: `/nfc` and `/nfc/`
+- Canonical destination: `/qr/`
+- QR payload: `https://raddadband.com/qr/`
+- Legacy aliases: `/tap`, `/tap/`, `/nfc`, and `/nfc/`
 
 The worker retains the NFC aliases strictly for backward compatibility. They do
 not indicate that current products contain NFC hardware. Keep the canonical URL,
-Open Graph URL, and all newly generated QR codes pointed at `/tap/`.
+Open Graph URL, and all newly generated QR codes pointed at `/qr/`.

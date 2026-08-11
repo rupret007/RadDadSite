@@ -2,9 +2,21 @@ const worker = {
     async fetch(request, env) {
         const requestUrl = new URL(request.url);
 
-        if (request.method === 'GET' && (requestUrl.pathname === '/tap' || requestUrl.pathname === '/nfc' || requestUrl.pathname === '/nfc/')) {
-            requestUrl.pathname = '/tap/';
-            return Response.redirect(requestUrl.toString(), 302);
+        const canonicalQrPath = '/qr/';
+        const qrAliases = new Set([
+            '/qr',
+            '/qr/index.html',
+            '/tap',
+            '/tap/',
+            '/tap/index.html',
+            '/nfc',
+            '/nfc/',
+            '/nfc/index.html'
+        ]);
+
+        if (request.method === 'GET' && qrAliases.has(requestUrl.pathname)) {
+            requestUrl.pathname = canonicalQrPath;
+            return Response.redirect(requestUrl.toString(), 301);
         }
 
         const response = await env.ASSETS.fetch(request);
