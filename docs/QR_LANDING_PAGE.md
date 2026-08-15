@@ -18,7 +18,7 @@ already scanned.
 - Apply one `25.4 mm / 1 inch` round QR sticker to its protected rear or
   underside landing.
 - Use matte-white permanent adhesive stock with pure black QR modules.
-- Encode only the canonical HTTPS URL: `https://raddadband.com/qr/`.
+- Encode the permanent printed-QR URL: `https://raddadband.com/tap/`.
 - Preserve the complete white quiet zone around the QR matrix.
 - Scan-test every batch before installation and test a sample again after
   installation.
@@ -50,10 +50,16 @@ For temporary local production, use the black 48-up FedEx Office sheet or the
 
 ## Routing
 
-- Canonical destination: `/qr/`
-- QR payload: `https://raddadband.com/qr/`
-- Legacy aliases: `/tap`, `/tap/`, `/nfc`, and `/nfc/`
+- Permanent printed-QR URL: `https://raddadband.com/tap/`
+- Canonical landing-page destination: `/qr/`
+- Permanent aliases: `/tap`, `/tap/`, and `/tap/index.html`
+- Legacy aliases: `/nfc` and `/nfc/`
 
-The worker retains the NFC aliases strictly for backward compatibility. They do
-not indicate that current products contain NFC hardware. Keep the canonical URL,
-Open Graph URL, and all newly generated QR codes pointed at `/qr/`.
+The `/tap/` URL is already printed on physical QR codes. Never delete, rename,
+or repurpose it. The Worker redirects it to `/qr/` with HTTP 301, and
+`tap/index.html` provides a platform-independent fallback for static hosting.
+
+The NFC aliases remain strictly for backward compatibility. They do not
+indicate that current products contain NFC hardware. Keep the canonical URL and
+Open Graph URL pointed at `/qr/`, while all physical QR codes continue to use
+the stable `/tap/` URL.

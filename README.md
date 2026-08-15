@@ -1,16 +1,21 @@
 # Rad Dad Band Website
 
 Static website for Rad Dad, a pop punk cover band. The site includes the main
-band page and a music-first `/qr/` landing page reached from QR stickers on Rad
-Dad's 3D-printed cassette, floppy disk, VHS, and collectible promotional items.
+band page and a music-first `/qr/` landing page reached through the permanent
+printed-QR URL `/tap/`.
 
 ## QR Landing Page
 
 The current physical promotion workflow uses a **1-inch round matte-white
 sticker with a solid-black QR code**. The sticker is installed on the protected
-rear or underside landing of each printed item and opens:
+rear or underside landing of each printed item and uses the permanent URL:
 
-`https://raddadband.com/qr/`
+`https://raddadband.com/tap/`
+
+`/tap/` redirects to the canonical `/qr/` landing page. It is printed on
+physical QR codes and must never be removed or repurposed. A static redirect
+page is retained alongside the Worker redirect so the URL works on either
+deployment path.
 
 The current products do not contain NFC hardware. The landing page should focus
 on the band and its music rather than explaining how the visitor arrived. The
@@ -110,9 +115,7 @@ RadDad Website/
 |   `-- QR_LANDING_PAGE.md
 |-- index.html
 |-- tap/
-|   |-- index.html
-|   |-- styles.css
-|   `-- script.js
+|   `-- index.html
 |-- styles.css
 |-- script.js
 |-- scripts/build-sites.mjs
