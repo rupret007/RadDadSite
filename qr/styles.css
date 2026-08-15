@@ -1527,6 +1527,7 @@ a {
 .next-show-section {
     position: relative;
     overflow: hidden;
+    scroll-margin-top: var(--header-height);
     padding-block: clamp(5rem, 10vw, 9rem);
     border-block: 1px solid var(--line);
     background:
@@ -1692,13 +1693,39 @@ a {
         padding-block: 4.7rem;
     }
 
+    .next-show-layout {
+        gap: 2.4rem;
+    }
+
+    .next-show-copy h2 {
+        font-size: clamp(3.25rem, 16vw, 4.6rem);
+    }
+
+    .next-show-copy__lede {
+        line-height: 1.55;
+    }
+
     .next-show-facts {
         grid-template-columns: 1fr;
+        margin-block: 1.5rem;
     }
 
     .next-show-facts div,
     .next-show-facts div:nth-child(2) {
+        display: grid;
+        grid-template-columns: 4.25rem minmax(0, 1fr);
+        gap: 0.75rem;
+        align-items: start;
+        padding: 0.85rem 0.9rem;
         border-right: 0;
+    }
+
+    .next-show-facts dt {
+        margin: 0.15rem 0 0;
+    }
+
+    .next-show-facts dd {
+        font-size: 1.15rem;
     }
 
     .next-show-facts div:last-child {
@@ -1711,6 +1738,11 @@ a {
     }
 
     .next-show-flyer picture {
+        margin-bottom: 0.65rem;
         box-shadow: 0.55rem 0.65rem 0 rgba(237, 39, 101, 0.18), -0.35rem -0.4rem 0 rgba(181, 220, 8, 0.13), var(--shadow);
+    }
+
+    .next-show-flyer {
+        width: min(100%, 21rem);
     }
 }
