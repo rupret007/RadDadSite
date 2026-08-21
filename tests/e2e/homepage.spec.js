@@ -2,8 +2,8 @@ const { test, expect } = require('@playwright/test');
 
 const EXPECTED_TITLE = 'Rad Dad + Friends at Guitars & Growlers | September 19, 2026';
 const CALENDAR_PATH = 'assets/rad-dad-friends-guitars-growlers-2026.ics';
-const FLYER_PATH = 'assets/rad-dad-friends-guitars-growlers-2026-full.png';
-const FLYER_ASPECT_RATIO = 1122 / 1402;
+const FLYER_PATH = 'assets/rad-dad-friends-guitars-growlers-2026-v2-full.png';
+const FLYER_ASPECT_RATIO = 1024 / 1536;
 
 async function getFlyerLayout(page) {
     const flyer = page.locator('.event-flyer');
@@ -34,7 +34,7 @@ test('loads the event-first homepage with the expected title and section order',
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://raddadband.com/');
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
         'content',
-        'https://raddadband.com/assets/rad-dad-social-2026.png'
+        'https://raddadband.com/assets/rad-dad-social-2026-v2.png'
     );
     await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute('content', '1200');
     await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute('content', '630');
@@ -87,8 +87,8 @@ test('presents the September event, flyer, and useful event actions', async ({ p
 
     const flyer = hero.locator('.event-flyer');
     await expect(flyer).toBeVisible();
-    await expect(flyer).toHaveAttribute('width', '1122');
-    await expect(flyer).toHaveAttribute('height', '1402');
+    await expect(flyer).toHaveAttribute('width', '1024');
+    await expect(flyer).toHaveAttribute('height', '1536');
     await expect(flyer).toHaveAttribute('fetchpriority', 'high');
     await expect(flyer).toHaveAttribute(
         'alt',
@@ -168,7 +168,7 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
     await expect(covers).not.toContainText('Pop • Punk • Alt');
 
     const motifs = covers.locator('.artist-motif');
-    await expect(motifs).toHaveCount(4);
+    await expect(motifs).toHaveCount(2);
     for (const motif of await motifs.all()) {
         await expect(motif).toHaveAttribute('aria-hidden', 'true');
     }
@@ -228,7 +228,7 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
     }
 });
 
-test('keeps the 2026 show history, all four videos, and stable contact links', async ({ page }) => {
+test('keeps the 2026 show history, all five videos, and stable contact links', async ({ page }) => {
     await page.goto('/');
 
     const showCards = page.locator('#shows .show-card');
@@ -267,18 +267,25 @@ test('keeps the 2026 show history, all four videos, and stable contact links', a
     await expect(pastShows.nth(1)).toContainText('11');
 
     const videos = page.locator('#watch .video-card');
-    await expect(videos).toHaveCount(4);
-    await expect(videos.nth(0)).toContainText('She — Green Day cover');
-    await expect(videos.nth(0)).toContainText('Wildflower 2026 · New release');
-    await expect(videos.nth(0)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=GCy4nHIqV5k');
+    await expect(videos).toHaveCount(5);
+    await expect(videos.nth(0)).toContainText('All the Small Things — blink-182 cover');
+    await expect(videos.nth(0)).toContainText('New on YouTube');
+    await expect(videos.nth(0)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=9Re_0wjIbfQ');
     await expect(videos.nth(0).locator('img')).toHaveAttribute(
+        'src',
+        'https://img.youtube.com/vi/9Re_0wjIbfQ/maxresdefault.jpg'
+    );
+    await expect(videos.nth(1)).toContainText('She — Green Day cover');
+    await expect(videos.nth(1)).toContainText('Wildflower 2026 · Live performance');
+    await expect(videos.nth(1)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=GCy4nHIqV5k');
+    await expect(videos.nth(1).locator('img')).toHaveAttribute(
         'src',
         'https://img.youtube.com/vi/GCy4nHIqV5k/maxresdefault.jpg'
     );
-    await expect(videos.nth(1)).toContainText('The Middle — Jimmy Eat World cover');
-    await expect(videos.nth(1)).toContainText('Wildflower 2026 · Featured performance');
-    await expect(videos.nth(1)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=iMrxzCQ7lVs');
-    const middleThumbnail = videos.nth(1).locator('img');
+    await expect(videos.nth(2)).toContainText('The Middle — Jimmy Eat World cover');
+    await expect(videos.nth(2)).toContainText('Wildflower 2026 · Featured performance');
+    await expect(videos.nth(2)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=iMrxzCQ7lVs');
+    const middleThumbnail = videos.nth(2).locator('img');
     await expect(middleThumbnail).toHaveAttribute('src', 'assets/the-middle-jimmy-eat-world-thumbnail.webp');
     await expect(middleThumbnail).toHaveAttribute('width', '1280');
     await expect(middleThumbnail).toHaveAttribute('height', '720');
@@ -292,15 +299,15 @@ test('keeps the 2026 show history, all four videos, and stable contact links', a
     const middleThumbnailResponse = await page.request.get('/assets/the-middle-jimmy-eat-world-thumbnail.webp');
     expect(middleThumbnailResponse.ok()).toBe(true);
     expect(middleThumbnailResponse.headers()['content-type']).toContain('image/webp');
-    await expect(videos.nth(2)).toContainText('Linoleum — NOFX cover');
-    await expect(videos.nth(2)).toContainText('Wildflower 2026 · Latest performance');
-    await expect(videos.nth(2)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=e9mR2sgnJ00');
-    await expect(videos.nth(2).locator('img')).toHaveAttribute(
+    await expect(videos.nth(3)).toContainText('Linoleum — NOFX cover');
+    await expect(videos.nth(3)).toContainText('Wildflower 2026 · Latest performance');
+    await expect(videos.nth(3)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=e9mR2sgnJ00');
+    await expect(videos.nth(3).locator('img')).toHaveAttribute(
         'src',
         'https://img.youtube.com/vi/e9mR2sgnJ00/maxresdefault.jpg'
     );
-    await expect(videos.nth(3)).toContainText('Tomorrow’s Another Day');
-    await expect(videos.nth(3)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
+    await expect(videos.nth(4)).toContainText('Tomorrow’s Another Day');
+    await expect(videos.nth(4)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
 
     await expect(page.locator('#watch .section-heading > .text-link')).toHaveAttribute(
         'href',
@@ -332,7 +339,7 @@ test('keeps the 2026 show history, all four videos, and stable contact links', a
     );
 });
 
-test('stacks four videos with equal-sized Wildflower features above the smaller earlier clip', async ({ page }) => {
+test('stacks five videos with equal-sized featured and spotlight cards above the smaller secondary clip', async ({ page }) => {
     for (const viewport of [
         { width: 390, height: 844 },
         { width: 1440, height: 900 },
@@ -341,7 +348,7 @@ test('stacks four videos with equal-sized Wildflower features above the smaller 
         await page.setViewportSize(viewport);
         await page.goto('/');
 
-        const [featured, spotlight, latest, secondary] = await page
+        const [featured, spotlight1, spotlight2, spotlight3, secondary] = await page
             .locator('#watch .video-card')
             .evaluateAll((cards) => cards.map((card) => {
                 const cardRect = card.getBoundingClientRect();
@@ -361,21 +368,26 @@ test('stacks four videos with equal-sized Wildflower features above the smaller 
                 };
             }));
 
-        expect(spotlight.card.top - featured.card.bottom).toBeGreaterThanOrEqual(16);
-        expect(latest.card.top - spotlight.card.bottom).toBeGreaterThanOrEqual(16);
-        expect(secondary.card.top - latest.card.bottom).toBeGreaterThanOrEqual(16);
-        expect(featured.image.width).toBeCloseTo(spotlight.image.width, 1);
-        expect(featured.image.height).toBeCloseTo(spotlight.image.height, 1);
-        expect(featured.image.width).toBeCloseTo(latest.image.width, 1);
-        expect(featured.image.height).toBeCloseTo(latest.image.height, 1);
+        expect(spotlight1.card.top - featured.card.bottom).toBeGreaterThanOrEqual(16);
+        expect(spotlight2.card.top - spotlight1.card.bottom).toBeGreaterThanOrEqual(16);
+        expect(spotlight3.card.top - spotlight2.card.bottom).toBeGreaterThanOrEqual(16);
+        expect(secondary.card.top - spotlight3.card.bottom).toBeGreaterThanOrEqual(16);
+        expect(featured.image.width).toBeCloseTo(spotlight1.image.width, 1);
+        expect(featured.image.height).toBeCloseTo(spotlight1.image.height, 1);
+        expect(featured.image.width).toBeCloseTo(spotlight2.image.width, 1);
+        expect(featured.image.height).toBeCloseTo(spotlight2.image.height, 1);
+        expect(featured.image.width).toBeCloseTo(spotlight3.image.width, 1);
+        expect(featured.image.height).toBeCloseTo(spotlight3.image.height, 1);
         expect(featured.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
         expect(featured.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
-        expect(spotlight.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
-        expect(spotlight.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
-        expect(latest.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
-        expect(latest.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
+        expect(spotlight1.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
+        expect(spotlight1.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
+        expect(spotlight2.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
+        expect(spotlight2.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
+        expect(spotlight3.image.width).toBeGreaterThanOrEqual(secondary.image.width * 1.12);
+        expect(spotlight3.image.height).toBeGreaterThanOrEqual(secondary.image.height * 1.12);
 
-        for (const video of [featured, spotlight, latest, secondary]) {
+        for (const video of [featured, spotlight1, spotlight2, spotlight3, secondary]) {
             expect(video.card.left).toBeGreaterThanOrEqual(-1);
             expect(video.card.right).toBeLessThanOrEqual(viewport.width + 1);
         }
@@ -433,10 +445,12 @@ test('gives the flyer a strong side-by-side desktop presentation', async ({ page
         flyerTransform: getComputedStyle(element).transform,
         outlineTransform: getComputedStyle(element.parentElement, '::before').transform
     }));
-    const beforeHover = await flyerFrame.boundingBox();
 
     expect(alignment.flyerTransform).toBe('none');
     expect(alignment.outlineTransform).toBe('none');
+
+    await flyerFrame.scrollIntoViewIfNeeded();
+    const beforeHover = await flyerFrame.boundingBox();
     expect(beforeHover).not.toBeNull();
 
     await flyerFrame.hover();
