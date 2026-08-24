@@ -35,6 +35,7 @@ specification, copy guardrails, and routing notes.
 The repo now includes a hybrid automated test suite:
 
 - `Vitest + JSDOM` for `script.js` behavior
+- artifact and deployment-helper safety tests for clean releases and rollback
 - `Playwright` for real-browser homepage smoke coverage in Chromium
 
 ### Install
@@ -61,6 +62,13 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
   npm run build:sites
   ```
 
+- Build and verify the clean production-only package:
+
+  ```bash
+  npm run build:production
+  npm run verify:production -- --expected-sha YOUR_40_CHARACTER_GIT_SHA
+  ```
+
 - Run the full suite:
 
   ```bash
@@ -79,6 +87,18 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
   npm run test:e2e
   ```
 
+- Run the server deployment-helper tests only:
+
+  ```bash
+  npm run test:deploy
+  ```
+
+- Lint the deployment helper and its shell test harness (requires ShellCheck):
+
+  ```bash
+  npm run lint:deploy
+  ```
+
 ### What The Suite Covers
 
 - Event-first section and focus order, page metadata, and structured event data
@@ -95,7 +115,27 @@ GitHub Actions runs the same test suite on every push and pull request:
 - installs Node 24 dependencies with `npm ci`
 - installs Chromium for Playwright
 - runs `npm test`
+- runs ShellCheck against the deployment helper and its shell test harness
+- builds and verifies a clean, commit-identified production artifact containing
+  the homepage plus the permanent `/tap/` and `/qr/` routes
 - uploads Playwright artifacts if the browser suite fails
+
+Pull requests cannot deploy and do not receive production credentials. The
+remote production job is disabled by default behind explicit discovery,
+branch/reviewer, shared-vhost-intent, and master enablement gates. Automatic
+deployment has its own additional disabled-by-default switch.
+
+## Production Deployment
+
+Production publishes only the verified `dist/client` artifact, never the
+complete repository. GitHub Pages and the existing ChatGPT Sites deployment
+remain separate from this guarded server path.
+
+See [the production deployment runbook](docs/production-deployment.md) for the
+mandatory hosting discovery record, `raddadband.com` / `lazypunksunite.com`
+vhost decision, protected branch and Environment reviewer setup, first rollout,
+health verification, rollback drill, and kill switches. No server action is
+authorized merely by merging the pipeline.
 
 ## File Structure
 
@@ -112,17 +152,29 @@ RadDad Website/
 |   |-- rad-dad-social-2026.png
 |   `-- wildflower-2026-poster-720.webp
 |-- docs/
-|   `-- QR_LANDING_PAGE.md
+|   |-- production-deployment.md
+|   |-- QR_LANDING_PAGE.md
+|   `-- raddad-deploy.conf.example
 |-- index.html
+|-- qr/
+|   |-- index.html
+|   |-- script.js
+|   `-- styles.css
 |-- tap/
 |   `-- index.html
 |-- styles.css
 |-- script.js
-|-- scripts/build-sites.mjs
+|-- scripts/
+|   |-- build-sites.mjs
+|   |-- deploy/server-deploy.sh
+|   |-- lib/production-artifact.mjs
+|   `-- verify-production-artifact.mjs
 |-- tests/
+|   |-- deploy/server-deploy.test.sh
 |   |-- e2e/homepage.spec.js
 |   |-- setup/vitest.setup.js
-|   `-- unit/homepage.test.js
+|   |-- unit/homepage.test.js
+|   `-- unit/production-artifact.test.js
 |-- playwright.config.js
 |-- vitest.config.js
 |-- package.json
