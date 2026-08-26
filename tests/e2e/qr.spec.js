@@ -28,9 +28,45 @@ test.describe('tap, NFC, and QR landing pages', () => {
 
             expect(response.ok()).toBe(true);
             expect(html).toContain('meta http-equiv="refresh"');
-            expect(html).toContain('url=/qr/');
+            expect(html).toContain('url=../qr/');
             expect(html).toContain('rel="canonical" href="https://raddadband.com/qr/"');
+            expect(html).toContain("new URL('../qr/', window.location.href)");
             expect(html).toContain('window.location.replace');
+            expect(html).toContain('href="../qr/"');
+            expect(html).not.toContain('url=/qr/');
+        }
+    });
+
+    test('tag and NFC aliases stay inside a project-site base without redirect loops', async ({ page }) => {
+        const projectPrefix = '/RadDadSite';
+
+        await page.route('**/RadDadSite/**', async (route) => {
+            const proxiedUrl = new URL(route.request().url());
+            proxiedUrl.pathname = proxiedUrl.pathname.slice(projectPrefix.length) || '/';
+            await route.continue({ url: proxiedUrl.toString() });
+        });
+
+        for (const alias of ['tap', 'nfc']) {
+            const navigations = [];
+            const recordNavigation = (frame) => {
+                if (frame === page.mainFrame()) {
+                    navigations.push(frame.url());
+                }
+            };
+            page.on('framenavigated', recordNavigation);
+
+            await page.goto(`${projectPrefix}/${alias}/?utm_source=project-site#wildflower`);
+
+            const expectedUrl = `http://127.0.0.1:4173${projectPrefix}/qr/?utm_source=project-site#wildflower`;
+            await expect(page).toHaveURL(expectedUrl);
+            await expect(page).toHaveTitle('Rad Dad | The Cover Band Covering Its Own Cover');
+            await page.waitForTimeout(200);
+
+            const destinationNavigations = navigations.filter((url) => url === expectedUrl);
+            expect(destinationNavigations).toHaveLength(1);
+            expect(navigations.some((url) => /\/qr\/qr\//.test(url))).toBe(false);
+
+            page.off('framenavigated', recordNavigation);
         }
     });
 

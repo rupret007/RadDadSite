@@ -166,6 +166,24 @@ describe('production artifact generation', () => {
         await expect(readFile(join(artifactRoot, 'qr/script.js'), 'utf8')).resolves.toBeTruthy();
         await expect(readFile(join(artifactRoot, 'qr/styles.css'), 'utf8')).resolves.toBeTruthy();
     });
+
+    it('ships project-site-safe tag and NFC redirects in the production artifact', async () => {
+        const artifactRoot = await createTemporaryDirectory();
+        await copyProductionClient({
+            projectRoot: repoRoot,
+            clientRoot: artifactRoot
+        });
+
+        for (const path of ['tap/index.html', 'nfc/index.html']) {
+            const html = await readFile(join(artifactRoot, path), 'utf8');
+
+            expect(html).toContain('content="0; url=../qr/"');
+            expect(html).toContain("new URL('../qr/', window.location.href)");
+            expect(html).toContain('href="../qr/"');
+            expect(html).toContain('href="https://raddadband.com/qr/"');
+            expect(html).not.toContain('url=/qr/');
+        }
+    });
 });
 
 describe('production artifact verification', () => {

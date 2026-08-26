@@ -58,12 +58,14 @@ For temporary local production, use the black 48-up FedEx Office sheet or the
 The `/tap/` URL is already printed on physical QR codes. Never delete, rename,
 or repurpose it. The Worker redirects it to `/qr/` with HTTP 301, and
 `tap/index.html` provides a platform-independent fallback for static hosting.
+That fallback resolves `../qr/` from the current document URL so it also stays
+inside a project-site prefix such as `/RadDadSite/`.
 
 The NFC aliases remain strictly for backward compatibility. They do not
 indicate that current products contain NFC hardware. Keep the canonical URL and
 Open Graph URL pointed at `/qr/`, while all physical QR codes continue to use
-the stable `/tap/` URL. `nfc/index.html` is the matching static-host fallback
-for old NFC links.
+the stable `/tap/` URL. `nfc/index.html` is the matching prefix-safe static-host
+fallback for old NFC links.
 
 Keep music, video, show, and follow content only in `qr/index.html`. The `/tap/`
 and `/nfc/` files are redirect-only compatibility shims so QR stickers, old NFC
