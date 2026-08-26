@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('tap and QR landing pages', () => {
+test.describe('tap, NFC, and QR landing pages', () => {
     test('/tap/ redirects to /qr/ via client-side JavaScript', async ({ page }) => {
         await page.goto('/tap/');
 
@@ -14,14 +14,24 @@ test.describe('tap and QR landing pages', () => {
         await expect(page).toHaveURL(/\/qr\/\?utm_source=sticker&utm_campaign=v7#song$/);
     });
 
-    test('/tap/index.html contains meta refresh fallback and canonical to /qr/', async ({ page }) => {
-        const response = await page.request.get('/tap/index.html');
-        const html = await response.text();
+    test('/nfc/ preserves legacy links while using the canonical QR content', async ({ page }) => {
+        await page.goto('/nfc/?utm_source=legacy#wildflower');
 
-        expect(html).toContain('meta http-equiv="refresh"');
-        expect(html).toContain('url=/qr/');
-        expect(html).toContain('rel="canonical" href="https://raddadband.com/qr/"');
-        expect(html).toContain('window.location.replace');
+        await expect(page).toHaveURL(/\/qr\/\?utm_source=legacy#wildflower$/);
+        await expect(page).toHaveTitle('Rad Dad | The Cover Band Covering Its Own Cover');
+    });
+
+    test('tag and NFC aliases contain static fallbacks canonicalized to /qr/', async ({ page }) => {
+        for (const path of ['/tap/index.html', '/nfc/index.html']) {
+            const response = await page.request.get(path);
+            const html = await response.text();
+
+            expect(response.ok()).toBe(true);
+            expect(html).toContain('meta http-equiv="refresh"');
+            expect(html).toContain('url=/qr/');
+            expect(html).toContain('rel="canonical" href="https://raddadband.com/qr/"');
+            expect(html).toContain('window.location.replace');
+        }
     });
 
     test('/qr/ loads the Story Of Us landing page with correct metadata', async ({ page }) => {
@@ -92,7 +102,7 @@ test.describe('tap and QR landing pages', () => {
         );
     });
 
-    test('/qr/ features Wildflower live videos including All the Small Things', async ({ page }) => {
+    test('/qr/ features the latest Wildflower video and earlier live performances', async ({ page }) => {
         await page.goto('/qr/');
 
         const wildflowerSection = page.locator('#wildflower');
@@ -100,20 +110,30 @@ test.describe('tap and QR landing pages', () => {
         await expect(wildflowerSection).toContainText('Texas Credit Union Stage');
 
         const liveCards = wildflowerSection.locator('.live-card');
-        await expect(liveCards).toHaveCount(3);
+        await expect(liveCards).toHaveCount(4);
 
-        const allTheSmallThings = liveCards.nth(0);
+        const tomorrowsAnotherDay = liveCards.nth(0);
+        await expect(tomorrowsAnotherDay).toContainText('Tomorrow’s Another Day');
+        await expect(tomorrowsAnotherDay).toContainText('MxPx');
+        await expect(tomorrowsAnotherDay).toHaveAttribute('href', 'https://www.youtube.com/watch?v=4ReFoSZHL7o');
+        await expect(tomorrowsAnotherDay.locator('img')).toHaveAttribute(
+            'src',
+            'https://img.youtube.com/vi/4ReFoSZHL7o/maxresdefault.jpg'
+        );
+        await expect(tomorrowsAnotherDay.locator('.live-card__stamp')).toHaveText('New video');
+
+        const allTheSmallThings = liveCards.nth(1);
         await expect(allTheSmallThings).toContainText('All the Small Things');
         await expect(allTheSmallThings).toContainText('blink-182');
         await expect(allTheSmallThings).toHaveAttribute('href', 'https://www.youtube.com/watch?v=9Re_0wjIbfQ');
-        await expect(allTheSmallThings.locator('.live-card__stamp')).toHaveText('New video');
+        await expect(allTheSmallThings.locator('.live-card__stamp')).toHaveText("Wildflower '26");
 
-        const theMiddle = liveCards.nth(1);
+        const theMiddle = liveCards.nth(2);
         await expect(theMiddle).toContainText('The Middle');
         await expect(theMiddle).toContainText('Jimmy Eat World');
         await expect(theMiddle).toHaveAttribute('href', 'https://www.youtube.com/watch?v=iMrxzCQ7lVs');
 
-        const linoleum = liveCards.nth(2);
+        const linoleum = liveCards.nth(3);
         await expect(linoleum).toContainText('Linoleum');
         await expect(linoleum).toContainText('NOFX');
         await expect(linoleum).toHaveAttribute('href', 'https://www.youtube.com/watch?v=e9mR2sgnJ00');

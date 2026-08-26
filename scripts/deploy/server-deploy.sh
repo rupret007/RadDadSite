@@ -451,6 +451,7 @@ CURRENT_PRODUCTION_FILES = {
     "assets/wildflower-2026-poster-720.webp",
     "assets/wildflower-she-green-day.webp",
     "index.html",
+    "nfc/index.html",
     "qr/index.html",
     "qr/script.js",
     "qr/styles.css",
@@ -473,6 +474,7 @@ RETAINED_ASSET_EXTENSIONS = {
     ".svg", ".webp", ".woff", ".woff2",
 }
 RETAINED_ROUTE_FILES = {
+    "nfc/index.html",
     "qr/index.html",
     "qr/script.js",
     "qr/styles.css",
@@ -516,7 +518,7 @@ def allowed_file(path):
     )
 
 def allowed_directory(path):
-    return path in {"assets", "qr", "tap"}
+    return path in {"assets", "nfc", "qr", "tap"}
 
 def read_directory(path):
     if not os.path.isabs(path):

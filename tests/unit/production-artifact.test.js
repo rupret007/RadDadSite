@@ -160,6 +160,7 @@ describe('production artifact generation', () => {
         await expect(readFile(join(artifactRoot, 'package.json'))).rejects.toThrow();
         await expect(readFile(join(artifactRoot, 'RadDad_OnePage_Site.zip'))).rejects.toThrow();
         await expect(readFile(join(artifactRoot, 'worker/index.js'))).rejects.toThrow();
+        await expect(readFile(join(artifactRoot, 'nfc/index.html'), 'utf8')).resolves.toBeTruthy();
         await expect(readFile(join(artifactRoot, 'tap/index.html'), 'utf8')).resolves.toBeTruthy();
         await expect(readFile(join(artifactRoot, 'qr/index.html'), 'utf8')).resolves.toBeTruthy();
         await expect(readFile(join(artifactRoot, 'qr/script.js'), 'utf8')).resolves.toBeTruthy();
