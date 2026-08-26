@@ -4,12 +4,17 @@
   "private": true,
   "description": "Static site for the Rad Dad band homepage.",
   "scripts": {
+    "build:production": "node scripts/build-sites.mjs --client-only",
     "build:sites": "node scripts/build-sites.mjs",
+    "lint:deploy": "shellcheck scripts/deploy/server-deploy.sh tests/deploy/server-deploy.test.sh",
     "serve:test": "http-server . -p 4173 -a 127.0.0.1 -c-1 --silent",
-    "test": "npm run test:unit && npm run test:e2e",
+    "test": "npm run test:unit && npm run test:deploy && npm run test:e2e",
+    "test:artifact": "vitest run tests/unit/production-artifact.test.js",
+    "test:deploy": "bash tests/deploy/server-deploy.test.sh",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
-    "test:install-browsers": "playwright install chromium"
+    "test:install-browsers": "playwright install chromium",
+    "verify:production": "node scripts/verify-production-artifact.mjs --artifact-dir dist/client"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
