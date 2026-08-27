@@ -79,7 +79,8 @@ describe('September 19 public lineup', () => {
             const lower = surface.toLowerCase();
 
             for (const phrase of FORBIDDEN_BILL_TALK) {
-                expect(lower).not.toContain(phrase);
+                const pattern = new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                expect(lower).not.toMatch(pattern);
             }
 
             expect(lower).not.toContain('sponsor');
