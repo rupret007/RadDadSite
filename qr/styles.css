@@ -1549,7 +1549,7 @@ a {
 }
 
 .next-show-copy h2 {
-    max-width: 9ch;
+    max-width: 14ch;
     margin: 0.5rem 0 1.1rem;
     font-family: var(--display);
     font-size: clamp(3.7rem, 7vw, 7rem);
@@ -1560,7 +1560,14 @@ a {
 
 .next-show-copy h2 span {
     display: block;
+    margin-top: 0.18em;
     color: var(--lime);
+    font-family: "Permanent Marker", "Trebuchet MS", cursive;
+    font-size: 0.36em;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.05;
+    text-transform: none;
 }
 
 .next-show-copy__lede {
@@ -1569,6 +1576,12 @@ a {
     color: #d8e0e6;
     font-size: clamp(1rem, 1.5vw, 1.18rem);
     line-height: 1.7;
+}
+
+.next-show-copy__lede a {
+    color: var(--cream);
+    text-decoration-color: var(--lime);
+    text-underline-offset: 0.18em;
 }
 
 .next-show-facts {

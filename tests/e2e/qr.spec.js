@@ -189,11 +189,18 @@ test.describe('tap, NFC, and QR landing pages', () => {
 
         const nextShowSection = page.locator('#next-show');
         await expect(nextShowSection.getByRole('heading', { level: 2 })).toContainText('Rad Dad');
-        await expect(nextShowSection.getByRole('heading', { level: 2 })).toContainText('Friends');
+        await expect(nextShowSection.getByRole('heading', { level: 2 })).toContainText('The Fault Lines');
+        await expect(nextShowSection).toContainText('Rad Dad and The Fault Lines');
+        await expect(nextShowSection).not.toContainText(/Friends/);
 
         const facts = nextShowSection.locator('.next-show-facts');
         await expect(facts).toContainText('September 19');
-        await expect(facts).toContainText('7–10 PM');
+        await expect(facts).toContainText('7:00 PM');
+        await expect(facts).not.toContainText('10 PM');
+        await expect(nextShowSection.getByRole('link', { name: 'The Fault Lines', exact: true })).toHaveAttribute(
+            'href',
+            'https://www.facebook.com/thefaultlinestx'
+        );
         await expect(facts).toContainText('Guitars & Growlers');
         await expect(facts).toContainText('Richardson, Texas');
         await expect(facts).toContainText('Free show');
@@ -214,6 +221,7 @@ test.describe('tap, NFC, and QR landing pages', () => {
         await expect(flyerImg).toHaveAttribute('width', '1024');
         await expect(flyerImg).toHaveAttribute('height', '1536');
         await expect(flyerImg).toHaveAttribute('src', /rad-dad-friends-guitars-growlers-2026-v2-full\.png/);
+        await expect(flyerImg).toHaveAttribute('alt', /Rad Dad and The Fault Lines/);
 
         await expect(nextShowSection.locator('.next-show-details')).toHaveAttribute('href', '../#show');
     });
@@ -258,7 +266,7 @@ test.describe('tap, NFC, and QR landing pages', () => {
         expect(cassetteResponse.headers()['content-type']).toContain('image/webp');
 
         expect(calendarResponse.ok()).toBe(true);
-        expect(await calendarResponse.text()).toContain('SUMMARY:Rad Dad + Friends');
+        expect(await calendarResponse.text()).toContain('SUMMARY:Rad Dad and The Fault Lines');
 
         expect(flyerResponse.ok()).toBe(true);
         expect(flyerResponse.headers()['content-type']).toContain('image/png');

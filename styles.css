@@ -266,7 +266,7 @@ button:focus-visible {
 }
 
 .hero-copy h1 {
-    max-width: 10ch;
+    max-width: 12ch;
     margin: 0;
     font-family: var(--display);
     font-size: clamp(4rem, 7.1vw, 7.25rem);
@@ -288,74 +288,20 @@ button:focus-visible {
     display: block;
 }
 
-.event-title__friends-row {
+.event-title__with {
+    display: block;
     width: max-content;
     max-width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.13em;
-    margin-top: 0.08em;
-}
-
-.event-title__friends-row > em {
-    flex: 0 0 auto;
-}
-
-.event-title__friends {
-    position: relative;
-    z-index: 0;
-    display: inline-flex;
-    align-items: center;
-    padding: 0 0.03em 0.12em;
-    color: var(--cream);
+    margin-top: 0.22em;
+    color: var(--lime);
     font-family: "Permanent Marker", "Trebuchet MS", cursive;
-    font-size: 0.56em;
+    font-size: clamp(1.35rem, 3.4vw, 2.55rem);
     font-style: normal;
     font-weight: 400;
-    letter-spacing: 0;
-    line-height: 0.9;
+    letter-spacing: 0.01em;
+    line-height: 1.05;
     text-shadow: 3px 4px 0 rgba(0, 0, 0, 0.42);
-    text-transform: uppercase;
-    transform: rotate(-1deg);
-}
-
-.event-title__friends::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    right: -0.05em;
-    bottom: 0;
-    left: -0.05em;
-    height: 0.08em;
-    background: var(--blue-bright);
-    clip-path: polygon(0 38%, 100% 0, 96% 100%, 3% 78%);
-    box-shadow: 0 0 18px rgba(32, 186, 255, 0.28);
-    transform: rotate(-1.5deg);
-}
-
-.event-title__friends > span {
-    --friend-dot: var(--pink);
-    display: inline-flex;
-    align-items: center;
-}
-
-.event-title__friends > span:not(:last-child)::after {
-    content: "";
-    width: 0.12em;
-    aspect-ratio: 1;
-    margin: 0 0.13em;
-    border-radius: 50%;
-    background: var(--friend-dot);
-    box-shadow: 0 0 0.08em var(--friend-dot);
-    transform: translateY(0.04em);
-}
-
-.event-title__friends > span:nth-child(3n + 2) {
-    --friend-dot: var(--blue-bright);
-}
-
-.event-title__friends > span:nth-child(3n) {
-    --friend-dot: var(--lime);
+    text-transform: none;
 }
 
 .hero-copy__lede {
@@ -365,6 +311,12 @@ button:focus-visible {
     font-size: clamp(1rem, 1.4vw, 1.16rem);
     font-weight: 500;
     line-height: 1.75;
+}
+
+.hero-copy__lede a {
+    color: var(--cream);
+    text-decoration-color: var(--lime);
+    text-underline-offset: 0.18em;
 }
 
 .event-facts {
@@ -1758,8 +1710,12 @@ button:focus-visible {
     }
 
     .hero-copy h1 {
-        max-width: 9ch;
+        max-width: 12ch;
         font-size: clamp(4rem, 12vw, 6.25rem);
+    }
+
+    .event-title__with {
+        font-size: clamp(1.3rem, 6.4vw, 2.2rem);
     }
 
     .hero-copy__lede {
@@ -1885,6 +1841,10 @@ button:focus-visible {
 
     .hero-copy h1 {
         font-size: clamp(3.65rem, 18vw, 5.8rem);
+    }
+
+    .event-title__with {
+        font-size: clamp(1.2rem, 7.2vw, 1.85rem);
     }
 
     .event-facts dd {
