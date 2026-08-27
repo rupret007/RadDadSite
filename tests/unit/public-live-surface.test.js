@@ -25,6 +25,13 @@ function coversSection(html) {
     return match[0];
 }
 
+function songSection(html) {
+    const match = html.match(/<section[^>]*id="song"[\s\S]*?<\/section>/i);
+
+    expect(match, 'QR landing page must keep the Story Of Us song section').not.toBeNull();
+    return match[0];
+}
+
 describe('public live surface honesty', () => {
     it('does not present the homepage artist wall as a setlist', async () => {
         const html = await readFile(homepagePath, 'utf8');
@@ -36,10 +43,24 @@ describe('public live surface honesty', () => {
         expect(covers).toContain('aria-label="Cover note"');
         expect(covers).toContain('Green Day');
         expect(covers.toLowerCase()).not.toContain('setlist');
+        expect(covers.toLowerCase()).not.toContain('part of the set');
 
         for (const title of OFFICIAL_SET_SONG_TITLES) {
             expect(covers).not.toContain(title);
         }
+    });
+
+    it('does not claim The Story Of Us is part of the official set', async () => {
+        const qr = await readFile(qrPath, 'utf8');
+        const song = songSection(qr);
+
+        expect(song).toContain('It started as a solo release');
+        expect(song).toContain('it became ours');
+        expect(song).toContain('The Story Of Us');
+        expect(song.toLowerCase()).not.toContain('setlist');
+        expect(song.toLowerCase()).not.toContain('part of the set');
+        expect(qr.toLowerCase()).not.toContain('setlist');
+        expect(qr.toLowerCase()).not.toContain('part of the set');
     });
 
     it('keeps the official next show and current Wildflower clip on public live routes', async () => {
@@ -53,5 +74,6 @@ describe('public live surface honesty', () => {
         expect(qr).toContain(FEATURED_VIDEO_ID);
         expect(qr).not.toContain(RETIRED_VIDEO_ID);
         expect(qr.toLowerCase()).not.toContain('setlist');
+        expect(qr.toLowerCase()).not.toContain('part of the set');
     });
 });
