@@ -129,8 +129,11 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
     const artistNames = await artistItems.locator('.artist-name').allTextContents();
 
     await expect(covers).toHaveAttribute('aria-labelledby', 'covers-title');
+    await expect(covers.locator('.section-kicker')).toHaveText('From the Rad Dad covers');
     await expect(covers.getByRole('heading', { level: 2, name: 'Playing hits from bands like' })).toBeVisible();
     await expect(covers).toContainText('Selections vary by show');
+    await expect(covers.locator('.covers-poster__footer')).toHaveAttribute('aria-label', 'Cover note');
+    await expect(covers).not.toContainText(/setlist/i);
     await expect(covers.locator('.artist-wall')).toHaveAttribute('role', 'list');
     await expect(artistItems).toHaveCount(14);
     expect(artistNames.map((name) => name.trim())).toEqual([
