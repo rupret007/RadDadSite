@@ -4,7 +4,6 @@
   "private": true,
   "description": "Static site for the Rad Dad band homepage.",
   "scripts": {
-    "build:flyers": "node scripts/render-flyers.mjs",
     "build:production": "node scripts/build-sites.mjs --client-only",
     "build:sites": "node scripts/build-sites.mjs",
     "lint:deploy": "shellcheck scripts/deploy/server-deploy.sh tests/deploy/server-deploy.test.sh",
