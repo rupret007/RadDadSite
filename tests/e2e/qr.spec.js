@@ -111,6 +111,10 @@ test.describe('tap, NFC, and QR landing pages', () => {
 
         const songSection = page.locator('#song');
         await expect(songSection.getByRole('heading', { level: 2 })).toContainText('song that became');
+        await expect(songSection).toContainText('It started as a solo release');
+        await expect(songSection).toContainText('it became ours');
+        await expect(songSection).not.toContainText(/setlist/i);
+        await expect(songSection).not.toContainText(/part of the set/i);
 
         const playerCard = songSection.locator('.player-card');
         await expect(playerCard).toBeVisible();
