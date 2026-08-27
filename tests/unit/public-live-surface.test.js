@@ -33,6 +33,7 @@ describe('public live surface honesty', () => {
         expect(covers).toContain('From the Rad Dad covers');
         expect(covers).toContain('Playing hits from');
         expect(covers).toContain('Selections vary by show');
+        expect(covers).toContain('aria-label="Cover note"');
         expect(covers).toContain('Green Day');
         expect(covers.toLowerCase()).not.toContain('setlist');
 
