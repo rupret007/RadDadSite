@@ -4,6 +4,12 @@ Static website for Rad Dad, a pop punk cover band. The site includes the main
 band page and a music-first `/qr/` landing page reached through the permanent
 printed-QR URL `/tap/`.
 
+The current September 19, 2026 show remains branded **Rad Dad + Friends** and
+runs from **7–10 PM** at Guitars & Growlers in Richardson. **The Fault Lines**
+are named as a participating band on the homepage, QR landing page, calendar
+download, and structured event metadata. The restored Friends flyer and visual
+treatment remain the source of truth; do not infer billing order or set times.
+
 ## QR Landing Page
 
 The current physical promotion workflow uses a **1-inch round matte-white
@@ -104,7 +110,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 ### What The Suite Covers
 
 - Event-first section and focus order, page metadata, and structured event data
-- September 19 event facts, flyer assets, calendar download, and directions
+- September 19 event facts, named participating bands, flyer assets, calendar download, and directions
 - Flyer-style recent-set artist wall, 2026 show history, videos, and stable contact/social links
 - The latest featured YouTube performance on both the homepage and canonical QR landing page
 - Permanent `/tap/` and legacy `/nfc/` fallbacks converging on the canonical `/qr/` content
