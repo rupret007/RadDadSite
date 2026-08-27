@@ -1571,17 +1571,6 @@ a {
     line-height: 1.7;
 }
 
-.next-show-copy__lede a {
-    color: var(--cream);
-    text-decoration-color: var(--lime);
-    text-underline-offset: 0.18em;
-}
-
-.next-show-copy__lede span {
-    margin-inline: 0.28em;
-    color: var(--pink);
-}
-
 .next-show-facts {
     display: grid;
     grid-template-columns: 1fr 1fr;
