@@ -268,24 +268,31 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
 
     const videos = page.locator('#watch .video-card');
     await expect(videos).toHaveCount(5);
-    await expect(videos.nth(0)).toContainText('All the Small Things — blink-182 cover');
-    await expect(videos.nth(0)).toContainText('New on YouTube');
-    await expect(videos.nth(0)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=9Re_0wjIbfQ');
+    await expect(videos.nth(0)).toContainText('Tomorrow’s Another Day — MxPx cover');
+    await expect(videos.nth(0)).toContainText('New on YouTube · Wildflower 2026');
+    await expect(videos.nth(0)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=4ReFoSZHL7o');
     await expect(videos.nth(0).locator('img')).toHaveAttribute(
+        'src',
+        'https://img.youtube.com/vi/4ReFoSZHL7o/maxresdefault.jpg'
+    );
+    await expect(videos.nth(1)).toContainText('All the Small Things — blink-182 cover');
+    await expect(videos.nth(1)).toContainText('Wildflower 2026 · Live performance');
+    await expect(videos.nth(1)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=9Re_0wjIbfQ');
+    await expect(videos.nth(1).locator('img')).toHaveAttribute(
         'src',
         'https://img.youtube.com/vi/9Re_0wjIbfQ/maxresdefault.jpg'
     );
-    await expect(videos.nth(1)).toContainText('She — Green Day cover');
-    await expect(videos.nth(1)).toContainText('Wildflower 2026 · Live performance');
-    await expect(videos.nth(1)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=GCy4nHIqV5k');
-    await expect(videos.nth(1).locator('img')).toHaveAttribute(
+    await expect(videos.nth(2)).toContainText('She — Green Day cover');
+    await expect(videos.nth(2)).toContainText('Wildflower 2026 · Live performance');
+    await expect(videos.nth(2)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=GCy4nHIqV5k');
+    await expect(videos.nth(2).locator('img')).toHaveAttribute(
         'src',
         'https://img.youtube.com/vi/GCy4nHIqV5k/maxresdefault.jpg'
     );
-    await expect(videos.nth(2)).toContainText('The Middle — Jimmy Eat World cover');
-    await expect(videos.nth(2)).toContainText('Wildflower 2026 · Featured performance');
-    await expect(videos.nth(2)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=iMrxzCQ7lVs');
-    const middleThumbnail = videos.nth(2).locator('img');
+    await expect(videos.nth(3)).toContainText('The Middle — Jimmy Eat World cover');
+    await expect(videos.nth(3)).toContainText('Wildflower 2026 · Featured performance');
+    await expect(videos.nth(3)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=iMrxzCQ7lVs');
+    const middleThumbnail = videos.nth(3).locator('img');
     await expect(middleThumbnail).toHaveAttribute('src', 'assets/the-middle-jimmy-eat-world-thumbnail.webp');
     await expect(middleThumbnail).toHaveAttribute('width', '1280');
     await expect(middleThumbnail).toHaveAttribute('height', '720');
@@ -299,15 +306,13 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
     const middleThumbnailResponse = await page.request.get('/assets/the-middle-jimmy-eat-world-thumbnail.webp');
     expect(middleThumbnailResponse.ok()).toBe(true);
     expect(middleThumbnailResponse.headers()['content-type']).toContain('image/webp');
-    await expect(videos.nth(3)).toContainText('Linoleum — NOFX cover');
-    await expect(videos.nth(3)).toContainText('Wildflower 2026 · Latest performance');
-    await expect(videos.nth(3)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=e9mR2sgnJ00');
-    await expect(videos.nth(3).locator('img')).toHaveAttribute(
+    await expect(videos.nth(4)).toContainText('Linoleum — NOFX cover');
+    await expect(videos.nth(4)).toContainText('Wildflower 2026 · Live performance');
+    await expect(videos.nth(4)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=e9mR2sgnJ00');
+    await expect(videos.nth(4).locator('img')).toHaveAttribute(
         'src',
         'https://img.youtube.com/vi/e9mR2sgnJ00/maxresdefault.jpg'
     );
-    await expect(videos.nth(4)).toContainText('Tomorrow’s Another Day');
-    await expect(videos.nth(4)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=_IwRtmuTKBY&t=14s');
 
     await expect(page.locator('#watch .section-heading > .text-link')).toHaveAttribute(
         'href',

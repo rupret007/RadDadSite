@@ -240,6 +240,7 @@ assets/the-middle-jimmy-eat-world-thumbnail.webp
 assets/wildflower-2026-poster-720.webp
 assets/wildflower-she-green-day.webp
 index.html
+nfc/index.html
 qr/index.html
 qr/script.js
 qr/styles.css
@@ -1411,6 +1412,7 @@ production_paths=(
   assets/wildflower-2026-poster-720.webp
   assets/wildflower-she-green-day.webp
   index.html
+  nfc/index.html
   qr/index.html
   qr/script.js
   qr/styles.css

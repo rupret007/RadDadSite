@@ -20,7 +20,9 @@ deployment path.
 The current products do not contain NFC hardware. The landing page should focus
 on the band and its music rather than explaining how the visitor arrived. The
 legacy `/nfc` and `/nfc/` routes continue to redirect to `/qr/` only so old
-links do not break.
+links do not break. `/qr/` is the single content source for `/tap/` and those
+legacy NFC aliases; the alias pages contain redirects, not duplicate music
+content.
 
 See [docs/QR_LANDING_PAGE.md](./docs/QR_LANDING_PAGE.md) for the physical QR
 specification, copy guardrails, and routing notes.
@@ -104,6 +106,8 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 - Event-first section and focus order, page metadata, and structured event data
 - September 19 event facts, flyer assets, calendar download, and directions
 - Flyer-style recent-set artist wall, 2026 show history, videos, and stable contact/social links
+- The latest featured YouTube performance on both the homepage and canonical QR landing page
+- Permanent `/tap/` and legacy `/nfc/` fallbacks converging on the canonical `/qr/` content
 - Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention
 - Desktop flyer-and-event-copy presentation
 - Logo fallback behavior when the brand image cannot load
@@ -117,7 +121,8 @@ GitHub Actions runs the same test suite on every push and pull request:
 - runs `npm test`
 - runs ShellCheck against the deployment helper and its shell test harness
 - builds and verifies a clean, commit-identified production artifact containing
-  the homepage plus the permanent `/tap/` and `/qr/` routes
+  the homepage, canonical `/qr/` content, permanent `/tap/` alias, and legacy
+  `/nfc/` fallback
 - uploads Playwright artifacts if the browser suite fails
 
 Pull requests cannot deploy and do not receive production credentials. The
@@ -156,6 +161,8 @@ RadDad Website/
 |   |-- QR_LANDING_PAGE.md
 |   `-- raddad-deploy.conf.example
 |-- index.html
+|-- nfc/
+|   `-- index.html
 |-- qr/
 |   |-- index.html
 |   |-- script.js
