@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>September 19, 2026 flyer source</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&amp;family=Oswald:wght@600;700&amp;family=Permanent+Marker&amp;display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #020810;
+            --cream: #f3f2ee;
+            --blue: #20baff;
+            --lime: #b5dc08;
+            --pink: #ed2765;
+            --display: "Oswald", sans-serif;
+            --marker: "Permanent Marker", "Trebuchet MS", cursive;
+            --body: "Montserrat", sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            background: #111;
+            color: var(--cream);
+        }
+
+        .board {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 12% 10%, rgba(32, 186, 255, 0.14), transparent 28%),
+                radial-gradient(circle at 88% 18%, rgba(237, 39, 101, 0.12), transparent 26%),
+                repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 7px),
+                #071018;
+            color: var(--cream);
+            font-family: var(--body);
+        }
+
+        .board::before,
+        .board::after {
+            content: "";
+            position: absolute;
+            width: 92px;
+            height: 92px;
+            background:
+                linear-gradient(90deg, var(--cream) 0 25%, #111 25% 50%, var(--cream) 50% 75%, #111 75%) 0 0 / 28px 28px,
+                linear-gradient(var(--cream) 0 25%, #111 25% 50%, var(--cream) 50% 75%, #111 75%) 0 0 / 28px 28px;
+            opacity: 0.9;
+        }
+
+        .board::before { top: 0; left: 0; }
+        .board::after { right: 0; bottom: 0; }
+
+        .tape {
+            position: absolute;
+            background: var(--pink);
+            opacity: 0.88;
+        }
+
+        .inner {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .kicker {
+            margin: 0;
+            color: var(--blue);
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .names {
+            margin: 0;
+        }
+
+        .names .rad {
+            display: block;
+            font-family: var(--display);
+            font-style: italic;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            line-height: 0.86;
+            text-transform: uppercase;
+        }
+
+        .names .and {
+            display: block;
+            margin: 0.18em 0 0.08em;
+            color: var(--pink);
+            font-family: var(--marker);
+            font-size: 34px;
+            line-height: 1;
+        }
+
+        .names .fault {
+            display: block;
+            color: var(--lime);
+            font-family: var(--marker);
+            line-height: 0.95;
+        }
+
+        .venue {
+            border: 3px solid var(--pink);
+            padding: 18px 20px 16px;
+            background: rgba(0, 0, 0, 0.28);
+        }
+
+        .venue strong,
+        .facts strong {
+            display: block;
+            font-family: var(--display);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .venue span,
+        .foot {
+            display: block;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .facts {
+            display: grid;
+            gap: 10px;
+        }
+
+        .free {
+            display: inline-block;
+            width: max-content;
+            padding: 8px 14px;
+            background: var(--cream);
+            color: var(--ink);
+            font-family: var(--display);
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .foot {
+            color: var(--blue);
+            font-weight: 800;
+        }
+
+        #poster-v2 {
+            width: 1024px;
+            height: 1536px;
+        }
+
+        #poster-v2 .inner { padding: 88px 78px 72px; }
+        #poster-v2 .tape-a { top: 36px; right: 170px; width: 118px; height: 22px; transform: rotate(8deg); }
+        #poster-v2 .tape-b { left: 48px; bottom: 210px; width: 86px; height: 18px; transform: rotate(-18deg); background: var(--blue); }
+        #poster-v2 .kicker { margin-bottom: 28px; }
+        #poster-v2 .rad { font-size: 176px; }
+        #poster-v2 .and { font-size: 40px; }
+        #poster-v2 .fault { font-size: 96px; }
+        #poster-v2 .venue { margin: 36px 0 28px; }
+        #poster-v2 .venue strong { font-size: 42px; }
+        #poster-v2 .venue span { margin-top: 8px; color: #c9d4de; font-size: 18px; }
+        #poster-v2 .facts strong { font-size: 48px; color: var(--blue); }
+        #poster-v2 .free { margin-top: 8px; font-size: 28px; color: var(--ink); }
+        #poster-v2 .foot { font-size: 28px; }
+
+        #poster-v1 {
+            width: 1122px;
+            height: 1402px;
+        }
+
+        #poster-v1 .inner { padding: 78px 86px 68px; }
+        #poster-v1 .tape-a { top: 32px; right: 180px; width: 118px; height: 22px; transform: rotate(8deg); }
+        #poster-v1 .tape-b { left: 54px; bottom: 188px; width: 86px; height: 18px; transform: rotate(-18deg); background: var(--blue); }
+        #poster-v1 .kicker { margin-bottom: 22px; }
+        #poster-v1 .rad { font-size: 156px; }
+        #poster-v1 .and { font-size: 38px; }
+        #poster-v1 .fault { font-size: 88px; }
+        #poster-v1 .venue { margin: 28px 0 22px; }
+        #poster-v1 .venue strong { font-size: 40px; }
+        #poster-v1 .venue span { margin-top: 8px; color: #c9d4de; font-size: 18px; }
+        #poster-v1 .facts strong { font-size: 44px; color: var(--blue); }
+        #poster-v1 .free { margin-top: 8px; font-size: 26px; color: var(--ink); }
+        #poster-v1 .foot { font-size: 26px; }
+
+        #social {
+            width: 1200px;
+            height: 630px;
+        }
+
+        #social .inner {
+            padding: 48px 58px 40px;
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        #social .tape-a { top: 24px; right: 210px; width: 110px; height: 18px; transform: rotate(7deg); }
+        #social .kicker { font-size: 16px; margin-bottom: 14px; }
+        #social .rad { font-size: 86px; }
+        #social .and { font-size: 30px; }
+        #social .fault { font-size: 52px; }
+        #social .side { align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; }
+        #social .venue { margin: 0; }
+        #social .venue strong { font-size: 28px; }
+        #social .venue span { margin-top: 6px; color: #c9d4de; font-size: 14px; }
+        #social .facts { margin-top: 16px; }
+        #social .facts strong { font-size: 30px; color: var(--blue); }
+        #social .free { margin-top: 6px; font-size: 20px; color: var(--ink); }
+        #social .foot { font-size: 18px; }
+    </style>
+</head>
+<body>
+    <section id="poster-v2" class="board" aria-label="September 19 2026 portrait flyer">
+        <span class="tape tape-a"></span>
+        <span class="tape tape-b"></span>
+        <div class="inner">
+            <div>
+                <p class="kicker">Saturday, September 19, 2026</p>
+                <p class="names">
+                    <span class="rad">Rad Dad</span>
+                    <span class="and">and</span>
+                    <span class="fault">The Fault Lines</span>
+                </p>
+            </div>
+            <div>
+                <div class="venue">
+                    <strong>Guitars &amp; Growlers</strong>
+                    <span>Richardson, Texas</span>
+                </div>
+                <div class="facts">
+                    <strong>7–10 PM</strong>
+                    <span class="free">Free show</span>
+                </div>
+            </div>
+            <p class="foot">raddadband.com</p>
+        </div>
+    </section>
+
+    <section id="poster-v1" class="board" aria-label="September 19 2026 alternate portrait flyer">
+        <span class="tape tape-a"></span>
+        <span class="tape tape-b"></span>
+        <div class="inner">
+            <div>
+                <p class="kicker">Saturday, September 19, 2026</p>
+                <p class="names">
+                    <span class="rad">Rad Dad</span>
+                    <span class="and">and</span>
+                    <span class="fault">The Fault Lines</span>
+                </p>
+            </div>
+            <div>
+                <div class="venue">
+                    <strong>Guitars &amp; Growlers</strong>
+                    <span>Richardson, Texas</span>
+                </div>
+                <div class="facts">
+                    <strong>7–10 PM</strong>
+                    <span class="free">Free show</span>
+                </div>
+            </div>
+            <p class="foot">raddadband.com</p>
+        </div>
+    </section>
+
+    <section id="social" class="board" aria-label="September 19 2026 social flyer">
+        <span class="tape tape-a"></span>
+        <div class="inner">
+            <div>
+                <p class="kicker">Saturday, September 19, 2026</p>
+                <p class="names">
+                    <span class="rad">Rad Dad</span>
+                    <span class="and">and</span>
+                    <span class="fault">The Fault Lines</span>
+                </p>
+            </div>
+            <div class="side">
+                <div class="venue">
+                    <strong>Guitars &amp; Growlers</strong>
+                    <span>Richardson, Texas</span>
+                </div>
+                <div class="facts">
+                    <strong>7–10 PM</strong>
+                    <span class="free">Free show</span>
+                </div>
+                <p class="foot">raddadband.com</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
