@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-const EXPECTED_TITLE = 'Rad Dad + Friends with The Fault Lines at Guitars & Growlers | September 19, 2026';
+const EXPECTED_TITLE = 'Rad Dad + Friends at Guitars & Growlers | September 19, 2026';
 const CALENDAR_PATH = 'assets/rad-dad-friends-guitars-growlers-2026.ics';
 const FLYER_PATH = 'assets/rad-dad-friends-guitars-growlers-2026-v2-full.png';
 const FLYER_ASPECT_RATIO = 1024 / 1536;
@@ -39,7 +39,6 @@ test('loads the event-first homepage with the expected title and section order',
     await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute('content', '1200');
     await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute('content', '630');
     await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Rad Dad \+ Friends with The Fault Lines/);
     await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Green Day/);
 
     const sectionOrder = await page.locator('main > section').evaluateAll((sections) =>
@@ -56,24 +55,17 @@ test('loads the event-first homepage with the expected title and section order',
     expect(heroOrder).toEqual(['flyer-stage', 'hero-copy']);
     expect(eventData).toMatchObject({
         '@type': 'MusicEvent',
-        name: 'Rad Dad + Friends with The Fault Lines',
+        name: 'Rad Dad + Friends',
         startDate: '2026-09-19T19:00:00-05:00',
+        endDate: '2026-09-19T22:00:00-05:00',
         isAccessibleForFree: true,
         location: {
             name: 'Guitars & Growlers'
         },
-        performer: [
-            {
-                name: 'Rad Dad',
-                url: 'https://raddadband.com/'
-            },
-            {
-                name: 'The Fault Lines',
-                url: 'https://www.facebook.com/thefaultlinestx'
-            }
-        ]
+        performer: {
+            name: 'Rad Dad'
+        }
     });
-    expect(eventData).not.toHaveProperty('endDate');
     expect(eventData).not.toHaveProperty('offers');
     expect(eventData).not.toHaveProperty('organizer');
 });
@@ -90,14 +82,8 @@ test('presents the September event, flyer, and useful event actions', async ({ p
     await expect(hero).toContainText('Guitars & Growlers');
     await expect(hero).toContainText('Richardson, Texas');
     await expect(hero).toContainText('September 19, 2026');
-    await expect(hero).toContainText('7:00 PM');
-    await expect(hero).not.toContainText('10:00 PM');
+    await expect(hero).toContainText('7:00–10:00 PM');
     await expect(hero).toContainText('Free show');
-    await expect(hero.locator('.flyer-stage__lineup')).toContainText('Rad Dad + Friends');
-    await expect(hero.locator('.flyer-stage__lineup').getByRole('link', { name: 'The Fault Lines' })).toHaveAttribute(
-        'href',
-        'https://www.facebook.com/thefaultlinestx'
-    );
 
     const flyer = hero.locator('.event-flyer');
     await expect(flyer).toBeVisible();
@@ -106,7 +92,7 @@ test('presents the September event, flyer, and useful event actions', async ({ p
     await expect(flyer).toHaveAttribute('fetchpriority', 'high');
     await expect(flyer).toHaveAttribute(
         'alt',
-        'Rad Dad + Friends event flyer for Guitars & Growlers in Richardson, Texas — September 19, 2026, 7:00 PM; free show.'
+        'Rad Dad + Friends at Guitars & Growlers in Richardson, Texas — September 19, 2026, 7–10 PM; free show.'
     );
 
     const actions = hero.locator('.event-actions');
@@ -130,10 +116,7 @@ test('presents the September event, flyer, and useful event actions', async ({ p
     ]);
 
     expect(calendarResponse.ok()).toBe(true);
-    const calendar = await calendarResponse.text();
-    expect(calendar).toContain('SUMMARY:Rad Dad + Friends with The Fault Lines');
-    expect(calendar).toContain('7:00 PM');
-    expect(calendar).not.toContain('DTEND');
+    expect(await calendarResponse.text()).toContain('SUMMARY:Rad Dad + Friends');
     expect(flyerResponse.ok()).toBe(true);
     expect(flyerResponse.headers()['content-type']).toContain('image/png');
 });
@@ -258,7 +241,7 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
 
     const showTitles = await showCards.locator('h3').allTextContents();
     expect(showTitles.map((title) => title.trim())).toEqual([
-        'Rad Dad + Friends · The Fault Lines',
+        'Rad Dad + Friends',
         'Wildflower Arts & Music Festival',
         'Downtown Dallas Arts and Music Festival'
     ]);
@@ -271,7 +254,7 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
     await expect(featuredShow).toContainText('SEP');
     await expect(featuredShow).toContainText('19');
     await expect(featuredShow).toContainText('2026');
-    await expect(featuredShow).toContainText('7:00 PM · Free show');
+    await expect(featuredShow).toContainText('7:00–10:00 PM · Free show');
 
     const pastShows = page.locator('#shows .show-card--past');
     await expect(pastShows).toHaveCount(2);

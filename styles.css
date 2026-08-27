@@ -367,13 +367,6 @@ button:focus-visible {
     line-height: 1.75;
 }
 
-.hero-copy__lede a,
-.flyer-stage__lineup a {
-    color: var(--cream);
-    text-decoration-color: var(--lime);
-    text-underline-offset: 0.18em;
-}
-
 .event-facts {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -511,23 +504,6 @@ button:focus-visible {
     width: min(100%, 39rem);
     justify-self: start;
     padding: 0.65rem;
-}
-
-.flyer-stage__lineup {
-    position: relative;
-    z-index: 2;
-    margin: 0.9rem 0 0;
-    color: #d6dee5;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-align: center;
-    text-transform: uppercase;
-}
-
-.flyer-stage__lineup span {
-    margin-inline: 0.35em;
-    color: var(--pink);
 }
 
 .flyer-stage::before {
