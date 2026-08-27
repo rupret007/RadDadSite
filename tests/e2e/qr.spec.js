@@ -195,7 +195,12 @@ test.describe('tap, NFC, and QR landing pages', () => {
 
         const facts = nextShowSection.locator('.next-show-facts');
         await expect(facts).toContainText('September 19');
-        await expect(facts).toContainText('7–10 PM');
+        await expect(facts).toContainText('7:00 PM');
+        await expect(facts).not.toContainText('10 PM');
+        await expect(nextShowSection.getByRole('link', { name: 'The Fault Lines' })).toHaveAttribute(
+            'href',
+            'https://www.facebook.com/thefaultlinestx'
+        );
         await expect(facts).toContainText('Guitars & Growlers');
         await expect(facts).toContainText('Richardson, Texas');
         await expect(facts).toContainText('Free show');

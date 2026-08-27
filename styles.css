@@ -313,6 +313,12 @@ button:focus-visible {
     line-height: 1.75;
 }
 
+.hero-copy__lede a {
+    color: var(--cream);
+    text-decoration-color: var(--lime);
+    text-underline-offset: 0.18em;
+}
+
 .event-facts {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

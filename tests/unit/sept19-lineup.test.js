@@ -56,9 +56,13 @@ describe('September 19 public lineup', () => {
         }
 
         expect(calendar).toContain('SUMMARY:Rad Dad and The Fault Lines');
-        expect(calendar).toContain('DESCRIPTION:Free show. Rad Dad and The Fault Lines at Guitars & Growlers.');
-        expect(hero).toContain('Rad Dad and The Fault Lines play a free night');
-        expect(qrShow).toContain('come hear Rad Dad and The Fault Lines');
+        expect(calendar).toContain('The Fault Lines at Guitars & Growlers');
+        expect(calendar).toContain('7:00 PM');
+        expect(calendar).not.toContain('DTEND');
+        expect(hero).toContain('https://www.facebook.com/thefaultlinestx');
+        expect(qrShow).toContain('https://www.facebook.com/thefaultlinestx');
+        expect(hero).toContain('7:00 PM');
+        expect(qrShow).toContain('7:00 PM');
     });
 
     it('does not invent bill order, extra bands, or set times on public show copy', async () => {
@@ -89,6 +93,11 @@ describe('September 19 public lineup', () => {
         }
 
         expect(homepage).toContain('mailto:rad.dad.band@gmail.com');
+        expect(homepage).not.toContain('mailto:thefaultlinestx@gmail.com');
+        expect(homepage).not.toContain('7–10');
+        expect(homepage).not.toContain('10:00 PM');
+        expect(qr).not.toContain('7–10');
+        expect(qr).not.toContain('10:00 PM');
         expect(homepage).not.toMatch(/The Story Of Us[\s\S]{0,80}part of the set/i);
         expect(qr.toLowerCase()).not.toContain('part of the set');
     });
@@ -103,7 +112,8 @@ describe('September 19 public lineup', () => {
         expect(flyerSource).toContain('The Fault Lines');
         expect(flyerSource).toContain('September 19, 2026');
         expect(flyerSource).toContain('Guitars &amp; Growlers');
-        expect(flyerSource).toContain('7–10 PM');
+        expect(flyerSource).toContain('7:00 PM');
+        expect(flyerSource).not.toContain('7–10');
         expect(flyerSource).toContain('Free show');
         expect(flyerSource).toContain('raddadband.com');
         expect(flyerSource).not.toContain('Green Day');

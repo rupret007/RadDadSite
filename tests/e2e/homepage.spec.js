@@ -57,7 +57,6 @@ test('loads the event-first homepage with the expected title and section order',
         '@type': 'MusicEvent',
         name: 'Rad Dad and The Fault Lines',
         startDate: '2026-09-19T19:00:00-05:00',
-        endDate: '2026-09-19T22:00:00-05:00',
         isAccessibleForFree: true,
         location: {
             name: 'Guitars & Growlers'
@@ -71,9 +70,11 @@ test('loads the event-first homepage with the expected title and section order',
         },
         {
             '@type': 'MusicGroup',
-            name: 'The Fault Lines'
+            name: 'The Fault Lines',
+            url: 'https://www.facebook.com/thefaultlinestx'
         }
     ]);
+    expect(eventData).not.toHaveProperty('endDate');
     expect(eventData).not.toHaveProperty('offers');
     expect(eventData).not.toHaveProperty('organizer');
 });
@@ -88,8 +89,13 @@ test('presents the September event, flyer, and useful event actions', async ({ p
     await expect(hero).toContainText('Guitars & Growlers');
     await expect(hero).toContainText('Richardson, Texas');
     await expect(hero).toContainText('September 19, 2026');
-    await expect(hero).toContainText('7:00–10:00 PM');
+    await expect(hero).toContainText('7:00 PM');
+    await expect(hero).not.toContainText('10:00 PM');
     await expect(hero).toContainText('Free show');
+    await expect(hero.getByRole('link', { name: 'The Fault Lines' })).toHaveAttribute(
+        'href',
+        'https://www.facebook.com/thefaultlinestx'
+    );
 
     const flyer = hero.locator('.event-flyer');
     await expect(flyer).toBeVisible();
@@ -98,7 +104,7 @@ test('presents the September event, flyer, and useful event actions', async ({ p
     await expect(flyer).toHaveAttribute('fetchpriority', 'high');
     await expect(flyer).toHaveAttribute(
         'alt',
-        'Rad Dad and The Fault Lines at Guitars & Growlers in Richardson, Texas — September 19, 2026, 7–10 PM; free show.'
+        'Rad Dad and The Fault Lines at Guitars & Growlers in Richardson, Texas — September 19, 2026, 7:00 PM; free show.'
     );
 
     const actions = hero.locator('.event-actions');
@@ -124,6 +130,8 @@ test('presents the September event, flyer, and useful event actions', async ({ p
     expect(calendarResponse.ok()).toBe(true);
     expect(await calendarResponse.text()).toContain('SUMMARY:Rad Dad and The Fault Lines');
     expect(await calendarResponse.text()).toContain('The Fault Lines');
+    expect(await calendarResponse.text()).toContain('7:00 PM');
+    expect(await calendarResponse.text()).not.toContain('DTEND');
     expect(flyerResponse.ok()).toBe(true);
     expect(flyerResponse.headers()['content-type']).toContain('image/png');
 });
@@ -261,7 +269,7 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
     await expect(featuredShow).toContainText('SEP');
     await expect(featuredShow).toContainText('19');
     await expect(featuredShow).toContainText('2026');
-    await expect(featuredShow).toContainText('7:00–10:00 PM · Free show');
+    await expect(featuredShow).toContainText('7:00 PM · Free show');
 
     const pastShows = page.locator('#shows .show-card--past');
     await expect(pastShows).toHaveCount(2);
