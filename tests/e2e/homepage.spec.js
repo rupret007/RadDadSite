@@ -92,7 +92,7 @@ test('presents the September event, flyer, and useful event actions', async ({ p
     await expect(hero).toContainText('7:00 PM');
     await expect(hero).not.toContainText('10:00 PM');
     await expect(hero).toContainText('Free show');
-    await expect(hero.getByRole('link', { name: 'The Fault Lines' })).toHaveAttribute(
+    await expect(hero.getByRole('link', { name: 'The Fault Lines', exact: true })).toHaveAttribute(
         'href',
         'https://www.facebook.com/thefaultlinestx'
     );

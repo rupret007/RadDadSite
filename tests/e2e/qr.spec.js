@@ -197,7 +197,7 @@ test.describe('tap, NFC, and QR landing pages', () => {
         await expect(facts).toContainText('September 19');
         await expect(facts).toContainText('7:00 PM');
         await expect(facts).not.toContainText('10 PM');
-        await expect(nextShowSection.getByRole('link', { name: 'The Fault Lines' })).toHaveAttribute(
+        await expect(nextShowSection.getByRole('link', { name: 'The Fault Lines', exact: true })).toHaveAttribute(
             'href',
             'https://www.facebook.com/thefaultlinestx'
         );
