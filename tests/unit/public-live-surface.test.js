@@ -69,11 +69,13 @@ describe('public live surface honesty', () => {
 
         expect(homepage).toContain('September 19, 2026');
         expect(homepage).toContain('Guitars &amp; Growlers');
+        expect(homepage).toContain('Rad Dad + Friends');
         expect(homepage).toContain('The Fault Lines');
-        expect(qr).toContain('The Fault Lines');
         expect(homepage).toContain(FEATURED_VIDEO_ID);
         expect(homepage).not.toContain(RETIRED_VIDEO_ID);
         expect(qr).toContain(FEATURED_VIDEO_ID);
+        expect(qr).toContain('Rad Dad <span>+ Friends</span>');
+        expect(qr).toContain('The Fault Lines');
         expect(qr).not.toContain(RETIRED_VIDEO_ID);
         expect(qr.toLowerCase()).not.toContain('setlist');
         expect(qr.toLowerCase()).not.toContain('part of the set');
