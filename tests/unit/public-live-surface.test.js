@@ -149,9 +149,14 @@ describe('public live surface honesty', () => {
             ['nfc alias', nfc],
             ['calendar', calendar]
         ]) {
-            rejectForbiddenLineup(source, label);
             expect(source.toLowerCase(), `${label} must not claim an official set`).not.toContain('setlist');
             expect(source.toLowerCase(), `${label} must not claim set membership`).not.toContain('part of the set');
+        }
+
+        // The Fault Lines are named on the show surfaces, but the alias
+        // redirect shims stay content-free.
+        for (const [label, source] of [['tap alias', tap], ['nfc alias', nfc]]) {
+            rejectForbiddenLineup(source, label);
         }
 
         expect(calendar).toContain('SUMMARY:Rad Dad + Friends');

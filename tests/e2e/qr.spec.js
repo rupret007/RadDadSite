@@ -193,6 +193,10 @@ test.describe('tap, NFC, and QR landing pages', () => {
         const nextShowSection = page.locator('#next-show');
         await expect(nextShowSection.getByRole('heading', { level: 2 })).toContainText('Rad Dad');
         await expect(nextShowSection.getByRole('heading', { level: 2 })).toContainText('Friends');
+        await expect(nextShowSection.getByRole('link', { name: 'The Fault Lines' })).toHaveAttribute(
+            'href',
+            'https://www.facebook.com/thefaultlinestx'
+        );
 
         const facts = nextShowSection.locator('.next-show-facts');
         await expect(facts).toContainText('September 19, 2026');
@@ -266,7 +270,7 @@ test.describe('tap, NFC, and QR landing pages', () => {
         expect(cassetteResponse.headers()['content-type']).toContain('image/webp');
 
         expect(calendarResponse.ok()).toBe(true);
-        expect(await calendarResponse.text()).toContain('SUMMARY:Rad Dad + Friends');
+        expect(await calendarResponse.text()).toContain('SUMMARY:Rad Dad + Friends with The Fault Lines');
 
         expect(flyerResponse.ok()).toBe(true);
         expect(flyerResponse.headers()['content-type']).toContain('image/png');
