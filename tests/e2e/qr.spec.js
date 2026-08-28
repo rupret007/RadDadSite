@@ -33,7 +33,10 @@ test.describe('tap, NFC, and QR landing pages', () => {
             expect(html).toContain("new URL('../qr/', window.location.href)");
             expect(html).toContain('window.location.replace');
             expect(html).toContain('href="../qr/"');
+            expect(html).toContain('Continue to the music');
             expect(html).not.toContain('url=/qr/');
+            expect(html).not.toMatch(/fault lines/i);
+            expect(html).not.toContain('The Story Of Us');
         }
     });
 
@@ -103,7 +106,7 @@ test.describe('tap, NFC, and QR landing pages', () => {
         await expect(cassetteImg).toHaveAttribute('src', /story-of-us-cassette-render\.webp/);
 
         await expect(hero.getByRole('link', { name: /Start with our song/ })).toHaveAttribute('href', '#song');
-        await expect(hero.getByRole('link', { name: /full band site/ })).toHaveAttribute('href', '../');
+        await expect(hero.getByRole('link', { name: /September 19 show/ })).toHaveAttribute('href', '#next-show');
     });
 
     test('/qr/ embeds The Story Of Us Apple Music player with streaming links', async ({ page }) => {
@@ -192,17 +195,17 @@ test.describe('tap, NFC, and QR landing pages', () => {
         await expect(nextShowSection.getByRole('heading', { level: 2 })).toContainText('Friends');
 
         const facts = nextShowSection.locator('.next-show-facts');
-        await expect(facts).toContainText('September 19');
+        await expect(facts).toContainText('September 19, 2026');
         await expect(facts).toContainText('7–10 PM');
         await expect(facts).toContainText('Guitars & Growlers');
         await expect(facts).toContainText('Richardson, Texas');
         await expect(facts).toContainText('Free show');
 
-        const calendarLink = nextShowSection.getByRole('link', { name: 'Add to calendar' });
+        const calendarLink = nextShowSection.getByRole('link', { name: 'Add to Calendar' });
         await expect(calendarLink).toHaveAttribute('href', '../assets/rad-dad-friends-guitars-growlers-2026.ics');
         await expect(calendarLink).toHaveAttribute('download', '');
 
-        const directionsLink = nextShowSection.getByRole('link', { name: 'Get directions' });
+        const directionsLink = nextShowSection.getByRole('link', { name: 'Get Directions' });
         await expect(directionsLink).toHaveAttribute('href', 'https://maps.app.goo.gl/Gr79GmmXAxMH5SkP6');
 
         const flyerLink = nextShowSection.locator('.next-show-flyer');
@@ -211,9 +214,14 @@ test.describe('tap, NFC, and QR landing pages', () => {
             '../assets/rad-dad-friends-guitars-growlers-2026-v2-full.png'
         );
         const flyerImg = flyerLink.locator('img');
+        await expect(flyerLink).toHaveAttribute('aria-label', 'Open the full Rad Dad + Friends event flyer');
         await expect(flyerImg).toHaveAttribute('width', '1024');
         await expect(flyerImg).toHaveAttribute('height', '1536');
         await expect(flyerImg).toHaveAttribute('src', /rad-dad-friends-guitars-growlers-2026-v2-full\.png/);
+        await expect(flyerImg).toHaveAttribute(
+            'alt',
+            'Rad Dad + Friends at Guitars & Growlers in Richardson, Texas — September 19, 2026, 7–10 PM; free show.'
+        );
 
         await expect(nextShowSection.locator('.next-show-details')).toHaveAttribute('href', '../#show');
     });
