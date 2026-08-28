@@ -255,6 +255,11 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
     await expect(featuredShow).toContainText('19');
     await expect(featuredShow).toContainText('2026');
     await expect(featuredShow).toContainText('7:00–10:00 PM · Free show');
+    await expect(featuredShow.getByRole('link', { name: 'Add to Calendar' })).toHaveAttribute(
+        'href',
+        CALENDAR_PATH
+    );
+    await expect(featuredShow).not.toContainText(/save the date/i);
 
     const pastShows = page.locator('#shows .show-card--past');
     await expect(pastShows).toHaveCount(2);
