@@ -857,6 +857,7 @@ button:focus-visible {
 .artist-wall__item {
     --artist-accent: var(--blue);
     position: relative;
+    z-index: var(--artist-layer, 1);
     min-width: 0;
     min-height: clamp(4.7rem, 7vw, 6.35rem);
     display: flex;
@@ -866,7 +867,7 @@ button:focus-visible {
     gap: 0.15rem;
     padding: 0.75rem 0.35rem 1rem;
     text-align: center;
-    transform: rotate(var(--artist-rotate, 0deg));
+    transform: translateY(var(--artist-shift-y, 0rem)) rotate(var(--artist-rotate, 0deg));
 }
 
 .artist-wall__item::after {
@@ -933,34 +934,70 @@ button:focus-visible {
     grid-column: span 4;
 }
 
+/* Punk flyer paste-up: masking-tape scraps, no extra markup */
+.artist-wall__item--jimmy::before,
+.artist-wall__item--nirvana::before,
+.artist-wall__item--beatles::before,
+.artist-wall__item--me-first::before {
+    content: "";
+    position: absolute;
+    top: -0.15rem;
+    left: 50%;
+    z-index: 3;
+    width: clamp(2.3rem, 3.6vw, 3.4rem);
+    height: 1.02rem;
+    background: linear-gradient(rgba(243, 242, 238, 0.36), rgba(243, 242, 238, 0.22));
+    clip-path: polygon(2% 0, 98% 8%, 100% 86%, 95% 100%, 3% 92%, 0 16%);
+    transform: translateX(-50%) rotate(-6deg);
+    pointer-events: none;
+}
+
 .artist-wall__item--green-day {
     --artist-accent: var(--lime);
-    --artist-rotate: -1deg;
+    --artist-rotate: -2.6deg;
+    --artist-shift-y: 0.35rem;
+    --artist-layer: 3;
+    background: linear-gradient(155deg, rgba(181, 220, 8, 0.22), rgba(181, 220, 8, 0.04) 68%);
+    clip-path: polygon(0 10%, 55% 3%, 97% 0, 100% 88%, 42% 100%, 3% 94%);
+    filter: drop-shadow(4px 5px 0 rgba(0, 0, 0, 0.5));
 }
 
 .artist-name--green-day {
     color: #d5f143;
-    font-size: clamp(1.7rem, 2.75vw, 2.75rem);
+    font-size: clamp(1.75rem, 2.9vw, 2.9rem);
     font-style: italic;
     text-shadow: 4px 4px 0 rgba(0, 158, 232, 0.42);
 }
 
 .artist-wall__item--blink {
     --artist-accent: var(--blue-bright);
-    --artist-rotate: 0.5deg;
+    --artist-rotate: 2.4deg;
+    --artist-shift-y: -0.45rem;
+    --artist-layer: 6;
+    background: linear-gradient(160deg, #fbf7ea, #e9e2c9);
+    clip-path: polygon(2% 16%, 34% 5%, 98% 0, 100% 76%, 70% 97%, 3% 100%, 0 46%);
+    filter: drop-shadow(5px 6px 0 rgba(0, 158, 232, 0.4));
 }
 
 .artist-name--blink {
+    color: #0a0f14;
     font-family: var(--body);
-    font-size: clamp(1.45rem, 2.5vw, 2.45rem);
+    font-size: clamp(1.5rem, 2.5vw, 2.45rem);
     font-weight: 800;
     letter-spacing: -0.075em;
     text-transform: lowercase;
+    filter: none;
 }
 
 .artist-wall__item--jimmy {
     --artist-accent: var(--cream);
-    --artist-rotate: -0.5deg;
+    --artist-rotate: -1.6deg;
+    --artist-layer: 2;
+}
+
+.artist-wall__item--jimmy::after {
+    height: 0.38rem;
+    clip-path: polygon(0 46%, 7% 0, 20% 72%, 34% 6%, 50% 80%, 64% 10%, 78% 74%, 91% 4%, 100% 50%, 92% 100%, 7% 94%);
 }
 
 .artist-name--jimmy {
@@ -971,19 +1008,32 @@ button:focus-visible {
 
 .artist-wall__item--nofx {
     --artist-accent: #ff5d8d;
-    --artist-rotate: 1.5deg;
+    --artist-rotate: 2.8deg;
+    --artist-shift-y: 0.4rem;
+    --artist-layer: 5;
+    border: 3px solid rgba(255, 93, 141, 0.85);
+    border-radius: 255px 18px 225px 18px / 18px 225px 18px 255px;
+}
+
+.artist-wall__item--nofx::after {
+    display: none;
 }
 
 .artist-name--nofx {
     color: #ff5d8d;
-    font-size: clamp(2rem, 3.4vw, 3.4rem);
+    font-size: clamp(2rem, 3.6vw, 3.55rem);
     font-style: italic;
     letter-spacing: 0.02em;
 }
 
 .artist-wall__item--mxpx {
     --artist-accent: var(--blue-bright);
-    --artist-rotate: 1deg;
+    --artist-rotate: -3.2deg;
+    --artist-shift-y: -0.35rem;
+    --artist-layer: 3;
+    background: linear-gradient(205deg, rgba(32, 186, 255, 0.24), rgba(32, 186, 255, 0.03) 72%);
+    clip-path: polygon(5% 0, 100% 7%, 96% 100%, 0 90%);
+    filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.5));
 }
 
 .artist-name--mxpx {
@@ -997,18 +1047,31 @@ button:focus-visible {
 
 .artist-wall__item--rancid {
     --artist-accent: var(--amber);
-    --artist-rotate: -1.4deg;
+    --artist-rotate: -2.9deg;
+    --artist-layer: 2;
+    background: linear-gradient(90deg, rgba(201, 138, 36, 0.2), rgba(201, 138, 36, 0.05));
+    clip-path: polygon(0 22%, 8% 12%, 19% 20%, 33% 8%, 47% 18%, 62% 6%, 78% 16%, 90% 8%, 100% 18%, 98% 84%, 88% 94%, 74% 86%, 58% 96%, 41% 86%, 26% 96%, 12% 88%, 2% 94%);
 }
 
 .artist-name--rancid {
     color: #f0c36d;
     font-size: clamp(1.7rem, 2.6vw, 2.55rem);
-    letter-spacing: 0.035em;
+    letter-spacing: 0.12em;
 }
 
 .artist-wall__item--nirvana {
     --artist-accent: #f1d85b;
-    --artist-rotate: 0.5deg;
+    --artist-rotate: 1.2deg;
+    --artist-layer: 1;
+}
+
+.artist-wall__item--nirvana::before {
+    transform: translateX(-50%) rotate(4deg);
+}
+
+.artist-wall__item--nirvana::after {
+    height: 0.34rem;
+    clip-path: polygon(0 60%, 10% 20%, 25% 70%, 40% 15%, 55% 65%, 70% 10%, 85% 60%, 100% 20%, 96% 100%, 4% 96%);
 }
 
 .artist-name--nirvana {
@@ -1022,10 +1085,13 @@ button:focus-visible {
 
 .artist-wall__item--taylor {
     --artist-accent: #ff73a0;
-    --artist-rotate: 1deg;
+    --artist-rotate: 2.6deg;
+    --artist-shift-y: -0.25rem;
+    --artist-layer: 4;
     background:
-        linear-gradient(145deg, rgba(237, 39, 101, 0.22), transparent 72%);
+        linear-gradient(145deg, rgba(237, 39, 101, 0.24), transparent 72%);
     clip-path: polygon(4% 10%, 98% 0, 94% 92%, 0 100%);
+    filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.5));
 }
 
 .artist-name--taylor {
@@ -1040,12 +1106,14 @@ button:focus-visible {
 
 .artist-wall__item--blur {
     --artist-accent: var(--pink);
-    --artist-rotate: -2deg;
+    --artist-rotate: -3.6deg;
+    --artist-shift-y: -0.5rem;
+    --artist-layer: 6;
 }
 
 .artist-name--blur {
     font-family: var(--body);
-    font-size: clamp(2rem, 3.2vw, 3.15rem);
+    font-size: clamp(2.05rem, 3.4vw, 3.35rem);
     font-weight: 800;
     letter-spacing: -0.08em;
     text-transform: lowercase;
@@ -1056,7 +1124,17 @@ button:focus-visible {
 
 .artist-wall__item--beatles {
     --artist-accent: var(--cream);
-    --artist-rotate: 0.5deg;
+    --artist-rotate: 1.4deg;
+    --artist-layer: 2;
+    border: 1px solid rgba(243, 242, 238, 0.55);
+    background: rgba(243, 242, 238, 0.06);
+}
+
+.artist-wall__item--beatles::before {
+    top: -0.35rem;
+    left: 12%;
+    width: 2.6rem;
+    transform: rotate(-42deg);
 }
 
 .artist-name--beatles {
@@ -1068,7 +1146,20 @@ button:focus-visible {
 
 .artist-wall__item--pennywise {
     --artist-accent: var(--lime);
-    --artist-rotate: 1.6deg;
+    --artist-rotate: 3.1deg;
+    --artist-shift-y: 0.3rem;
+    --artist-layer: 3;
+}
+
+.artist-wall__item--pennywise::after {
+    height: 0.52rem;
+    background: repeating-linear-gradient(
+        to bottom,
+        var(--artist-accent) 0 0.16rem,
+        transparent 0.16rem 0.34rem,
+        var(--artist-accent) 0.34rem 0.52rem
+    );
+    clip-path: polygon(0 12%, 100% 0, 98% 100%, 1% 86%);
 }
 
 .artist-name--pennywise {
@@ -1081,7 +1172,13 @@ button:focus-visible {
 
 .artist-wall__item--me-first {
     --artist-accent: var(--blue-bright);
-    --artist-rotate: -0.7deg;
+    --artist-rotate: -2.1deg;
+    --artist-layer: 2;
+}
+
+.artist-wall__item--me-first::before {
+    left: 42%;
+    transform: translateX(-50%) rotate(-3deg);
 }
 
 .artist-name--me-first {
@@ -1104,7 +1201,12 @@ button:focus-visible {
 
 .artist-wall__item--sublime {
     --artist-accent: #f2cb3c;
-    --artist-rotate: 1.8deg;
+    --artist-rotate: 3.2deg;
+    --artist-shift-y: -0.3rem;
+    --artist-layer: 3;
+    background: linear-gradient(140deg, rgba(242, 203, 60, 0.2), rgba(242, 203, 60, 0.03) 70%);
+    clip-path: polygon(3% 8%, 96% 0, 100% 92%, 40% 100%, 0 86%);
+    filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.5));
 }
 
 .artist-name--sublime {
@@ -1118,10 +1220,13 @@ button:focus-visible {
 
 .artist-wall__item--bowling {
     --artist-accent: #ff5d3d;
-    --artist-rotate: -0.8deg;
+    --artist-rotate: -3deg;
+    --artist-shift-y: 0.3rem;
+    --artist-layer: 4;
     background:
-        linear-gradient(135deg, rgba(255, 93, 61, 0.18), transparent 72%);
+        linear-gradient(135deg, rgba(255, 93, 61, 0.2), transparent 72%);
     clip-path: polygon(3% 9%, 98% 0, 95% 92%, 0 100%);
+    filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.5));
 }
 
 .artist-name--bowling {
@@ -1963,9 +2068,16 @@ button:focus-visible {
     }
 
     .artist-wall__item {
+        --artist-shift-y: 0rem;
         grid-column: span 1;
         min-height: 5rem;
         padding: 0.65rem 0.3rem 0.9rem;
+        transform: rotate(clamp(-1.75deg, var(--artist-rotate, 0deg), 1.75deg));
+    }
+
+    .artist-wall__item::after {
+        transform: translateX(-50%)
+            rotate(calc(clamp(-1.75deg, var(--artist-rotate, 0deg), 1.75deg) * -1));
     }
 
     .artist-wall__item--jimmy,
