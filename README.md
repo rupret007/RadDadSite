@@ -138,9 +138,17 @@ deployment has its own additional disabled-by-default switch.
 
 ## Production Deployment
 
-Production publishes only the verified `dist/client` artifact, never the
-complete repository. GitHub Pages and the existing ChatGPT Sites deployment
-remain separate from this guarded server path.
+The guarded production path publishes only the verified `dist/client`
+artifact, never the complete repository. Its first production cutover has
+**not** completed. The current legacy `raddadband.com` root still exposes
+repository-only paths such as package metadata, tests, backups, and historical
+ZIP files. Do not describe the live server as clean-artifact-only until public
+`version.json`, `artifact-manifest.json`, and `SHA256SUMS` identify one verified
+release and every forbidden-path probe returns HTTP 404.
+
+GitHub Pages and the existing ChatGPT Sites deployment remain separate from
+this guarded server path. Merging code does not authorize Che's server cutover,
+remove legacy files, or change either independent deployment.
 
 See [the production deployment runbook](docs/production-deployment.md) for the
 mandatory hosting discovery record, `raddadband.com` / `lazypunksunite.com`

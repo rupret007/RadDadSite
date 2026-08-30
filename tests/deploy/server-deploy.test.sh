@@ -89,6 +89,7 @@ cat >"$MOCK_BIN/curl" <<'EOF'
 set -u
 url=
 output=
+write_out=
 saw_https_proto=false
 while (($#)); do
     case "$1" in
@@ -102,6 +103,10 @@ while (($#)); do
             ;;
         --output)
             output=${2:-}
+            shift 2
+            ;;
+        --write-out)
+            write_out=${2:-}
             shift 2
             ;;
         https://*)
@@ -121,6 +126,17 @@ request=/${request#*/}
 request=${request%%\?*}
 request=${request#/}
 [[ -n "$request" ]] || request=index.html
+
+if [[ ! -e "$MOCK_RELEASE_ROOT/current/$request" ]]; then
+    status=404
+    if [[ "${MOCK_HEALTH:-success}" == "leak-path" ]] &&
+       [[ "$request" == "${MOCK_FAIL_PATH:-}" ]] &&
+       [[ -z "${MOCK_FAIL_SHA:-}" || "$sha" == "$MOCK_FAIL_SHA" ]]; then
+        status=200
+    fi
+    [[ -z "$write_out" ]] || printf '%s' "$status"
+    exit 0
+fi
 
 case "${MOCK_HEALTH:-success}" in
     success)
@@ -161,6 +177,8 @@ case "${MOCK_HEALTH:-success}" in
             done
             exit 0
         fi
+        ;;
+    leak-path)
         ;;
     *)
         exit 22
@@ -718,6 +736,16 @@ MOCK_FAIL_PATH=assets/rad-dad-social-2026.png \
 [[ $(readlink "$RELEASE_ROOT/current") = "releases/$SHA_A" ]] ||
     fail "asset health failure did not restore previous current"
 pass "all-file asset health restores the previous known-good release"
+
+MOCK_HEALTH=leak-path MOCK_FAIL_SHA=$SHA_B MOCK_FAIL_PATH=package.json \
+    expect_failure "public repository path exposure fails deployment health" \
+    "$DEPLOY_HELPER" deploy --sha "$SHA_B" --artifact "$ARTIFACT_B" --config "$CONFIG"
+grep -q "Forbidden public path package.json returned HTTP 200" \
+    "$TEST_TMP/last-failure.log" ||
+    fail "repository-path health failure did not name the exposed path"
+[[ $(readlink "$RELEASE_ROOT/current") = "releases/$SHA_A" ]] ||
+    fail "repository-path health failure did not restore previous current"
+pass "repository-path exposure restores the previous known-good release"
 
 "$DEPLOY_HELPER" list --config "$CONFIG" >"$TEST_TMP/list-failed-b.log"
 grep -q "^${SHA_B}[[:space:]]INSTALLED-UNHEALTHY[[:space:]]INACTIVE$" \
