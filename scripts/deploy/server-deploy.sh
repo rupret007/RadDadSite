@@ -32,6 +32,10 @@ PUBLIC_FORBIDDEN_PATHS=(
     "backup_restore_point/index.html"
     "worker/index.js"
     "RadDad_OnePage_Site.zip"
+    "RadDad_OnePage_Site_v2.zip"
+    "RadDad_OnePage_Site_v3.zip"
+    "RadDad_OnePage_Site_v4.zip"
+    "RadDad_Website.zip"
 )
 
 log() {

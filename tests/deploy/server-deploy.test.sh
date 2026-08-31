@@ -747,6 +747,25 @@ grep -q "Forbidden public path package.json returned HTTP 200" \
     fail "repository-path health failure did not restore previous current"
 pass "repository-path exposure restores the previous known-good release"
 
+archive_probe_count=0
+while IFS= read -r archive_path; do
+    archive_path=${archive_path#"$PROJECT_ROOT/"}
+    archive_probe_count=$((archive_probe_count + 1))
+    MOCK_HEALTH=leak-path MOCK_FAIL_SHA=$SHA_B MOCK_FAIL_PATH=$archive_path \
+        expect_failure "public tracked archive $archive_path exposure fails deployment health" \
+        "$DEPLOY_HELPER" deploy --sha "$SHA_B" --artifact "$ARTIFACT_B" --config "$CONFIG"
+    grep -Fq "Forbidden public path $archive_path returned HTTP 200" \
+        "$TEST_TMP/last-failure.log" ||
+        fail "archive-path health failure did not name $archive_path"
+    [[ $(readlink "$RELEASE_ROOT/current") = "releases/$SHA_A" ]] ||
+        fail "archive-path health failure did not restore previous current"
+done < <(
+    git -C "$PROJECT_ROOT" ls-files -- ':(top,glob)*.zip' |
+        LC_ALL=C sort
+)
+((archive_probe_count >= 5)) ||
+    fail "archive-path health regression did not exercise every tracked site ZIP"
+
 "$DEPLOY_HELPER" list --config "$CONFIG" >"$TEST_TMP/list-failed-b.log"
 grep -q "^${SHA_B}[[:space:]]INSTALLED-UNHEALTHY[[:space:]]INACTIVE$" \
     "$TEST_TMP/list-failed-b.log" ||
