@@ -14,6 +14,26 @@ LAST_RESTORE_RESULT=""
 CLEANUP_RUNNING=0
 RETENTION_TEMP=""
 
+# Reuse the runbook's representative non-disclosure probes during every
+# activation and rollback health check.
+PUBLIC_FORBIDDEN_PATHS=(
+    ".git/HEAD"
+    ".github/workflows/test.yml"
+    ".openai/hosting.json"
+    ".env"
+    "README.md"
+    "package.json"
+    "package-lock.json"
+    "scripts/build-sites.mjs"
+    "tests/e2e/homepage.spec.js"
+    "test-results/"
+    "node_modules/"
+    "GPT/"
+    "backup_restore_point/index.html"
+    "worker/index.js"
+    "RadDad_OnePage_Site.zip"
+)
+
 log() {
     printf '[raddad-deploy] %s\n' "$*"
 }
@@ -1152,7 +1172,7 @@ restore_activation_after_failure() {
 
 health_check() {
     local sha="$1"
-    local attempt path url_path
+    local attempt path url_path forbidden_path status_code
     local attempt_ok
     local -a public_paths=()
 
@@ -1247,7 +1267,33 @@ PY
         done
 
         if [[ "$attempt_ok" == "1" ]]; then
-            log "Public health check verified every published file for $sha."
+            for forbidden_path in "${PUBLIC_FORBIDDEN_PATHS[@]}"; do
+                if ! status_code="$(
+                    curl \
+                        --silent \
+                        --show-error \
+                        --proto '=https' \
+                        --connect-timeout 5 \
+                        --max-time 15 \
+                        -H 'Cache-Control: no-cache' \
+                        --output /dev/null \
+                        --write-out '%{http_code}' \
+                        "${RADDAD_SITE_URL}/${forbidden_path}?v=${sha}"
+                )"; then
+                    attempt_ok=0
+                    break
+                fi
+
+                if [[ "$status_code" != "404" ]]; then
+                    log "Forbidden public path $forbidden_path returned HTTP $status_code."
+                    attempt_ok=0
+                    break
+                fi
+            done
+        fi
+
+        if [[ "$attempt_ok" == "1" ]]; then
+            log "Public health check verified every published file and rejected repository-only paths for $sha."
             return 0
         fi
 

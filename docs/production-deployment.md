@@ -3,6 +3,12 @@
 This runbook covers `raddadband.com`. GitHub Pages and the ChatGPT Sites
 deployment remain independent and are not changed by this production path.
 
+> **Current boundary (2026-08-30): not cut over.** The live server still uses
+> the legacy repository-root publication path. Repository-only URLs are
+> reachable and the three verified-release identity files are absent. The
+> clean release layout below is the required target state, not a description of
+> current production. A merge alone does not authorize the owner/Che cutover.
+
 ## Safety model
 
 Production deployments follow this path:
@@ -22,9 +28,11 @@ Production deployments follow this path:
    production activations cannot overlap.
 5. The server validates the uploaded archive and SHA in a private staging
    directory, installs a versioned release, atomically changes the `current`
-   symlink, and verifies the exact public bytes of every file in that release.
-   A failed check restores the verified previous release automatically, or
-   removes an unverified first-release link when no safe fallback exists.
+   symlink, verifies the exact public bytes of every file in that release, and
+   requires representative repository, development, backup, and archive paths
+   to return HTTP 404. A failed positive or negative check restores the verified
+   previous release automatically, or removes an unverified first-release link
+   when no safe fallback exists.
 
 The checked-in workflow is inert for remote production work by default:
 `PROD_REMOTE_ACTIONS_ENABLED` is absent or false, so even a manual dispatch
