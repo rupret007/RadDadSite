@@ -82,8 +82,11 @@ describe('public surface security', () => {
         expect(source).toContain("normalized === '/show-control'");
         expect(source).toContain("normalized.startsWith('/show-control/')");
         expect(source).toContain('status: 404');
+        expect(source).toContain("'cache-control': 'no-store'");
         expect(source).not.toContain('chatgpt.site');
-        expect(source).not.toMatch(/pathname = '\/index\.html'[\s\S]*show-control/);
+        expect(source.indexOf('isClosedOwnerPath(requestUrl.pathname)')).toBeLessThan(
+            source.indexOf("fallbackUrl.pathname = '/index.html'")
+        );
     });
 
     it('isolates every new-tab link and rejects script or data URLs', async () => {
