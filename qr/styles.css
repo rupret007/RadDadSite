@@ -21,10 +21,12 @@
     --marker: "Permanent Marker", cursive;
     --shadow: 0 28px 90px rgba(0, 0, 0, 0.52);
     --header-height: 4.65rem;
+    --show-strip-height: 2.625rem;
 }
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--header-height) + var(--show-strip-height));
     background: var(--ink);
 }
 
@@ -1179,6 +1181,9 @@ a {
 
 /* Persistent next-show announcement */
 .next-show-strip {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 19;
     display: block;
     color: #020810;
     background: #b5dc08;
@@ -1527,7 +1532,7 @@ a {
 .next-show-section {
     position: relative;
     overflow: hidden;
-    scroll-margin-top: var(--header-height);
+    scroll-margin-top: calc(var(--header-height) + var(--show-strip-height));
     padding-block: clamp(5rem, 10vw, 9rem);
     border-block: 1px solid var(--line);
     background:
@@ -1846,12 +1851,24 @@ a {
     color: var(--lime);
 }
 
-.participation-pass__copy > p:last-child {
+.participation-pass__copy > p:last-child,
+.participation-pass__show {
     max-width: 39rem;
     margin: 1.15rem 0 0;
     color: #d2dbe2;
     font-size: 0.92rem;
     line-height: 1.7;
+}
+
+.participation-pass__show {
+    margin-top: 0.85rem;
+}
+
+.participation-pass__show a {
+    color: var(--lime);
+    font-weight: 800;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
 }
 
 .participation-pass__actions {
@@ -1964,7 +1981,8 @@ a {
         font-size: clamp(2.25rem, 11vw, 3.3rem);
     }
 
-    .participation-pass__copy > p:last-child {
+    .participation-pass__copy > p:last-child,
+    .participation-pass__show {
         font-size: 0.84rem;
     }
 

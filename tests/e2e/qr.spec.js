@@ -92,7 +92,7 @@ test.describe('tap, NFC, and QR landing pages', () => {
         );
         await expect(page.locator('link[rel="stylesheet"][href^="styles.css"]')).toHaveAttribute(
             'href',
-            'styles.css?v=20260903-1'
+            'styles.css?v=20260903-2'
         );
     });
 
@@ -131,22 +131,19 @@ test.describe('tap, NFC, and QR landing pages', () => {
         );
 
         const serviceLinks = playerCard.locator('.service-links');
+        await expect(serviceLinks.getByRole('link')).toHaveCount(2);
         await expect(serviceLinks.getByRole('link', { name: 'Apple Music' })).toHaveAttribute(
             'href',
             /music\.apple\.com.*1827102667/
         );
         await expect(serviceLinks.getByRole('link', { name: 'Amazon Music' })).toHaveAttribute(
             'href',
-            /music\.amazon\.com/
+            /music\.amazon\.com\/tracks\/B0FHPB9FN7/
         );
-        await expect(serviceLinks.getByRole('link', { name: 'Spotify' })).toHaveAttribute(
-            'href',
-            /open\.spotify\.com/
-        );
-        await expect(serviceLinks.getByRole('link', { name: 'YouTube Music' })).toHaveAttribute(
-            'href',
-            /music\.youtube\.com/
-        );
+        await expect(serviceLinks.getByRole('link', { name: 'Spotify' })).toHaveCount(0);
+        await expect(serviceLinks.getByRole('link', { name: 'YouTube Music' })).toHaveCount(0);
+        await expect(songSection).not.toContainText('open.spotify.com/search');
+        await expect(songSection).not.toContainText('music.youtube.com/search');
     });
 
     test('/qr/ features the latest Wildflower video and earlier live performances', async ({ page }) => {
@@ -232,6 +229,13 @@ test.describe('tap, NFC, and QR landing pages', () => {
         );
 
         await expect(nextShowSection.locator('.next-show-details')).toHaveAttribute('href', '../#show');
+
+        const strip = page.locator('.next-show-strip');
+        await expect(strip).toBeVisible();
+        await expect(strip).toHaveAttribute('href', '#next-show');
+        await expect(strip).toContainText('Sep 19');
+        await expect(strip).toContainText('Guitars & Growlers');
+        await expect(strip).toContainText('7–10 PM');
     });
 
     test('/qr/ offers the same review-only public show-board path as the homepage', async ({ page }) => {
@@ -254,6 +258,11 @@ test.describe('tap, NFC, and QR landing pages', () => {
             'https://rad-dad-show-night.jeffstory007.chatgpt.site/#suggestions'
         );
         await expect(participation.locator('a[href*="show-control"]')).toHaveCount(0);
+        await expect(page.locator('a[href*="show-control"]')).toHaveCount(0);
+        await expect(participation.getByRole('link', { name: 'September 19 at Guitars & Growlers' })).toHaveAttribute(
+            'href',
+            '#next-show'
+        );
 
         const layout = await participation.locator('.participation-pass').evaluate((card) => {
             const rect = card.getBoundingClientRect();
@@ -335,5 +344,12 @@ test.describe('tap, NFC, and QR landing pages', () => {
         await expect(page.locator('.tap-header')).toBeVisible();
         await expect(page.locator('.hero')).toBeVisible();
         await expect(page.locator('#song')).toBeVisible();
+
+        const strip = page.locator('.next-show-strip');
+        await expect(strip).toBeVisible();
+        await expect(strip).toHaveAttribute('href', '#next-show');
+        await expect(strip).toContainText('Sep 19');
+        await expect(strip).toContainText('Guitars & Growlers');
+        await expect(page.locator('a[href*="show-control"]')).toHaveCount(0);
     });
 });

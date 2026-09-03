@@ -717,12 +717,24 @@ button:focus-visible {
     color: var(--lime);
 }
 
-.participation-pass__copy > p:last-child {
+.participation-pass__copy > p:last-child,
+.participation-pass__show {
     max-width: 39rem;
     margin: 1.15rem 0 0;
     color: #d2dbe2;
     font-size: 0.92rem;
     line-height: 1.7;
+}
+
+.participation-pass__show {
+    margin-top: 0.85rem;
+}
+
+.participation-pass__show a {
+    color: var(--lime);
+    font-weight: 800;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
 }
 
 .participation-pass__actions {
@@ -1433,8 +1445,21 @@ button:focus-visible {
     text-transform: uppercase;
 }
 
-.covers-poster__footer span:last-child {
+.covers-poster__paths {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.45rem 1rem;
+}
+
+.covers-poster__paths a {
     color: var(--lime);
+    text-decoration: none;
+}
+
+.covers-poster__paths a:hover,
+.covers-poster__paths a:focus-visible {
+    color: var(--cream);
 }
 
 /* Shared section layout */
@@ -1746,6 +1771,17 @@ button:focus-visible {
     margin-top: 0.45rem;
 }
 
+.show-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 1.15rem;
+    margin-top: 0.45rem;
+}
+
+.show-card__actions .text-link {
+    margin-top: 0;
+}
+
 .highlight-card {
     position: sticky;
     top: 6.25rem;
@@ -1850,6 +1886,16 @@ button:focus-visible {
     gap: 0.4rem 1.6rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--line);
+}
+
+.social-nav__kicker {
+    flex: 1 0 100%;
+    margin: 0;
+    color: var(--cream);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .social-nav a {
@@ -2251,7 +2297,8 @@ button:focus-visible {
         font-size: clamp(2.25rem, 11vw, 3.3rem);
     }
 
-    .participation-pass__copy > p:last-child {
+    .participation-pass__copy > p:last-child,
+    .participation-pass__show {
         font-size: 0.84rem;
     }
 
@@ -2335,8 +2382,13 @@ button:focus-visible {
         min-height: 4.4rem;
         flex-direction: column;
         justify-content: center;
-        gap: 0;
+        gap: 0.55rem;
+        padding-bottom: 0.35rem;
         text-align: center;
+    }
+
+    .covers-poster__paths {
+        justify-content: center;
     }
 
     .section-heading {
