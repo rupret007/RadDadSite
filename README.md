@@ -10,6 +10,20 @@ are named as a participating band on the homepage, QR landing page, calendar
 download, and structured event metadata. The restored Friends flyer and visual
 treatment remain the source of truth; do not infer billing order or set times.
 
+## Public Show-Night Board
+
+The homepage and `/qr/` landing page both connect fans to the same public
+[Rad Dad show-night board](https://rad-dad-show-night.jeffstory007.chatgpt.site/).
+The two focused actions deep-link to the current running order and public song
+suggestions without adding either destination to the already-compact site
+navigation.
+
+Suggestions are review-only: submitting an idea never changes the official
+show automatically. The public site links only to `#official-sets` and
+`#suggestions`; it must never expose the owner-only `/show-control` route. The
+show-night app remains the canonical source for running-order and suggestion
+data, so this static repository must not copy those records.
+
 ## QR Landing Page
 
 The current physical promotion workflow uses a **1-inch round matte-white
@@ -112,6 +126,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 - Event-first section and focus order, page metadata, and structured event data
 - September 19 event facts, named participating bands, flyer assets, calendar download, and directions
 - Flyer-style recent-set artist wall, 2026 show history, videos, and stable contact/social links
+- Review-only fan participation links shared by the homepage and canonical QR landing page
 - The latest featured YouTube performance on both the homepage and canonical QR landing page
 - Permanent `/tap/` and legacy `/nfc/` fallbacks converging on the canonical `/qr/` content
 - Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention

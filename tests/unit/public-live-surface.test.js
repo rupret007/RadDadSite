@@ -13,6 +13,7 @@ const nfcPath = join(repoRoot, 'nfc', 'index.html');
 const calendarPath = join(repoRoot, 'assets', 'rad-dad-friends-guitars-growlers-2026.ics');
 const FEATURED_VIDEO_ID = '4ReFoSZHL7o';
 const RETIRED_VIDEO_ID = ['_IwRtmu', 'TKBY'].join('');
+const PUBLIC_SHOW_BOARD = 'https://rad-dad-show-night.jeffstory007.chatgpt.site/';
 const OFFICIAL_SET_SONG_TITLES = [
     'Basket Case',
     'The Rock Show',
@@ -54,6 +55,13 @@ function heroSection(html) {
     const match = html.match(/<section[^>]*class="hero page-shell"[\s\S]*?<\/section>/i);
 
     expect(match, 'QR landing page must keep the music-first hero').not.toBeNull();
+    return match[0];
+}
+
+function participationSection(html) {
+    const match = html.match(/<section[^>]*id="join-show"[\s\S]*?<\/section>/i);
+
+    expect(match, 'page must keep the public show-board bridge').not.toBeNull();
     return match[0];
 }
 
@@ -109,6 +117,28 @@ describe('public live surface honesty', () => {
         expect(qr).not.toContain(RETIRED_VIDEO_ID);
         expect(qr.toLowerCase()).not.toContain('setlist');
         expect(qr.toLowerCase()).not.toContain('part of the set');
+    });
+
+    it('connects both discovery routes to one review-only public show board', async () => {
+        const homepage = participationSection(await readFile(homepagePath, 'utf8'));
+        const qr = participationSection(await readFile(qrPath, 'utf8'));
+
+        for (const surface of [homepage, qr]) {
+            expect(surface).toContain(`${PUBLIC_SHOW_BOARD}#official-sets`);
+            expect(surface).toContain(`${PUBLIC_SHOW_BOARD}#suggestions`);
+            expect(surface).toContain('See the running order');
+            expect(surface).toContain('Suggest a song');
+            expect(surface).toContain('goes to the band for review');
+            expect(surface).toContain('never changes the official show automatically');
+            expect(surface).toContain('public show-night board');
+            expect(surface).not.toContain('/show-control');
+            expect(surface).not.toContain('will be played');
+        }
+
+        for (const destination of ['#official-sets', '#suggestions']) {
+            expect(homepage.match(new RegExp(destination, 'g'))).toHaveLength(1);
+            expect(qr.match(new RegExp(destination, 'g'))).toHaveLength(1);
+        }
     });
 
     it('makes the next Friends action the same calendar action on homepage and QR', async () => {

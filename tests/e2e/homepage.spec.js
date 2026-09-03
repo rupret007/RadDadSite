@@ -51,7 +51,7 @@ test('loads the event-first homepage with the expected title and section order',
         await page.locator('script[type="application/ld+json"]').textContent()
     );
 
-    expect(sectionOrder).toEqual(['show', 'covers', 'watch', 'shows', 'contact']);
+    expect(sectionOrder).toEqual(['show', 'join-show', 'covers', 'watch', 'shows', 'contact']);
     expect(heroOrder).toEqual(['flyer-stage', 'hero-copy']);
     expect(eventData).toMatchObject({
         '@type': 'MusicEvent',
@@ -74,6 +74,49 @@ test('loads the event-first homepage with the expected title and section order',
     });
     expect(eventData).not.toHaveProperty('offers');
     expect(eventData).not.toHaveProperty('organizer');
+});
+
+test('invites fans into the review-only show board without exposing owner controls', async ({ page }) => {
+    for (const viewport of [
+        { width: 390, height: 844 },
+        { width: 1440, height: 900 }
+    ]) {
+        await page.setViewportSize(viewport);
+        await page.goto('/');
+
+        const participation = page.locator('#join-show');
+        const runningOrder = participation.getByRole('link', { name: 'See the running order' });
+        const suggestion = participation.getByRole('link', { name: 'Suggest a song' });
+
+        await expect(participation.getByRole('heading', { level: 2, name: 'Help shape the night.' })).toBeVisible();
+        await expect(participation).toContainText('Every suggestion goes to the band for review');
+        await expect(participation).toContainText('never changes the official show automatically');
+        await expect(runningOrder).toHaveAttribute(
+            'href',
+            'https://rad-dad-show-night.jeffstory007.chatgpt.site/#official-sets'
+        );
+        await expect(suggestion).toHaveAttribute(
+            'href',
+            'https://rad-dad-show-night.jeffstory007.chatgpt.site/#suggestions'
+        );
+        await expect(runningOrder).toHaveAttribute('target', '_blank');
+        await expect(suggestion).toHaveAttribute('target', '_blank');
+        await expect(participation.locator('a[href*="show-control"]')).toHaveCount(0);
+
+        const layout = await participation.locator('.participation-pass').evaluate((card) => {
+            const rect = card.getBoundingClientRect();
+            return {
+                bodyScrollWidth: document.body.scrollWidth,
+                left: rect.left,
+                right: rect.right,
+                viewportWidth: window.innerWidth
+            };
+        });
+
+        expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+        expect(layout.left).toBeGreaterThanOrEqual(-1);
+        expect(layout.right).toBeLessThanOrEqual(layout.viewportWidth + 1);
+    }
 });
 
 test('presents the September event, flyer, and useful event actions', async ({ page }) => {
