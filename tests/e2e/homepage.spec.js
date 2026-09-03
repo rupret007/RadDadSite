@@ -102,6 +102,11 @@ test('invites fans into the review-only show board without exposing owner contro
         await expect(runningOrder).toHaveAttribute('target', '_blank');
         await expect(suggestion).toHaveAttribute('target', '_blank');
         await expect(participation.locator('a[href*="show-control"]')).toHaveCount(0);
+        await expect(page.locator('a[href*="show-control"]')).toHaveCount(0);
+        await expect(participation.getByRole('link', { name: 'September 19 at Guitars & Growlers' })).toHaveAttribute(
+            'href',
+            '#show'
+        );
 
         const layout = await participation.locator('.participation-pass').evaluate((card) => {
             const rect = card.getBoundingClientRect();
@@ -186,6 +191,10 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
     await expect(covers.getByRole('heading', { level: 2, name: 'Playing hits from bands like' })).toBeVisible();
     await expect(covers).toContainText('Selections vary by show');
     await expect(covers.locator('.covers-poster__footer')).toHaveAttribute('aria-label', 'Cover note');
+    const coverPaths = covers.getByRole('navigation', { name: 'Show and listen paths' });
+    await expect(coverPaths.getByRole('link', { name: 'Hear Rad Dad' })).toHaveAttribute('href', '#watch');
+    await expect(coverPaths.getByRole('link', { name: 'Help shape the night' })).toHaveAttribute('href', '#join-show');
+    await expect(coverPaths.getByRole('link', { name: 'September 19 show' })).toHaveAttribute('href', '#show');
     await expect(covers).not.toContainText(/setlist/i);
     await expect(covers.locator('.artist-wall')).toHaveAttribute('role', 'list');
     await expect(artistItems).toHaveCount(14);
@@ -312,6 +321,11 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
         'href',
         CALENDAR_PATH
     );
+    await expect(featuredShow.getByRole('link', { name: 'Get Directions' })).toHaveAttribute(
+        'href',
+        'https://maps.app.goo.gl/Gr79GmmXAxMH5SkP6'
+    );
+    await expect(featuredShow.getByRole('link', { name: 'Show details' })).toHaveAttribute('href', '#show');
     await expect(featuredShow).not.toContainText(/save the date/i);
 
     const pastShows = page.locator('#shows .show-card--past');
@@ -380,7 +394,14 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
         'https://www.youtube.com/@RadDadBand'
     );
 
+    const nav = page.getByRole('navigation', { name: 'Primary navigation' });
+    await expect(nav.getByRole('link', { name: 'Show' })).toHaveAttribute('href', '#show');
+    await expect(nav.getByRole('link', { name: 'Covers' })).toHaveAttribute('href', '#covers');
+    await expect(nav.getByRole('link', { name: 'Listen' })).toHaveAttribute('href', '#watch');
+    await expect(nav.getByRole('link', { name: 'Connect' })).toHaveAttribute('href', '#contact');
+
     const contact = page.locator('#contact');
+    await expect(contact.locator('.social-nav__kicker')).toHaveText('Just here for the band? Follow along.');
     await expect(contact.getByRole('link', { name: 'Email Rad Dad' })).toHaveAttribute(
         'href',
         'mailto:rad.dad.band@gmail.com'

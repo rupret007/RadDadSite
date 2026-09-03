@@ -133,6 +133,8 @@ describe('public live surface honesty', () => {
             expect(surface).toContain('public show-night board');
             expect(surface).not.toContain('/show-control');
             expect(surface).not.toContain('will be played');
+            expect(surface).toContain('Looking for the date?');
+            expect(surface).toContain('September 19 at Guitars');
         }
 
         for (const destination of ['#official-sets', '#suggestions']) {
@@ -149,6 +151,9 @@ describe('public live surface honesty', () => {
         const nextShow = nextShowSection(qr);
 
         expect(featured).toContain('Add to Calendar');
+        expect(featured).toContain('Get Directions');
+        expect(featured).toContain('href="#show"');
+        expect(featured).toContain('Show details');
         expect(featured).not.toContain('Save the date');
         expect(featured).toContain('rad-dad-friends-guitars-growlers-2026.ics');
         expect(hero).toContain('Start with our song');
@@ -189,6 +194,14 @@ describe('public live surface honesty', () => {
             rejectForbiddenLineup(source, label);
         }
 
+        expect(homepage).toContain('href="#covers"');
+        expect(homepage).toContain('href="#watch">Listen</a>');
+        expect(homepage).toContain('aria-label="Show and listen paths"');
+        expect(homepage).toContain('href="#watch">Hear Rad Dad</a>');
+        expect(qr).toContain('class="next-show-strip"');
+        expect(qr).toContain('href="#next-show"');
+        expect(qr).not.toContain('open.spotify.com/search');
+        expect(qr).not.toContain('music.youtube.com/search');
         expect(calendar).toContain('SUMMARY:Rad Dad + Friends');
         expect(calendar).toContain('DTSTART:20260920T000000Z');
         expect(calendar).toContain('DTEND:20260920T030000Z');
