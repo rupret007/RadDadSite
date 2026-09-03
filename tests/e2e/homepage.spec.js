@@ -192,7 +192,7 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
     await expect(covers).toContainText('Selections vary by show');
     await expect(covers.locator('.covers-poster__footer')).toHaveAttribute('aria-label', 'Cover note');
     const coverPaths = covers.getByRole('navigation', { name: 'Show and listen paths' });
-    await expect(coverPaths.getByRole('link', { name: 'Hear Rad Dad' })).toHaveAttribute('href', '#watch');
+    await expect(coverPaths.getByRole('link', { name: 'Hear Rad Dad' })).toHaveAttribute('href', '#our-song');
     await expect(coverPaths.getByRole('link', { name: 'Help shape the night' })).toHaveAttribute('href', '#join-show');
     await expect(coverPaths.getByRole('link', { name: 'September 19 show' })).toHaveAttribute('href', '#show');
     await expect(covers).not.toContainText(/setlist/i);
@@ -341,6 +341,26 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
     await expect(pastShows.nth(1)).toContainText('APR');
     await expect(pastShows.nth(1)).toContainText('11');
 
+    const songDesk = page.locator('#our-song');
+    await expect(songDesk.getByRole('heading', { level: 3, name: 'The Story Of Us' })).toBeVisible();
+    await expect(songDesk).toContainText('It started as a solo release');
+    await expect(songDesk.locator('iframe')).toHaveAttribute(
+        'src',
+        /embed\.music\.apple\.com.*1827102667/
+    );
+    await expect(songDesk.getByRole('link', { name: 'Apple Music' })).toHaveAttribute(
+        'href',
+        /music\.apple\.com.*1827102667/
+    );
+    await expect(songDesk.getByRole('link', { name: 'Amazon Music' })).toHaveAttribute(
+        'href',
+        /music\.amazon\.com\/tracks\/B0FHPB9FN7/
+    );
+    await expect(songDesk.getByRole('link', { name: 'Song story' })).toHaveAttribute('href', 'qr/#song');
+    await expect(songDesk.getByRole('link', { name: 'September 19 show' })).toHaveAttribute('href', '#show');
+    await expect(songDesk.getByRole('link', { name: 'Spotify' })).toHaveCount(0);
+    await expect(songDesk).not.toContainText('open.spotify.com/search');
+
     const videos = page.locator('#watch .video-card');
     await expect(videos).toHaveCount(5);
     await expect(videos.nth(0)).toContainText('Tomorrow’s Another Day — MxPx cover');
@@ -397,7 +417,7 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
     const nav = page.getByRole('navigation', { name: 'Primary navigation' });
     await expect(nav.getByRole('link', { name: 'Show' })).toHaveAttribute('href', '#show');
     await expect(nav.getByRole('link', { name: 'Covers' })).toHaveAttribute('href', '#covers');
-    await expect(nav.getByRole('link', { name: 'Listen' })).toHaveAttribute('href', '#watch');
+    await expect(nav.getByRole('link', { name: 'Listen' })).toHaveAttribute('href', '#our-song');
     await expect(nav.getByRole('link', { name: 'Connect' })).toHaveAttribute('href', '#contact');
 
     const contact = page.locator('#contact');
@@ -495,6 +515,17 @@ test('keeps the mobile page overflow-free with a prominent, uncropped flyer', as
 
     expect(layout.documentScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
     expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+
+    const songDesk = await page.locator('#our-song').evaluate((card) => {
+        const rect = card.getBoundingClientRect();
+        return {
+            left: rect.left,
+            right: rect.right
+        };
+    });
+    expect(songDesk.left).toBeGreaterThanOrEqual(-1);
+    expect(songDesk.right).toBeLessThanOrEqual(viewport.width + 1);
+
     expect(flyer.left).toBeGreaterThanOrEqual(-4);
     expect(flyer.right).toBeLessThanOrEqual(viewport.width + 4);
     expect(flyer.offsetWidth).toBeGreaterThanOrEqual(viewport.width * 0.85);

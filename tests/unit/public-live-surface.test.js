@@ -51,6 +51,13 @@ function featuredShowCard(html) {
     return match[0];
 }
 
+function homepageSongDesk(html) {
+    const match = html.match(/<article class="song-desk"[\s\S]*?<\/article>/i);
+
+    expect(match, 'homepage must keep the Story Of Us listen desk').not.toBeNull();
+    return match[0];
+}
+
 function heroSection(html) {
     const match = html.match(/<section[^>]*class="hero page-shell"[\s\S]*?<\/section>/i);
 
@@ -89,6 +96,29 @@ describe('public live surface honesty', () => {
         for (const title of OFFICIAL_SET_SONG_TITLES) {
             expect(covers).not.toContain(title);
         }
+    });
+
+    it('puts The Story Of Us on the homepage listen path without calling it a setlist', async () => {
+        const homepage = await readFile(homepagePath, 'utf8');
+        const covers = coversSection(homepage);
+        const desk = homepageSongDesk(homepage);
+
+        expect(desk).toContain('id="our-song"');
+        expect(desk).toContain('The Story Of Us');
+        expect(desk).toContain('It started as a solo release');
+        expect(desk).toContain('embed.music.apple.com/us/album/the-story-of-us/1827102667');
+        expect(desk).toContain('sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"');
+        expect(desk).toContain('https://music.apple.com/us/album/the-story-of-us/1827102667?i=1827102893');
+        expect(desk).toContain('https://music.amazon.com/tracks/B0FHPB9FN7');
+        expect(desk).toContain('href="qr/#song"');
+        expect(desk).toContain('href="#show"');
+        expect(desk).toContain('September 19 show');
+        expect(desk).not.toContain('open.spotify.com/search');
+        expect(desk).not.toContain('music.youtube.com/search');
+        expect(desk.toLowerCase()).not.toContain('setlist');
+        expect(desk.toLowerCase()).not.toContain('part of the set');
+        expect(covers).not.toContain('The Story Of Us');
+        expect(covers).not.toContain('The Story of Us');
     });
 
     it('does not claim The Story Of Us is part of the official set', async () => {
@@ -195,9 +225,9 @@ describe('public live surface honesty', () => {
         }
 
         expect(homepage).toContain('href="#covers"');
-        expect(homepage).toContain('href="#watch">Listen</a>');
+        expect(homepage).toContain('href="#our-song">Listen</a>');
         expect(homepage).toContain('aria-label="Show and listen paths"');
-        expect(homepage).toContain('href="#watch">Hear Rad Dad</a>');
+        expect(homepage).toContain('href="#our-song">Hear Rad Dad</a>');
         expect(qr).toContain('class="next-show-strip"');
         expect(qr).toContain('href="#next-show"');
         expect(qr).not.toContain('open.spotify.com/search');
