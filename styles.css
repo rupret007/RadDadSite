@@ -1928,10 +1928,15 @@ button:focus-visible {
     text-transform: uppercase;
 }
 
-.highlight-card__copy > p:last-child {
+.highlight-card__copy > p:last-of-type {
     margin: 0.9rem 0 0;
     color: var(--muted);
     font-size: 0.86rem;
+}
+
+.highlight-card__copy .text-link {
+    display: inline-block;
+    margin-top: 0.85rem;
 }
 
 /* Contact and footer */

@@ -29,7 +29,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Oswald:wght@500;600;700&amp;family=Permanent+Marker&amp;display=swap" rel="stylesheet">
     <link rel="preload" as="image" href="../assets/story-of-us-cover.webp">
-    <link rel="stylesheet" href="styles.css?v=20260903-2">
+    <link rel="stylesheet" href="styles.css?v=20260903-3">
 
     <script type="application/ld+json">
     {
@@ -130,12 +130,17 @@
                         title="Listen to The Story Of Us by Jeff Story on Apple Music"
                         allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
                         sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+                        referrerpolicy="strict-origin-when-cross-origin"
                         src="https://embed.music.apple.com/us/album/the-story-of-us/1827102667?i=1827102893">
                     </iframe>
                     <div class="service-links" aria-label="Listen on a music service">
                         <a href="https://music.apple.com/us/album/the-story-of-us/1827102667?i=1827102893" target="_blank" rel="noopener noreferrer">Apple Music <span aria-hidden="true">↗</span></a>
                         <a href="https://music.amazon.com/tracks/B0FHPB9FN7" target="_blank" rel="noopener noreferrer">Amazon Music <span aria-hidden="true">↗</span></a>
                     </div>
+                    <nav class="song-paths" aria-label="Show and listen paths">
+                        <a href="#next-show">September 19 show</a>
+                        <a href="#join-show">Help shape the night</a>
+                    </nav>
                 </div>
             </div>
         </section>
@@ -176,6 +181,21 @@
                             <figcaption>
                                 <span>blink-182 cover</span>
                                 <strong>All the Small Things</strong>
+                                <small>Watch the performance <span aria-hidden="true">↗</span></small>
+                            </figcaption>
+                        </figure>
+                    </a>
+
+                    <a class="live-card live-card--cyan reveal" data-reveal href="https://www.youtube.com/watch?v=GCy4nHIqV5k" target="_blank" rel="noopener noreferrer" aria-label="Watch Rad Dad perform She by Green Day live at Wildflower Festival on YouTube">
+                        <figure>
+                            <div class="live-card__image">
+                                <img src="../assets/wildflower-she-green-day.webp" alt="Rad Dad performing She by Green Day live at Wildflower Festival" width="1280" height="720" loading="lazy">
+                                <span class="live-card__play" aria-hidden="true">▶</span>
+                                <span class="live-card__stamp">Wildflower '26</span>
+                            </div>
+                            <figcaption>
+                                <span>Green Day cover</span>
+                                <strong>She</strong>
                                 <small>Watch the performance <span aria-hidden="true">↗</span></small>
                             </figcaption>
                         </figure>
@@ -247,7 +267,10 @@
                         <a class="button button--quiet" href="https://maps.app.goo.gl/Gr79GmmXAxMH5SkP6" target="_blank" rel="noopener noreferrer">Get Directions <span aria-hidden="true">&nearr;</span></a>
                     </div>
 
-                    <a class="next-show-details" href="../#show">See full show details <span aria-hidden="true">&nearr;</span></a>
+                    <nav class="next-show-paths" aria-label="Listen and show paths">
+                        <a class="next-show-details" href="#song">Hear The Story Of Us</a>
+                        <a class="next-show-details" href="../#show">See full show details <span aria-hidden="true">&nearr;</span></a>
+                    </nav>
                 </div>
 
                 <a class="next-show-flyer reveal" data-reveal href="../assets/rad-dad-friends-guitars-growlers-2026-v2-full.png" target="_blank" rel="noopener noreferrer" aria-label="Open the full Rad Dad + Friends event flyer">
@@ -307,7 +330,7 @@
                     <a href="https://www.youtube.com/@RadDadBand" target="_blank" rel="noopener noreferrer">YouTube <span aria-hidden="true">↗</span></a>
                     <a href="https://www.instagram.com/rad.dad.band/" target="_blank" rel="noopener noreferrer">Instagram <span aria-hidden="true">↗</span></a>
                     <a href="https://www.facebook.com/people/Rad-Dad/61581475409339/" target="_blank" rel="noopener noreferrer">Facebook <span aria-hidden="true">↗</span></a>
-                    <a href="../">Shows and the full site <span aria-hidden="true">↗</span></a>
+                    <a href="../#shows">Shows and the full site <span aria-hidden="true">↗</span></a>
                 </nav>
             </div>
         </section>

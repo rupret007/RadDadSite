@@ -27,7 +27,31 @@ describe('QR route aliases', () => {
         expect(assetFetch).not.toHaveBeenCalled();
     });
 
-    it('does not create a /show-control route and never leaves the site for that path', async () => {
+    it.each([
+        '/show-control',
+        '/show-control/',
+        '/show-control/index.html',
+        '/show-control/sets',
+        '/SHOW-CONTROL'
+    ])('fails closed on owner path %s without a homepage disguise', async (path) => {
+        const assetFetch = vi.fn();
+        const response = await worker.fetch(
+            new Request(`https://raddadband.com${path}`, {
+                method: 'GET',
+                headers: { accept: 'text/html' }
+            }),
+            { ASSETS: { fetch: assetFetch } }
+        );
+
+        expect(response.status).toBe(404);
+        expect(await response.text()).toBe('Not found');
+        expect(response.headers.get('content-type')).toMatch(/text\/plain/);
+        expect(response.headers.get('cache-control')).toBe('no-store');
+        expect(response.headers.get('location')).toBeNull();
+        expect(assetFetch).not.toHaveBeenCalled();
+    });
+
+    it('still uses the homepage fallback for unknown public HTML paths', async () => {
         const assetResponse = new Response('<h1>Rad Dad</h1>', {
             status: 200,
             headers: { 'content-type': 'text/html' }
@@ -41,7 +65,7 @@ describe('QR route aliases', () => {
         });
 
         const response = await worker.fetch(
-            new Request('https://raddadband.com/show-control', {
+            new Request('https://raddadband.com/missing-public-page', {
                 headers: { accept: 'text/html' }
             }),
             { ASSETS: { fetch: assetFetch } }
@@ -49,9 +73,8 @@ describe('QR route aliases', () => {
 
         expect(response).toBe(assetResponse);
         expect(assetFetch).toHaveBeenCalledTimes(2);
-        expect(new URL(assetFetch.mock.calls[0][0].url).pathname).toBe('/show-control');
+        expect(new URL(assetFetch.mock.calls[0][0].url).pathname).toBe('/missing-public-page');
         expect(new URL(assetFetch.mock.calls[1][0].url).pathname).toBe('/index.html');
-        expect(response.headers.get('location')).toBeNull();
     });
 
     it('serves /qr/ through the asset binding instead of redirecting it', async () => {

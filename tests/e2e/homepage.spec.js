@@ -197,6 +197,7 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
     await expect(coverPaths.getByRole('link', { name: 'September 19 show' })).toHaveAttribute('href', '#show');
     await expect(covers).not.toContainText(/setlist/i);
     await expect(covers.locator('.artist-wall')).toHaveAttribute('role', 'list');
+    await expect(covers.locator('.artist-wall a')).toHaveCount(0);
     await expect(artistItems).toHaveCount(14);
     expect(artistNames.map((name) => name.trim())).toEqual([
         'Green Day',
@@ -317,6 +318,10 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
     await expect(featuredShow).toContainText('19');
     await expect(featuredShow).toContainText('2026');
     await expect(featuredShow).toContainText('7:00–10:00 PM · Free show');
+    await expect(featuredShow.getByRole('link', { name: 'Hear The Story Of Us' })).toHaveAttribute(
+        'href',
+        '#our-song'
+    );
     await expect(featuredShow.getByRole('link', { name: 'Add to Calendar' })).toHaveAttribute(
         'href',
         CALENDAR_PATH
@@ -330,6 +335,18 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
 
     const pastShows = page.locator('#shows .show-card--past');
     await expect(pastShows).toHaveCount(2);
+    await expect(pastShows.nth(0).getByRole('link', { name: 'Hear the Wildflower tapes' })).toHaveAttribute(
+        'href',
+        '#live-tapes'
+    );
+    await expect(pastShows.nth(0).getByRole('link', { name: 'Festival website' })).toHaveAttribute(
+        'href',
+        'https://wildflowerfestival.com/'
+    );
+    await expect(page.locator('.highlight-card').getByRole('link', { name: 'Hear the Wildflower tapes' })).toHaveAttribute(
+        'href',
+        '#live-tapes'
+    );
     await expect(pastShows.nth(0).locator('.show-status')).toHaveText('Earlier this year');
     await expect(pastShows.nth(0).locator('time.show-date')).toHaveAttribute('datetime', '2026-05-16');
     await expect(pastShows.nth(0).locator('.show-date .sr-only')).toHaveText('May 16, 2026');
@@ -357,9 +374,11 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
         /music\.amazon\.com\/tracks\/B0FHPB9FN7/
     );
     await expect(songDesk.getByRole('link', { name: 'Song story' })).toHaveAttribute('href', 'qr/#song');
+    await expect(songDesk.getByRole('link', { name: 'Help shape the night' })).toHaveAttribute('href', '#join-show');
     await expect(songDesk.getByRole('link', { name: 'September 19 show' })).toHaveAttribute('href', '#show');
     await expect(songDesk.getByRole('link', { name: 'Spotify' })).toHaveCount(0);
     await expect(songDesk).not.toContainText('open.spotify.com/search');
+    await expect(songDesk.locator('iframe')).toHaveAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
 
     const videos = page.locator('#watch .video-card');
     await expect(videos).toHaveCount(5);
@@ -380,10 +399,19 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
     await expect(videos.nth(2)).toContainText('She — Green Day cover');
     await expect(videos.nth(2)).toContainText('Wildflower 2026 · Live performance');
     await expect(videos.nth(2)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=GCy4nHIqV5k');
-    await expect(videos.nth(2).locator('img')).toHaveAttribute(
-        'src',
-        'https://img.youtube.com/vi/GCy4nHIqV5k/maxresdefault.jpg'
-    );
+    const sheThumbnail = videos.nth(2).locator('img');
+    await expect(sheThumbnail).toHaveAttribute('src', 'assets/wildflower-she-green-day.webp');
+    await expect(sheThumbnail).toHaveAttribute('width', '1280');
+    await expect(sheThumbnail).toHaveAttribute('height', '720');
+    await sheThumbnail.scrollIntoViewIfNeeded();
+    await expect.poll(() => sheThumbnail.evaluate((image) => [
+        image.naturalWidth,
+        image.naturalHeight
+    ])).toEqual([1280, 720]);
+
+    const sheThumbnailResponse = await page.request.get('/assets/wildflower-she-green-day.webp');
+    expect(sheThumbnailResponse.ok()).toBe(true);
+    expect(sheThumbnailResponse.headers()['content-type']).toContain('image/webp');
     await expect(videos.nth(3)).toContainText('The Middle — Jimmy Eat World cover');
     await expect(videos.nth(3)).toContainText('Wildflower 2026 · Featured performance');
     await expect(videos.nth(3)).toHaveAttribute('href', 'https://www.youtube.com/watch?v=iMrxzCQ7lVs');
@@ -413,6 +441,14 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
         'href',
         'https://www.youtube.com/@RadDadBand'
     );
+
+    await featuredShow.getByRole('link', { name: 'Hear The Story Of Us' }).click();
+    await expect(page).toHaveURL(/#our-song$/);
+    await expect(songDesk).toBeInViewport();
+
+    await songDesk.getByRole('link', { name: 'Help shape the night' }).click();
+    await expect(page).toHaveURL(/#join-show$/);
+    await expect(page.locator('#join-show')).toBeInViewport();
 
     const nav = page.getByRole('navigation', { name: 'Primary navigation' });
     await expect(nav.getByRole('link', { name: 'Show' })).toHaveAttribute('href', '#show');
@@ -516,15 +552,19 @@ test('keeps the mobile page overflow-free with a prominent, uncropped flyer', as
     expect(layout.documentScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
     expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
 
-    const songDesk = await page.locator('#our-song').evaluate((card) => {
-        const rect = card.getBoundingClientRect();
-        return {
-            left: rect.left,
-            right: rect.right
-        };
-    });
-    expect(songDesk.left).toBeGreaterThanOrEqual(-1);
-    expect(songDesk.right).toBeLessThanOrEqual(viewport.width + 1);
+    const leftoverCards = await page.locator('#our-song, .show-card--featured, #join-show .participation-pass').evaluateAll((cards) =>
+        cards.map((card) => {
+            const rect = card.getBoundingClientRect();
+            return {
+                left: rect.left,
+                right: rect.right
+            };
+        })
+    );
+    for (const card of leftoverCards) {
+        expect(card.left).toBeGreaterThanOrEqual(-1);
+        expect(card.right).toBeLessThanOrEqual(viewport.width + 1);
+    }
 
     expect(flyer.left).toBeGreaterThanOrEqual(-4);
     expect(flyer.right).toBeLessThanOrEqual(viewport.width + 4);
