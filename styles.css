@@ -617,6 +617,173 @@ button:focus-visible {
     border-right: 1px solid rgba(2, 8, 16, 0.28);
 }
 
+/* Fan participation */
+.participation-section {
+    padding: clamp(3.5rem, 7vw, 6rem) 0;
+    border-bottom: 1px solid var(--line);
+    background:
+        linear-gradient(110deg, rgba(0, 158, 232, 0.055), transparent 42%),
+        linear-gradient(290deg, rgba(237, 39, 101, 0.055), transparent 38%),
+        var(--ink);
+}
+
+.participation-pass {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(7.5rem, 0.34fr) minmax(18rem, 1.12fr) minmax(19rem, 0.9fr);
+    gap: clamp(1.5rem, 4vw, 3.4rem);
+    align-items: center;
+    padding: clamp(1.5rem, 4vw, 3.4rem);
+    overflow: hidden;
+    border: 1px solid rgba(181, 220, 8, 0.52);
+    background:
+        radial-gradient(circle at 8% 18%, rgba(181, 220, 8, 0.12), transparent 25%),
+        radial-gradient(circle at 96% 84%, rgba(237, 39, 101, 0.12), transparent 30%),
+        linear-gradient(135deg, rgba(13, 30, 45, 0.98), rgba(5, 14, 24, 0.98));
+    box-shadow: var(--shadow), 0.7rem 0.7rem 0 rgba(0, 158, 232, 0.12);
+}
+
+.participation-pass::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    content: "";
+    opacity: 0.28;
+    background-image:
+        repeating-linear-gradient(0deg, transparent 0 4px, rgba(255, 255, 255, 0.025) 4px 5px),
+        radial-gradient(circle, rgba(243, 242, 238, 0.16) 0 0.6px, transparent 0.8px);
+    background-size: auto, 6px 6px;
+    pointer-events: none;
+}
+
+.participation-pass::after {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.85rem;
+    z-index: -1;
+    content: "SHOW NIGHT / OPEN BOARD";
+    color: rgba(243, 242, 238, 0.12);
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.participation-pass__stamp {
+    aspect-ratio: 1;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    padding: 1rem;
+    border: 0.3rem solid var(--pink);
+    border-radius: 50%;
+    color: var(--cream);
+    background: rgba(2, 8, 16, 0.78);
+    text-align: center;
+    text-transform: uppercase;
+    transform: rotate(-6deg);
+    box-shadow: inset 0 0 0 0.18rem var(--ink), inset 0 0 0 0.26rem rgba(243, 242, 238, 0.72);
+}
+
+.participation-pass__stamp span {
+    color: var(--blue-bright);
+    font-size: clamp(0.65rem, 1.1vw, 0.8rem);
+    font-weight: 800;
+    letter-spacing: 0.18em;
+}
+
+.participation-pass__stamp strong {
+    font-family: var(--display);
+    font-size: clamp(1.6rem, 3.2vw, 2.7rem);
+    letter-spacing: -0.025em;
+    line-height: 0.95;
+}
+
+.participation-pass__copy .section-kicker {
+    margin-bottom: 0.7rem;
+}
+
+.participation-pass__copy h2 {
+    max-width: 11ch;
+    margin: 0;
+    font-family: var(--display);
+    font-size: clamp(2.7rem, 5vw, 4.8rem);
+    letter-spacing: -0.04em;
+    line-height: 0.93;
+    text-transform: uppercase;
+}
+
+.participation-pass__copy h2 span {
+    color: var(--lime);
+}
+
+.participation-pass__copy > p:last-child {
+    max-width: 39rem;
+    margin: 1.15rem 0 0;
+    color: #d2dbe2;
+    font-size: 0.92rem;
+    line-height: 1.7;
+}
+
+.participation-pass__actions {
+    display: grid;
+    gap: 0.65rem;
+    padding-left: clamp(1.25rem, 3vw, 2.25rem);
+    border-left: 1px dashed rgba(243, 242, 238, 0.28);
+}
+
+.participation-action {
+    min-height: 4.4rem;
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid rgba(243, 242, 238, 0.2);
+    background: rgba(2, 8, 16, 0.6);
+    text-decoration: none;
+    transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+}
+
+.participation-action > span {
+    color: var(--blue-bright);
+    font: 800 0.66rem/1 var(--body);
+    letter-spacing: 0.12em;
+}
+
+.participation-action strong {
+    font-family: var(--display);
+    font-size: 1.08rem;
+    letter-spacing: 0.035em;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.participation-action em {
+    color: var(--lime);
+    font-size: 1.25rem;
+    font-style: normal;
+}
+
+.participation-action:hover {
+    border-color: var(--blue-bright);
+    background: rgba(0, 158, 232, 0.1);
+    transform: translateX(0.25rem);
+}
+
+.participation-action--idea:hover {
+    border-color: var(--pink);
+    background: rgba(237, 39, 101, 0.1);
+}
+
+.participation-pass__actions small {
+    margin-top: 0.15rem;
+    color: var(--muted);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.035em;
+}
+
 /* Covered artists */
 .covers-section {
     position: relative;
@@ -1770,6 +1937,22 @@ button:focus-visible {
         grid-template-columns: minmax(0, 1.08fr) minmax(18rem, 0.72fr);
         gap: 2rem;
     }
+
+    .participation-pass {
+        grid-template-columns: 7rem minmax(0, 1fr);
+    }
+
+    .participation-pass__actions {
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 1.35rem 0 0;
+        border-top: 1px dashed rgba(243, 242, 238, 0.28);
+        border-left: 0;
+    }
+
+    .participation-pass__actions small {
+        grid-column: 1 / -1;
+    }
 }
 
 @media (min-width: 901px) and (max-height: 820px) {
@@ -2034,6 +2217,50 @@ button:focus-visible {
 
     .content-section {
         padding: 5.5rem 0;
+    }
+
+    .participation-section {
+        padding-block: 3.5rem;
+    }
+
+    .participation-pass::after {
+        display: none;
+    }
+
+    .participation-pass {
+        grid-template-columns: 4.9rem minmax(0, 1fr);
+        gap: 1.1rem 1rem;
+        padding: 1.25rem;
+        box-shadow: var(--shadow), 0.4rem 0.45rem 0 rgba(0, 158, 232, 0.12);
+    }
+
+    .participation-pass__stamp {
+        padding: 0.45rem;
+        border-width: 0.22rem;
+    }
+
+    .participation-pass__stamp strong {
+        font-size: 1.35rem;
+    }
+
+    .participation-pass__stamp span {
+        font-size: 0.52rem;
+    }
+
+    .participation-pass__copy h2 {
+        font-size: clamp(2.25rem, 11vw, 3.3rem);
+    }
+
+    .participation-pass__copy > p:last-child {
+        font-size: 0.84rem;
+    }
+
+    .participation-pass__actions {
+        grid-template-columns: 1fr;
+    }
+
+    .participation-pass__actions small {
+        grid-column: auto;
     }
 
     .covers-poster {

@@ -90,6 +90,10 @@ test.describe('tap, NFC, and QR landing pages', () => {
             'content',
             /Story Of Us/
         );
+        await expect(page.locator('link[rel="stylesheet"][href^="styles.css"]')).toHaveAttribute(
+            'href',
+            'styles.css?v=20260903-1'
+        );
     });
 
     test('/qr/ presents the hero with cassette render and call-to-action', async ({ page }) => {
@@ -228,6 +232,42 @@ test.describe('tap, NFC, and QR landing pages', () => {
         );
 
         await expect(nextShowSection.locator('.next-show-details')).toHaveAttribute('href', '../#show');
+    });
+
+    test('/qr/ offers the same review-only public show-board path as the homepage', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.goto('/qr/');
+
+        const participation = page.locator('#join-show');
+        const runningOrder = participation.getByRole('link', { name: 'See the running order' });
+        const suggestion = participation.getByRole('link', { name: 'Suggest a song' });
+
+        await expect(participation.getByRole('heading', { level: 2, name: 'Help shape the night.' })).toBeVisible();
+        await expect(participation).toContainText('Every suggestion goes to the band for review');
+        await expect(participation).toContainText('never changes the official show automatically');
+        await expect(runningOrder).toHaveAttribute(
+            'href',
+            'https://rad-dad-show-night.jeffstory007.chatgpt.site/#official-sets'
+        );
+        await expect(suggestion).toHaveAttribute(
+            'href',
+            'https://rad-dad-show-night.jeffstory007.chatgpt.site/#suggestions'
+        );
+        await expect(participation.locator('a[href*="show-control"]')).toHaveCount(0);
+
+        const layout = await participation.locator('.participation-pass').evaluate((card) => {
+            const rect = card.getBoundingClientRect();
+            return {
+                bodyScrollWidth: document.body.scrollWidth,
+                left: rect.left,
+                right: rect.right,
+                viewportWidth: window.innerWidth
+            };
+        });
+
+        expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+        expect(layout.left).toBeGreaterThanOrEqual(-1);
+        expect(layout.right).toBeLessThanOrEqual(layout.viewportWidth + 1);
     });
 
     test('/qr/ includes follow links and footer navigation back to main site', async ({ page }) => {
