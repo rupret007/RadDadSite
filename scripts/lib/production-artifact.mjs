@@ -38,6 +38,7 @@ export const CLIENT_SOURCE_PATHS = Object.freeze([
     'qr/script.js',
     'qr/styles.css',
     'script.js',
+    'show-state.js',
     'styles.css',
     'tap/index.html'
 ]);

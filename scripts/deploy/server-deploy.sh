@@ -480,6 +480,7 @@ CURRENT_PRODUCTION_FILES = {
     "qr/script.js",
     "qr/styles.css",
     "script.js",
+    "show-state.js",
     "styles.css",
     "tap/index.html",
     "version.json",
@@ -502,6 +503,7 @@ RETAINED_ROUTE_FILES = {
     "qr/index.html",
     "qr/script.js",
     "qr/styles.css",
+    "show-state.js",
     "tap/index.html",
 }
 REQUIRED_FILES = (

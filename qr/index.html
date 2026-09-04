@@ -29,7 +29,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Oswald:wght@500;600;700&amp;family=Permanent+Marker&amp;display=swap" rel="stylesheet">
     <link rel="preload" as="image" href="../assets/story-of-us-cover.webp">
-    <link rel="stylesheet" href="styles.css?v=20260903-4">
+    <link rel="stylesheet" href="styles.css?v=20260904-1">
 
     <script type="application/ld+json">
     {
@@ -78,10 +78,10 @@
 
     <a class="next-show-strip" href="#next-show">
         <span class="next-show-strip__inner page-shell">
-            <span class="next-show-strip__label">Next show</span>
+            <span class="next-show-strip__label" data-show-status>Next show</span>
             <strong>Sep 19</strong>
             <span class="next-show-strip__venue">Guitars &amp; Growlers</span>
-            <span class="next-show-strip__details">7–10 PM · Free · Richardson</span>
+            <span class="next-show-strip__details" data-show-detail>7–10 PM · Free · Richardson</span>
             <span class="next-show-strip__cta">Show details <span aria-hidden="true">↓</span></span>
         </span>
     </a>
@@ -98,7 +98,7 @@
                 <p class="hero__lede">Yes, Rad Dad is a cover band. And yes, one of our favorite songs to cover came from inside the band. Honestly, that feels exactly right.</p>
                 <div class="hero__actions">
                     <a class="button button--primary" href="#song">Start with our song <span aria-hidden="true">↓</span></a>
-                    <a class="button button--quiet" href="#next-show">See the September 19 show <span aria-hidden="true">↓</span></a>
+                    <a class="button button--quiet" href="#next-show"><span data-show-see-link-label>See the September 19 show</span> <span aria-hidden="true">↓</span></a>
                 </div>
             </div>
 
@@ -138,7 +138,7 @@
                         <a href="https://music.amazon.com/tracks/B0FHPB9FN7" target="_blank" rel="noopener noreferrer">Amazon Music <span aria-hidden="true">↗</span></a>
                     </div>
                     <nav class="song-paths" aria-label="Show and listen paths">
-                        <a href="#next-show">September 19 show</a>
+                        <a data-show-link-label href="#next-show">September 19 show</a>
                         <a href="#join-show">Help shape the night</a>
                     </nav>
                 </div>
@@ -243,9 +243,31 @@
         <section class="next-show-section" id="next-show" aria-labelledby="next-show-title">
             <div class="page-shell next-show-layout">
                 <div class="next-show-copy reveal" data-reveal>
-                    <p class="section-kicker">Hear it live</p>
+                    <p class="section-kicker" data-show-section-kicker>Hear it live</p>
                     <h2 id="next-show-title">Rad Dad <span>+ Friends</span></h2>
                     <p class="next-show-copy__lede">You found the music. Now come hear Rad Dad + Friends with <a href="https://www.facebook.com/thefaultlinestx" target="_blank" rel="noopener noreferrer">The Fault Lines</a> at Guitars &amp; Growlers.</p>
+
+                    <div class="show-moment" data-show-moment>
+                        <div class="show-moment__copy" role="status" aria-live="polite" aria-atomic="true">
+                            <strong data-show-status>Next show</strong>
+                            <span data-show-detail>September 19 · 7–10 PM · Free</span>
+                        </div>
+                        <a
+                            class="show-moment__action"
+                            href="../assets/rad-dad-friends-guitars-growlers-2026.ics"
+                            download
+                            data-show-primary-action
+                            data-upcoming-href="../assets/rad-dad-friends-guitars-growlers-2026.ics"
+                            data-upcoming-label="Add to Calendar"
+                            data-upcoming-download="true"
+                            data-tonight-href="https://maps.app.goo.gl/Gr79GmmXAxMH5SkP6"
+                            data-tonight-label="Get Directions"
+                            data-complete-href="#wildflower"
+                            data-complete-label="Watch Rad Dad live">
+                            <span data-show-primary-label>Add to Calendar</span>
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </div>
 
                     <dl class="next-show-facts" aria-label="Next show details">
                         <div>
@@ -262,14 +284,9 @@
                         </div>
                     </dl>
 
-                    <div class="next-show-actions" role="group" aria-label="Next show actions">
-                        <a class="button button--primary" href="../assets/rad-dad-friends-guitars-growlers-2026.ics" download>Add to Calendar</a>
-                        <a class="button button--quiet" href="https://maps.app.goo.gl/Gr79GmmXAxMH5SkP6" target="_blank" rel="noopener noreferrer">Get Directions <span aria-hidden="true">&nearr;</span></a>
-                    </div>
-
                     <nav class="next-show-paths" aria-label="Listen and show paths">
                         <a class="next-show-details" href="#song">Hear The Story Of Us</a>
-                        <a class="next-show-details" href="../#show">See full show details <span aria-hidden="true">&nearr;</span></a>
+                        <a class="next-show-details" href="../#show"><span data-show-details-link-label>See full show details</span> <span aria-hidden="true">&nearr;</span></a>
                     </nav>
                 </div>
 
@@ -299,10 +316,10 @@
                 </div>
 
                 <div class="participation-pass__copy">
-                    <p class="section-kicker">Make some noise before the show</p>
+                    <p class="section-kicker" data-show-participation-kicker>Make some noise before the show</p>
                     <h2 id="join-show-title">Help shape the <span>night.</span></h2>
                     <p>Browse the current running order or send Rad Dad a song idea. Every suggestion goes to the band for review—it never changes the official show automatically.</p>
-                    <p class="participation-pass__show">Looking for the date? The next show is <a href="#next-show">September 19 at Guitars &amp; Growlers</a>.</p>
+                    <p class="participation-pass__show">Looking for the date? <span data-show-reference-prefix>The next show is</span> <a href="#next-show">September 19 at Guitars &amp; Growlers</a>.</p>
                 </div>
 
                 <nav class="participation-pass__actions" aria-label="Public show-night board">
@@ -377,6 +394,7 @@
         </div>
     </footer>
 
-    <script src="script.js?v=20260903-4" defer></script>
+    <script src="../show-state.js?v=20260904-1" defer></script>
+    <script src="script.js?v=20260904-1" defer></script>
 </body>
 </html>

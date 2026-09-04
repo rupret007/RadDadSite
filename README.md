@@ -24,6 +24,24 @@ show automatically. The public site links only to `#official-sets` and
 show-night app remains the canonical source for running-order and suggestion
 data, so this static repository must not copy those records.
 
+## Show Lifecycle
+
+The homepage and canonical `/qr/` page share one event-state controller in
+`show-state.js`. It uses the fixed September 19 Central-time boundaries to show
+one useful fan action at a time:
+
+- before show day: add the verified local calendar file;
+- on show day before 7 PM: get directions;
+- from 7–10 PM: open the public running order;
+- after 10 PM: watch the current Rad Dad live-video section.
+
+The status copy, show-history language, and featured-show treatment change with
+the same state, so the two surfaces cannot drift into conflicting “next show”
+claims. The HTML fallback remains the pre-show calendar action. Missing action
+configuration hides that action instead of guessing a destination. Live state
+may use only the review-safe `#official-sets` board anchor; owner controls remain
+forbidden.
+
 On `/qr/`, a normal tap on a verified-embeddable Wildflower performance opens
 a focused inline player so a fan can watch without losing their place in the
 song-to-show path. The privacy-enhanced YouTube frame is created only after
@@ -118,6 +136,13 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
   npm run test:e2e
   ```
 
+  When another local project already uses port `4173`, choose an isolated port
+  without stopping that process:
+
+  ```bash
+  RAD_DAD_TEST_PORT=4273 npm run test:e2e
+  ```
+
 - Run the server deployment-helper tests only:
 
   ```bash
@@ -133,7 +158,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 ### What The Suite Covers
 
 - Event-first section and focus order, page metadata, and structured event data
-- September 19 event facts, named participating bands, flyer assets, calendar download, and directions
+- September 19 event facts, named participating bands, flyer assets, and the calendar → directions → live order → video lifecycle
 - Flyer-style recent-set artist wall with show and listen paths, homepage Story Of Us listen desk, leftover show-tape and QR listen loops, 2026 show history, videos, and stable contact/social links
 - Review-only fan participation links shared by the homepage and canonical QR landing page
 - Public HTML never exposing `/show-control`, board links limited to `#official-sets` and `#suggestions`, and the Worker failing closed on owner-only `/show-control` paths
@@ -201,6 +226,7 @@ RadDad Website/
 |   |-- QR_LANDING_PAGE.md
 |   `-- raddad-deploy.conf.example
 |-- index.html
+|-- show-state.js
 |-- nfc/
 |   `-- index.html
 |-- qr/
@@ -219,8 +245,10 @@ RadDad Website/
 |-- tests/
 |   |-- deploy/server-deploy.test.sh
 |   |-- e2e/homepage.spec.js
+|   |-- e2e/show-lifecycle.spec.js
 |   |-- setup/vitest.setup.js
 |   |-- unit/homepage.test.js
+|   |-- unit/show-state.test.js
 |   `-- unit/production-artifact.test.js
 |-- playwright.config.js
 |-- vitest.config.js

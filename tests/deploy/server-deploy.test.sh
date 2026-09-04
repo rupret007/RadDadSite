@@ -241,6 +241,7 @@ REQUIRED_PRODUCTION_PATHS=(
     "qr/script.js"
     "qr/styles.css"
     "script.js"
+    "show-state.js"
     "styles.css"
     "tap/index.html"
     "version.json"
@@ -287,6 +288,7 @@ with tempfile.TemporaryDirectory() as temporary:
         "qr/script.js",
         "qr/styles.css",
         "script.js",
+        "show-state.js",
         "styles.css",
         "tap/index.html",
     ]
