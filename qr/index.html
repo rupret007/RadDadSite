@@ -29,7 +29,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Oswald:wght@500;600;700&amp;family=Permanent+Marker&amp;display=swap" rel="stylesheet">
     <link rel="preload" as="image" href="../assets/story-of-us-cover.webp">
-    <link rel="stylesheet" href="styles.css?v=20260903-3">
+    <link rel="stylesheet" href="styles.css?v=20260903-4">
 
     <script type="application/ld+json">
     {
@@ -166,12 +166,12 @@
                             <figcaption>
                                 <span>MxPx cover · Wildflower '26</span>
                                 <strong>Tomorrow’s Another Day</strong>
-                                <small>Watch the performance <span aria-hidden="true">↗</span></small>
+                                <small>Watch on YouTube <span aria-hidden="true">↗</span></small>
                             </figcaption>
                         </figure>
                     </a>
 
-                    <a class="live-card live-card--pink reveal" data-reveal href="https://www.youtube.com/watch?v=9Re_0wjIbfQ" target="_blank" rel="noopener noreferrer" aria-label="Watch Rad Dad perform All the Small Things by blink-182 on YouTube">
+                    <a class="live-card live-card--pink reveal" data-reveal data-inline-video href="https://www.youtube.com/watch?v=9Re_0wjIbfQ" target="_blank" rel="noopener noreferrer" aria-label="Watch Rad Dad perform All the Small Things by blink-182 on YouTube">
                         <figure>
                             <div class="live-card__image">
                                 <img src="https://img.youtube.com/vi/9Re_0wjIbfQ/maxresdefault.jpg" alt="Rad Dad performing All the Small Things by blink-182" width="1280" height="720" loading="lazy" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/9Re_0wjIbfQ/hqdefault.jpg'">
@@ -181,12 +181,12 @@
                             <figcaption>
                                 <span>blink-182 cover</span>
                                 <strong>All the Small Things</strong>
-                                <small>Watch the performance <span aria-hidden="true">↗</span></small>
+                                <small>Watch here <span aria-hidden="true">▶</span></small>
                             </figcaption>
                         </figure>
                     </a>
 
-                    <a class="live-card live-card--cyan reveal" data-reveal href="https://www.youtube.com/watch?v=GCy4nHIqV5k" target="_blank" rel="noopener noreferrer" aria-label="Watch Rad Dad perform She by Green Day live at Wildflower Festival on YouTube">
+                    <a class="live-card live-card--cyan reveal" data-reveal data-inline-video href="https://www.youtube.com/watch?v=GCy4nHIqV5k" target="_blank" rel="noopener noreferrer" aria-label="Watch Rad Dad perform She by Green Day live at Wildflower Festival on YouTube">
                         <figure>
                             <div class="live-card__image">
                                 <img src="../assets/wildflower-she-green-day.webp" alt="Rad Dad performing She by Green Day live at Wildflower Festival" width="1280" height="720" loading="lazy">
@@ -196,12 +196,12 @@
                             <figcaption>
                                 <span>Green Day cover</span>
                                 <strong>She</strong>
-                                <small>Watch the performance <span aria-hidden="true">↗</span></small>
+                                <small>Watch here <span aria-hidden="true">▶</span></small>
                             </figcaption>
                         </figure>
                     </a>
 
-                    <a class="live-card live-card--lime reveal" data-reveal href="https://www.youtube.com/watch?v=iMrxzCQ7lVs" target="_blank" rel="noopener noreferrer" aria-label="Watch Rad Dad perform The Middle by Jimmy Eat World live at Wildflower Festival on YouTube">
+                    <a class="live-card live-card--lime reveal" data-reveal data-inline-video href="https://www.youtube.com/watch?v=iMrxzCQ7lVs" target="_blank" rel="noopener noreferrer" aria-label="Watch Rad Dad perform The Middle by Jimmy Eat World live at Wildflower Festival on YouTube">
                         <figure>
                             <div class="live-card__image">
                                 <img src="../assets/the-middle-jimmy-eat-world-thumbnail.webp" alt="Rad Dad performing The Middle by Jimmy Eat World at Wildflower Festival" width="1280" height="720" loading="lazy">
@@ -211,7 +211,7 @@
                             <figcaption>
                                 <span>Jimmy Eat World cover</span>
                                 <strong>The Middle</strong>
-                                <small>Watch the performance <span aria-hidden="true">↗</span></small>
+                                <small>Watch here <span aria-hidden="true">▶</span></small>
                             </figcaption>
                         </figure>
                     </a>
@@ -226,7 +226,7 @@
                             <figcaption>
                                 <span>NOFX cover · Wildflower '26</span>
                                 <strong>Linoleum</strong>
-                                <small>Watch the performance <span aria-hidden="true">↗</span></small>
+                                <small>Watch on YouTube <span aria-hidden="true">↗</span></small>
                             </figcaption>
                         </figure>
                     </a>
@@ -336,6 +336,37 @@
         </section>
     </main>
 
+    <dialog class="video-dialog" id="live-video-dialog" aria-labelledby="live-video-title">
+        <div class="video-dialog__panel">
+            <header class="video-dialog__header">
+                <div>
+                    <span>Live without losing your place</span>
+                    <h2 id="live-video-title">Rad Dad live</h2>
+                </div>
+                <button class="video-dialog__close" type="button" data-video-close aria-label="Close video player">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </header>
+            <div class="video-dialog__frame">
+                <iframe
+                    data-video-frame
+                    title="Rad Dad live video player"
+                    allow="autoplay; encrypted-media; picture-in-picture; web-share"
+                    sandbox="allow-scripts allow-same-origin allow-presentation"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    loading="lazy"
+                    allowfullscreen>
+                </iframe>
+            </div>
+            <footer class="video-dialog__footer">
+                <p data-video-context>Wildflower Arts &amp; Music Festival · 2026</p>
+                <a data-video-youtube href="https://www.youtube.com/@RadDadBand" target="_blank" rel="noopener noreferrer">
+                    Watch on YouTube <span aria-hidden="true">&nearr;</span>
+                </a>
+            </footer>
+        </div>
+    </dialog>
+
     <footer class="tap-footer">
         <div class="page-shell">
             <a class="tap-brand tap-brand--footer" href="../" aria-label="Rad Dad home">
@@ -346,6 +377,6 @@
         </div>
     </footer>
 
-    <script src="script.js" defer></script>
+    <script src="script.js?v=20260903-4" defer></script>
 </body>
 </html>

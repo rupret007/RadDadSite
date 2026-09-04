@@ -70,3 +70,24 @@ fallback for old NFC links.
 Keep music, video, show, and follow content only in `qr/index.html`. The `/tap/`
 and `/nfc/` files are redirect-only compatibility shims so QR stickers, old NFC
 links, and tag links cannot drift into separate landing-page experiences.
+
+## Live-video playback
+
+Wildflower performance cards that have been manually verified as embeddable
+are progressively enhanced on `/qr/`. An unmodified tap or click opens a native
+dialog and loads the matching video from the privacy-enhanced
+`youtube-nocookie.com` embed host. The iframe has no `src` before that explicit
+action and is cleared as soon as the dialog closes, which both avoids a
+premature third-party request and stops playback reliably. A card must not gain
+`data-inline-video` until its exact public video plays successfully in that
+embed. Videos with embedding disabled remain direct links labeled “Watch on
+YouTube”; never route them through a knowingly unavailable inline player.
+The iframe sends only the site origin on cross-origin requests; YouTube requires
+that limited player identity and rejects a fully suppressed referrer.
+
+The cards themselves must remain canonical HTTPS `youtube.com/watch` links
+with `target="_blank"` and `rel="noopener noreferrer"`. If the URL is malformed,
+the video ID is not exactly 11 safe characters, JavaScript is unavailable, or
+the browser lacks `HTMLDialogElement.showModal`, the script does not intercept
+the click. That fail-open playback path sends the fan to the original YouTube
+page instead of manufacturing or guessing an embed URL.

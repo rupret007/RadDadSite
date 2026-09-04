@@ -60,7 +60,10 @@ test.describe('tap, NFC, and QR landing pages', () => {
 
             await page.goto(`${projectPrefix}/${alias}/?utm_source=project-site#wildflower`);
 
-            const expectedUrl = `http://127.0.0.1:4173${projectPrefix}/qr/?utm_source=project-site#wildflower`;
+            const expectedUrl = new URL(
+                `${projectPrefix}/qr/?utm_source=project-site#wildflower`,
+                page.url()
+            ).href;
             await expect(page).toHaveURL(expectedUrl);
             await expect(page).toHaveTitle('Rad Dad | The Cover Band Covering Its Own Cover');
             await page.waitForTimeout(200);
@@ -92,7 +95,11 @@ test.describe('tap, NFC, and QR landing pages', () => {
         );
         await expect(page.locator('link[rel="stylesheet"][href^="styles.css"]')).toHaveAttribute(
             'href',
-            'styles.css?v=20260903-3'
+            'styles.css?v=20260903-4'
+        );
+        await expect(page.locator('script[src^="script.js"]')).toHaveAttribute(
+            'src',
+            'script.js?v=20260903-4'
         );
     });
 
@@ -209,6 +216,42 @@ test.describe('tap, NFC, and QR landing pages', () => {
             'href',
             'https://www.youtube.com/@RadDadBand'
         );
+    });
+
+    test('/qr/ plays a live performance inline and returns the fan to the tapped card', async ({ page }) => {
+        await page.goto('/qr/');
+
+        const firstInlineVideo = page.locator('#wildflower [data-inline-video]').first();
+        await firstInlineVideo.scrollIntoViewIfNeeded();
+        await firstInlineVideo.click();
+
+        const dialog = page.locator('#live-video-dialog');
+        const frame = dialog.locator('[data-video-frame]');
+        await expect(dialog).toBeVisible();
+        await expect(page).toHaveURL(/\/qr\/$/);
+        await expect(dialog.getByRole('heading', { name: 'All the Small Things' })).toBeVisible();
+        await expect(dialog.locator('[data-video-context]')).toContainText('blink-182 cover');
+        await expect(frame).toHaveAttribute(
+            'src',
+            'https://www.youtube-nocookie.com/embed/9Re_0wjIbfQ?autoplay=1&rel=0'
+        );
+        await expect(dialog.getByRole('link', { name: /Watch on YouTube/ })).toHaveAttribute(
+            'href',
+            'https://www.youtube.com/watch?v=9Re_0wjIbfQ'
+        );
+        await expect(page.locator('html')).toHaveClass(/has-video-dialog/);
+
+        await dialog.getByRole('button', { name: 'Close video player' }).click();
+
+        await expect(dialog).toBeHidden();
+        await expect(frame).not.toHaveAttribute('src', /.+/);
+        await expect(firstInlineVideo).toBeFocused();
+        await expect(page.locator('html')).not.toHaveClass(/has-video-dialog/);
+
+        const latestVideo = page.locator('#wildflower .live-card').first();
+        await expect(latestVideo).not.toHaveAttribute('data-inline-video', '');
+        await expect(latestVideo).toHaveAttribute('href', 'https://www.youtube.com/watch?v=4ReFoSZHL7o');
+        await expect(latestVideo).toContainText('Watch on YouTube');
     });
 
     test('/qr/ promotes the next show with v2 flyer and event actions', async ({ page }) => {

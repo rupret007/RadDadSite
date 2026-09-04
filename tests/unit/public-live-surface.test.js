@@ -276,6 +276,10 @@ describe('public live surface honesty', () => {
         expect(homepage).toContain('href="#our-song">Hear Rad Dad</a>');
         expect(qr).toContain('class="next-show-strip"');
         expect(qr).toContain('href="#next-show"');
+        expect(qr.match(/data-inline-video/g)).toHaveLength(3);
+        expect(qr).toContain('id="live-video-dialog"');
+        expect(qr).toContain('data-video-frame');
+        expect(qr).not.toMatch(/data-video-frame[^>]+src=/);
         expect(qr).not.toContain('open.spotify.com/search');
         expect(qr).not.toContain('music.youtube.com/search');
         expect(calendar).toContain('SUMMARY:Rad Dad + Friends');

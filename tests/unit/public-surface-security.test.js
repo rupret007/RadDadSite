@@ -63,16 +63,32 @@ describe('public surface security', () => {
         for (const relativePath of ['index.html', 'qr/index.html']) {
             const html = await readFile(join(repoRoot, relativePath), 'utf8');
             const iframes = [...html.matchAll(/<iframe\b[^>]*>/gi)].map((match) => match[0]);
+            const appleFrames = iframes.filter((tag) => tag.includes('embed.music.apple.com'));
 
-            expect(iframes.length, relativePath).toBeGreaterThan(0);
+            expect(appleFrames, relativePath).toHaveLength(1);
 
-            for (const tag of iframes) {
-                expect(tag, relativePath).toContain('embed.music.apple.com');
+            for (const tag of appleFrames) {
                 expect(tag, relativePath).toContain('sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"');
                 expect(tag, relativePath).toContain('referrerpolicy="strict-origin-when-cross-origin"');
                 expect(tag, relativePath).not.toContain('allow-same-origin allow-scripts allow-popups allow-top-navigation"');
             }
         }
+    });
+
+    it('keeps the QR video frame dormant and narrowly sandboxed until a validated tap', async () => {
+        const html = await readFile(join(repoRoot, 'qr/index.html'), 'utf8');
+        const script = await readFile(join(repoRoot, 'qr/script.js'), 'utf8');
+        const videoFrame = html.match(/<iframe\b[^>]*\bdata-video-frame[^>]*>/i)?.[0];
+
+        expect(videoFrame).toBeTruthy();
+        expect(videoFrame).not.toMatch(/\bsrc=/i);
+        expect(videoFrame).toContain('sandbox="allow-scripts allow-same-origin allow-presentation"');
+        expect(videoFrame).toContain('referrerpolicy="strict-origin-when-cross-origin"');
+        expect(videoFrame).not.toContain('allow-popups');
+        expect(script).toContain('https://www.youtube-nocookie.com/embed/');
+        expect(script).toContain("['www.youtube.com', 'youtube.com'].includes(watchUrl.hostname)");
+        expect(script).toContain("watchUrl.pathname === '/watch'");
+        expect(script).toContain('/^[A-Za-z0-9_-]{11}$/');
     });
 
     it('fails closed in the worker for /show-control instead of disguising it as the homepage', async () => {
