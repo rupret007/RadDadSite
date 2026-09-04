@@ -30,6 +30,13 @@ function coversSection(html) {
     return match[0];
 }
 
+function artistWall(html) {
+    const match = html.match(/<ul class="artist-wall"[\s\S]*?<\/ul>/i);
+
+    expect(match, 'homepage must keep the flyer artist wall').not.toBeNull();
+    return match[0];
+}
+
 function songSection(html) {
     const match = html.match(/<section[^>]*id="song"[\s\S]*?<\/section>/i);
 
@@ -111,14 +118,51 @@ describe('public live surface honesty', () => {
         expect(desk).toContain('https://music.apple.com/us/album/the-story-of-us/1827102667?i=1827102893');
         expect(desk).toContain('https://music.amazon.com/tracks/B0FHPB9FN7');
         expect(desk).toContain('href="qr/#song"');
+        expect(desk).toContain('href="#join-show"');
+        expect(desk).toContain('Help shape the night');
         expect(desk).toContain('href="#show"');
         expect(desk).toContain('September 19 show');
+        expect(desk).toContain('referrerpolicy="strict-origin-when-cross-origin"');
         expect(desk).not.toContain('open.spotify.com/search');
         expect(desk).not.toContain('music.youtube.com/search');
         expect(desk.toLowerCase()).not.toContain('setlist');
         expect(desk.toLowerCase()).not.toContain('part of the set');
         expect(covers).not.toContain('The Story Of Us');
         expect(covers).not.toContain('The Story of Us');
+    });
+
+    it('does not turn the flyer wall into artist links or official-set titles', async () => {
+        const homepage = await readFile(homepagePath, 'utf8');
+        const wall = artistWall(coversSection(homepage));
+
+        expect(wall).not.toContain('<a');
+        expect(wall).not.toContain('href=');
+
+        for (const title of OFFICIAL_SET_SONG_TITLES) {
+            expect(wall).not.toContain(title);
+        }
+    });
+
+    it('closes leftover listen loops from the 2026 show tape and QR next-show', async () => {
+        const homepage = await readFile(homepagePath, 'utf8');
+        const qr = await readFile(qrPath, 'utf8');
+        const featured = featuredShowCard(homepage);
+        const song = songSection(qr);
+        const nextShow = nextShowSection(qr);
+
+        expect(featured).toContain('href="#our-song"');
+        expect(featured).toContain('Hear The Story Of Us');
+        expect(homepage).toContain('href="#live-tapes">Hear the Wildflower tapes</a>');
+        expect(homepage).toContain('assets/wildflower-she-green-day.webp');
+        expect(song).toContain('aria-label="Show and listen paths"');
+        expect(song).toContain('href="#next-show">September 19 show</a>');
+        expect(song).toContain('href="#join-show">Help shape the night</a>');
+        expect(song).toContain('referrerpolicy="strict-origin-when-cross-origin"');
+        expect(nextShow).toContain('href="#song">Hear The Story Of Us</a>');
+        expect(qr).toContain('https://www.youtube.com/watch?v=GCy4nHIqV5k');
+        expect(qr).toContain('../assets/wildflower-she-green-day.webp');
+        expect(qr).toContain('href="../#shows"');
+        expect(qr).not.toContain('/show-control');
     });
 
     it('does not claim The Story Of Us is part of the official set', async () => {
@@ -180,8 +224,10 @@ describe('public live surface honesty', () => {
         const hero = heroSection(qr);
         const nextShow = nextShowSection(qr);
 
+        expect(featured).toContain('Hear The Story Of Us');
         expect(featured).toContain('Add to Calendar');
         expect(featured).toContain('Get Directions');
+        expect(featured).toContain('href="#our-song"');
         expect(featured).toContain('href="#show"');
         expect(featured).toContain('Show details');
         expect(featured).not.toContain('Save the date');

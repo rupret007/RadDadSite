@@ -125,9 +125,9 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 
 - Event-first section and focus order, page metadata, and structured event data
 - September 19 event facts, named participating bands, flyer assets, calendar download, and directions
-- Flyer-style recent-set artist wall with show and listen paths, homepage Story Of Us listen desk, 2026 show history, videos, and stable contact/social links
+- Flyer-style recent-set artist wall with show and listen paths, homepage Story Of Us listen desk, leftover show-tape and QR listen loops, 2026 show history, videos, and stable contact/social links
 - Review-only fan participation links shared by the homepage and canonical QR landing page
-- Public HTML never exposing `/show-control`, and board links limited to `#official-sets` and `#suggestions`
+- Public HTML never exposing `/show-control`, board links limited to `#official-sets` and `#suggestions`, and the Worker failing closed on owner-only `/show-control` paths
 - The latest featured YouTube performance on both the homepage and canonical QR landing page
 - Permanent `/tap/` and legacy `/nfc/` fallbacks converging on the canonical `/qr/` content
 - Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention

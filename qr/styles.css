@@ -639,6 +639,28 @@ a {
     background: var(--lime);
 }
 
+.song-paths {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 1.1rem;
+    padding: 0.85rem 1rem 1rem;
+    border-top: 1px solid var(--line);
+}
+
+.song-paths a {
+    color: var(--lime);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.song-paths a:hover,
+.song-paths a:focus-visible {
+    color: var(--cream);
+}
+
 .wildflower-section {
     position: relative;
     padding-block: clamp(5rem, 11vw, 10rem);
@@ -1636,9 +1658,15 @@ a {
     gap: 0.8rem;
 }
 
+.next-show-paths {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1.25rem;
+    margin-top: 1.35rem;
+}
+
 .next-show-details {
     display: inline-block;
-    margin-top: 1.35rem;
     color: var(--cream);
     font-size: 0.72rem;
     font-weight: 800;
