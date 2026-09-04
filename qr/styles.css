@@ -62,6 +62,10 @@ img {
     max-width: 100%;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 a {
     color: inherit;
 }
@@ -1754,6 +1758,92 @@ a {
     color: #d8e0e6;
     font-size: clamp(1rem, 1.5vw, 1.18rem);
     line-height: 1.7;
+}
+
+.show-moment {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: center;
+    max-width: 42rem;
+    margin-top: 1.5rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(32, 186, 255, 0.5);
+    border-left: 0.3rem solid var(--blue-bright);
+    background: linear-gradient(100deg, rgba(0, 158, 232, 0.13), rgba(255, 255, 255, 0.025));
+}
+
+.show-moment__copy {
+    min-width: 0;
+    display: grid;
+    gap: 0.12rem;
+}
+
+.show-moment__copy strong {
+    color: var(--lime);
+    font-family: var(--display);
+    font-size: 1.3rem;
+    letter-spacing: 0.025em;
+    line-height: 1.05;
+    text-transform: uppercase;
+}
+
+.show-moment__copy span {
+    color: #d8e0e6;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.035em;
+}
+
+.show-moment__action {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.65rem 0.85rem;
+    color: var(--ink);
+    background: var(--lime);
+    font-size: 0.69rem;
+    font-weight: 900;
+    letter-spacing: 0.045em;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.show-moment__action:hover {
+    background: var(--cream);
+    transform: translateY(-2px);
+}
+
+html[data-show-phase="tonight"] .show-moment {
+    border-color: rgba(181, 220, 8, 0.72);
+    background: linear-gradient(100deg, rgba(181, 220, 8, 0.14), rgba(255, 255, 255, 0.025));
+}
+
+html[data-show-phase="live"] .show-moment {
+    border-color: rgba(237, 39, 101, 0.8);
+    border-left-color: var(--pink);
+    background: linear-gradient(100deg, rgba(237, 39, 101, 0.18), rgba(0, 158, 232, 0.08));
+}
+
+html[data-show-phase="complete"] .show-moment {
+    border-color: rgba(243, 242, 238, 0.24);
+    border-left-color: var(--muted);
+    background: rgba(255, 255, 255, 0.035);
+}
+
+@media (max-width: 560px) {
+    .show-moment {
+        grid-template-columns: 1fr;
+    }
+
+    .show-moment__action {
+        width: 100%;
+    }
 }
 
 .next-show-facts {

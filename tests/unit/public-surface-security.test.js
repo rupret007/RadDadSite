@@ -15,6 +15,7 @@ const PUBLIC_HTML = [
 const PUBLIC_CLIENT_TEXT = [
     ...PUBLIC_HTML,
     'script.js',
+    'show-state.js',
     'qr/script.js',
     'styles.css',
     'qr/styles.css'

@@ -71,6 +71,22 @@ Keep music, video, show, and follow content only in `qr/index.html`. The `/tap/`
 and `/nfc/` files are redirect-only compatibility shims so QR stickers, old NFC
 links, and tag links cannot drift into separate landing-page experiences.
 
+## Show lifecycle
+
+`/qr/` and the homepage consume the same `show-state.js` controller. The QR
+show panel must present one primary action rather than parallel calendar and
+directions buttons: calendar before show day, directions on show day before
+7 PM Central, the public running order from 7–10 PM, and the current live-video
+section after the show. Its status strip and show copy must come from that same
+state.
+
+Keep a real local calendar link in the static HTML as the no-JavaScript
+fallback. The controller may progressively replace it only with the configured
+directions URL, the review-safe public `#official-sets` anchor, or the local
+video anchor. A missing action destination or label hides the action; it must
+not manufacture a URL. Never add `/show-control` or copy show-board data into
+this static site.
+
 ## Live-video playback
 
 Wildflower performance cards that have been manually verified as embeddable

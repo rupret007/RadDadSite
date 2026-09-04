@@ -253,6 +253,7 @@ qr/index.html
 qr/script.js
 qr/styles.css
 script.js
+show-state.js
 styles.css
 tap/index.html
 version.json
@@ -1425,6 +1426,7 @@ production_paths=(
   qr/script.js
   qr/styles.css
   script.js
+  show-state.js
   styles.css
   tap/index.html
   version.json

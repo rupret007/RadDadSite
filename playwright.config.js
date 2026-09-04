@@ -1,5 +1,17 @@
 const { defineConfig } = require('@playwright/test');
 
+const rawTestPort = process.env.RAD_DAD_TEST_PORT || '4173';
+const testPort = Number(rawTestPort);
+
+if (!Number.isInteger(testPort) || testPort < 1024 || testPort > 65535) {
+    throw new Error('RAD_DAD_TEST_PORT must be an integer between 1024 and 65535.');
+}
+
+const testBaseURL = `http://127.0.0.1:${testPort}`;
+const serveCommand = process.platform === 'win32'
+    ? `npx.cmd --no-install http-server . -p ${testPort} -a 127.0.0.1 -c-1 --silent`
+    : `npx --no-install http-server . -p ${testPort} -a 127.0.0.1 -c-1 --silent`;
+
 module.exports = defineConfig({
     testDir: './tests/e2e',
     timeout: 30000,
@@ -13,7 +25,7 @@ module.exports = defineConfig({
         ['html', { open: 'never' }]
     ],
     use: {
-        baseURL: 'http://127.0.0.1:4173',
+        baseURL: testBaseURL,
         browserName: 'chromium',
         headless: true,
         screenshot: 'only-on-failure',
@@ -21,10 +33,8 @@ module.exports = defineConfig({
         video: 'retain-on-failure'
     },
     webServer: {
-        command: process.platform === 'win32'
-            ? 'cmd /d /s /c "npm.cmd run serve:test"'
-            : 'npm run serve:test',
-        url: 'http://127.0.0.1:4173',
+        command: serveCommand,
+        url: testBaseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 30000
     }

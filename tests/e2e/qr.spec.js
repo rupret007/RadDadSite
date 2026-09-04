@@ -95,11 +95,15 @@ test.describe('tap, NFC, and QR landing pages', () => {
         );
         await expect(page.locator('link[rel="stylesheet"][href^="styles.css"]')).toHaveAttribute(
             'href',
-            'styles.css?v=20260903-4'
+            'styles.css?v=20260904-1'
+        );
+        await expect(page.locator('script[src^="../show-state.js"]')).toHaveAttribute(
+            'src',
+            '../show-state.js?v=20260904-1'
         );
         await expect(page.locator('script[src^="script.js"]')).toHaveAttribute(
             'src',
-            'script.js?v=20260903-4'
+            'script.js?v=20260904-1'
         );
     });
 
@@ -254,7 +258,7 @@ test.describe('tap, NFC, and QR landing pages', () => {
         await expect(latestVideo).toContainText('Watch on YouTube');
     });
 
-    test('/qr/ promotes the next show with v2 flyer and event actions', async ({ page }) => {
+    test('/qr/ promotes the next show with v2 flyer and one lifecycle action', async ({ page }) => {
         await page.goto('/qr/');
 
         const nextShowSection = page.locator('#next-show');
@@ -272,12 +276,11 @@ test.describe('tap, NFC, and QR landing pages', () => {
         await expect(facts).toContainText('Richardson, Texas');
         await expect(facts).toContainText('Free show');
 
-        const calendarLink = nextShowSection.getByRole('link', { name: 'Add to Calendar' });
+        const showMoment = nextShowSection.locator('.show-moment');
+        await expect(showMoment.getByRole('status')).toContainText('Next show');
+        const calendarLink = showMoment.getByRole('link', { name: 'Add to Calendar' });
         await expect(calendarLink).toHaveAttribute('href', '../assets/rad-dad-friends-guitars-growlers-2026.ics');
         await expect(calendarLink).toHaveAttribute('download', '');
-
-        const directionsLink = nextShowSection.getByRole('link', { name: 'Get Directions' });
-        await expect(directionsLink).toHaveAttribute('href', 'https://maps.app.goo.gl/Gr79GmmXAxMH5SkP6');
 
         const flyerLink = nextShowSection.locator('.next-show-flyer');
         await expect(flyerLink).toHaveAttribute(

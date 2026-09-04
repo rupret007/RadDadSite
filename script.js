@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
+    window.RadDadShowState?.start(document);
+
     const logo = document.getElementById('logo');
 
     if (!logo) {

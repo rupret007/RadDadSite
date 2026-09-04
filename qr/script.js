@@ -1,4 +1,5 @@
 document.documentElement.classList.add('js');
+window.RadDadShowState?.start(document);
 
 const revealItems = document.querySelectorAll('[data-reveal]');
 

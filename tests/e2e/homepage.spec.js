@@ -124,7 +124,7 @@ test('invites fans into the review-only show board without exposing owner contro
     }
 });
 
-test('presents the September event, flyer, and useful event actions', async ({ page }) => {
+test('presents the September event, flyer, and one useful lifecycle action', async ({ page }) => {
     await page.goto('/');
 
     const hero = page.locator('#show');
@@ -153,17 +153,13 @@ test('presents the September event, flyer, and useful event actions', async ({ p
         'Rad Dad + Friends at Guitars & Growlers in Richardson, Texas — September 19, 2026, 7–10 PM; free show.'
     );
 
-    const actions = hero.locator('.event-actions');
-    await expect(actions).toHaveAttribute('role', 'group');
-    await expect(actions).toHaveAttribute('aria-label', 'Event actions');
-    const calendarLink = actions.getByRole('link', { name: 'Add to Calendar' });
-    const directionsLink = actions.getByRole('link', { name: 'Get Directions' });
-    const fullFlyerLink = actions.getByRole('link', { name: 'View Full Flyer' });
+    const showMoment = hero.locator('.show-moment');
+    await expect(showMoment.getByRole('status')).toContainText('Next show');
+    const calendarLink = showMoment.getByRole('link', { name: 'Add to Calendar' });
+    const fullFlyerLink = hero.getByRole('link', { name: 'View Full Flyer' });
 
     await expect(calendarLink).toHaveAttribute('href', CALENDAR_PATH);
     await expect(calendarLink).toHaveAttribute('download', '');
-    await expect(directionsLink).toHaveAttribute('href', 'https://maps.app.goo.gl/Gr79GmmXAxMH5SkP6');
-    await expect(directionsLink).toHaveAttribute('target', '_blank');
     await expect(fullFlyerLink).toHaveAttribute('href', FLYER_PATH);
     await expect(fullFlyerLink).toHaveAttribute('target', '_blank');
     await expect(hero.locator('.flyer-link')).toHaveAttribute('href', FLYER_PATH);
