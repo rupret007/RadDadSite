@@ -24,6 +24,15 @@ show automatically. The public site links only to `#official-sets` and
 show-night app remains the canonical source for running-order and suggestion
 data, so this static repository must not copy those records.
 
+On `/qr/`, a normal tap on a verified-embeddable Wildflower performance opens
+a focused inline player so a fan can watch without losing their place in the
+song-to-show path. The privacy-enhanced YouTube frame is created only after
+that explicit tap. Videos that YouTube does not permit to embed—including the
+current featured upload—stay clearly labeled direct YouTube links instead of
+opening a broken player. Every card remains a real `youtube.com` link, so
+modified clicks, browsers without the dialog API, and visits without
+JavaScript keep the direct YouTube fallback.
+
 ## QR Landing Page
 
 The current physical promotion workflow uses a **1-inch round matte-white
@@ -129,6 +138,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 - Review-only fan participation links shared by the homepage and canonical QR landing page
 - Public HTML never exposing `/show-control`, board links limited to `#official-sets` and `#suggestions`, and the Worker failing closed on owner-only `/show-control` paths
 - The latest featured YouTube performance on both the homepage and canonical QR landing page
+- Progressive inline playback for verified-embeddable `/qr/` videos, including privacy-delayed loading, honest direct-only cards, close cleanup, and focus return
 - Permanent `/tap/` and legacy `/nfc/` fallbacks converging on the canonical `/qr/` content
 - Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention
 - Desktop flyer-and-event-copy presentation
