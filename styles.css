@@ -2166,7 +2166,12 @@ html[data-show-phase="complete"] .show-moment {
 
 .contact-actions {
     display: grid;
+    align-content: center;
     gap: 0.75rem;
+}
+
+.contact-actions .button {
+    width: 100%;
 }
 
 .social-nav {
@@ -2174,8 +2179,9 @@ html[data-show-phase="complete"] .show-moment {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem 1.6rem;
+    margin-top: 0.35rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--line);
+    border-top: 1px dashed rgba(243, 242, 238, 0.28);
 }
 
 .social-nav__kicker {

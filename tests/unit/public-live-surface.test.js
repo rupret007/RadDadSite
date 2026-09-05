@@ -79,6 +79,13 @@ function participationSection(html) {
     return match[0];
 }
 
+function contactSection(html) {
+    const match = html.match(/<section[^>]*id="contact"[\s\S]*?<\/section>/i);
+
+    expect(match, 'homepage must keep the public contact panel').not.toBeNull();
+    return match[0];
+}
+
 function rejectForbiddenLineup(source, label) {
     const lower = source.toLowerCase();
 
@@ -191,6 +198,37 @@ describe('public live surface honesty', () => {
         expect(qr).not.toContain(RETIRED_VIDEO_ID);
         expect(qr.toLowerCase()).not.toContain('setlist');
         expect(qr.toLowerCase()).not.toContain('part of the set');
+    });
+
+    it('keeps homepage booking and follow as two honest contact lanes', async () => {
+        const homepage = await readFile(homepagePath, 'utf8');
+        const qr = await readFile(qrPath, 'utf8');
+        const contact = contactSection(homepage);
+        const follow = qr.match(/<section[^>]*id="follow"[\s\S]*?<\/section>/i)?.[0];
+
+        expect(follow, 'QR landing page must keep the follow-only closer').toBeTruthy();
+        expect(contact).toContain('Book a show');
+        expect(contact).toContain('Bring Rad Dad to your stage.');
+        expect(contact).toContain('Email or call with the venue, city, and date');
+        expect(contact).toContain('This page does not book the night.');
+        expect(contact).toContain('aria-label="Show booking"');
+        expect(contact).toContain('mailto:rad.dad.band@gmail.com?subject=Rad%20Dad%20booking');
+        expect(contact).toContain('Email about a show');
+        expect(contact).toContain('href="tel:+12146970584"');
+        expect(contact).toContain('Call (214) 697-0584');
+        expect(contact).toContain('Just here for the band? Follow along.');
+        expect(contact).toContain('https://www.instagram.com/rad.dad.band/');
+        expect(contact).toContain('https://www.facebook.com/people/Rad-Dad/61581475409339/');
+        expect(contact).toContain('https://www.youtube.com/@RadDadBand');
+        expect(contact).not.toContain('<form');
+        expect(contact).not.toContain('mailto:rad.dad.band@gmail.com"');
+        expect(contact.toLowerCase()).not.toContain('setlist');
+        expect(contact).not.toMatch(/auto-pitch|book automatically|instant booking|submit a booking/i);
+        expect(follow).toContain('Now stay for the');
+        expect(follow).not.toContain('mailto:');
+        expect(follow).not.toContain('tel:');
+        expect(follow).not.toContain('<form');
+        expect(qr).not.toContain('mailto:rad.dad.band@gmail.com');
     });
 
     it('connects both discovery routes to one review-only public show board', async () => {

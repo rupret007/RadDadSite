@@ -68,6 +68,16 @@ the show, and after it ends. No JavaScript leaves a normal public show link.
 See [the sharing handoff](docs/SHOW_SHARING.md) for behavior, offline evidence,
 device checks still needed, and the source-only deployment boundary.
 
+## Booking and Follow
+
+The homepage Connect panel is the booking surface. Email and phone stay the
+only booking actions, with a booking-subject mailto so the note is labeled
+before anyone reads it. Copy asks for venue, city, and date, and says a person
+reads the note — the page does not book the night. Social links stay
+follow-only. Travis continues to own booking and connections; there is no
+form, inbox automation, or auto-pitch. `/qr/` stays music-first and does not
+grow a second booking path.
+
 ## QR Landing Page
 
 The current physical promotion workflow uses a **1-inch round matte-white
@@ -176,8 +186,9 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 
 - Event-first section and focus order, page metadata, and structured event data
 - September 19 event facts, named participating bands, flyer assets, and the calendar → directions → live order → video lifecycle
-- Flyer-style recent-set artist wall with show and listen paths, homepage Story Of Us listen desk, leftover show-tape and QR listen loops, 2026 show history, videos, and stable contact/social links
+- Flyer-style recent-set artist wall with show and listen paths, homepage Story Of Us listen desk, leftover show-tape and QR listen loops, 2026 show history, videos, and a homepage contact panel that separates show booking from follow-only social links
 - Review-only fan participation links shared by the homepage and canonical QR landing page
+- Homepage Connect booking vs follow lanes, booking-subject mailto, and no-form contact honesty
 - Canonical show sharing, explicit fallback choices, clipboard denial, cancellation, stale completion, and no-JavaScript access on both pages
 - Public HTML never exposing `/show-control`, board links limited to `#official-sets` and `#suggestions`, and the Worker failing closed on owner-only `/show-control` paths
 - The latest featured YouTube performance on both the homepage and canonical QR landing page

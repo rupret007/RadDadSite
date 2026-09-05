@@ -380,6 +380,9 @@ test.describe('tap, NFC, and QR landing pages', () => {
             'https://www.facebook.com/people/Rad-Dad/61581475409339/'
         );
         await expect(followLinks.getByRole('link', { name: /full site/ })).toHaveAttribute('href', '../#shows');
+        await expect(followSection.locator('a[href^="mailto:"]')).toHaveCount(0);
+        await expect(followSection.locator('a[href^="tel:"]')).toHaveCount(0);
+        await expect(followSection.locator('form')).toHaveCount(0);
 
         const footer = page.locator('.tap-footer');
         await expect(footer.locator('.tap-brand')).toHaveAttribute('href', '../');
