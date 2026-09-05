@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 
 test.describe('tap, NFC, and QR landing pages', () => {
     test('/tap/ redirects to /qr/ via client-side JavaScript', async ({ page }) => {
@@ -95,11 +95,11 @@ test.describe('tap, NFC, and QR landing pages', () => {
         );
         await expect(page.locator('link[rel="stylesheet"][href^="styles.css"]')).toHaveAttribute(
             'href',
-            'styles.css?v=20260904-1'
+            'styles.css?v=20260905-1'
         );
         await expect(page.locator('script[src^="../show-state.js"]')).toHaveAttribute(
             'src',
-            '../show-state.js?v=20260904-1'
+            '../show-state.js?v=20260905-1'
         );
         await expect(page.locator('script[src^="script.js"]')).toHaveAttribute(
             'src',

@@ -51,6 +51,23 @@ opening a broken player. Every card remains a real `youtube.com` link, so
 modified clicks, browsers without the dialog API, and visits without
 JavaScript keep the direct YouTube fallback.
 
+## Share Show Details
+
+The homepage show panel and `/qr/` offer one secondary sharing action without
+replacing the primary calendar → directions → running order → video path.
+Both use the same verified event facts and public `https://raddadband.com/#show`
+link. Preview addresses, query strings, and private page fragments are never
+included in the shared note.
+
+An explicit tap opens the browser's share options when supported, or copies
+the details when only the clipboard is available. Cancellation or a failed
+share never automatically copies or sends anything: the fan can explicitly
+copy or select the full note instead. The wording updates for tonight, during
+the show, and after it ends. No JavaScript leaves a normal public show link.
+
+See [the sharing handoff](docs/SHOW_SHARING.md) for behavior, offline evidence,
+device checks still needed, and the source-only deployment boundary.
+
 ## QR Landing Page
 
 The current physical promotion workflow uses a **1-inch round matte-white
@@ -92,7 +109,7 @@ The repo now includes a hybrid automated test suite:
 1. Install dependencies:
 
    ```bash
-   npm install
+   npm ci
    ```
 
 2. Install the Playwright Chromium browser once:
@@ -161,6 +178,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 - September 19 event facts, named participating bands, flyer assets, and the calendar → directions → live order → video lifecycle
 - Flyer-style recent-set artist wall with show and listen paths, homepage Story Of Us listen desk, leftover show-tape and QR listen loops, 2026 show history, videos, and stable contact/social links
 - Review-only fan participation links shared by the homepage and canonical QR landing page
+- Canonical show sharing, explicit fallback choices, clipboard denial, cancellation, stale completion, and no-JavaScript access on both pages
 - Public HTML never exposing `/show-control`, board links limited to `#official-sets` and `#suggestions`, and the Worker failing closed on owner-only `/show-control` paths
 - The latest featured YouTube performance on both the homepage and canonical QR landing page
 - Progressive inline playback for verified-embeddable `/qr/` videos, including privacy-delayed loading, honest direct-only cards, close cleanup, and focus return
@@ -168,6 +186,12 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 - Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention
 - Desktop flyer-and-event-copy presentation
 - Logo fallback behavior when the brand image cannot load
+
+Browser tests isolate external network access: known font, thumbnail, and
+media responses are synthetic, and unexpected external requests fail the test.
+Share and clipboard APIs are controlled test doubles. These tests verify our
+UI and payload logic, not real provider playback, OS share delivery, or device
+clipboard permissions.
 
 ## Continuous Integration
 
