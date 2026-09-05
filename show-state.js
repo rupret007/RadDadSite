@@ -279,8 +279,6 @@
                 message(widget, 'Show details selected. Use your device’s Copy command.');
             });
         });
-        bind(root, 'visibilitychange', refresh);
-        bind(global, 'pageshow', refresh);
         refresh();
 
         return {
@@ -361,6 +359,18 @@
         root.querySelectorAll('[data-show-moment]').forEach((element) => {
             element.dataset.phase = state.phase;
         });
+        root.querySelectorAll('[data-show-visit]').forEach((visit) => {
+            const summary = visit.querySelector('[data-show-visit-title]');
+            if (summary) summary.textContent = state.phase === 'complete' ? 'Venue details' : 'Plan your visit';
+            visit.querySelectorAll('[data-show-visit-directions]').forEach((action) => {
+                // Keep the disclosure open and keyboard focus useful when a
+                // returning fan's directions action expires at show end.
+                if (state.hideDirections && root.activeElement === action) {
+                    summary?.focus({ preventScroll: true });
+                }
+                action.hidden = state.hideDirections;
+            });
+        });
 
         applyPrimaryActions(root, state);
         return state;
@@ -377,8 +387,14 @@
             sharing.refresh();
         };
         const interval = global.setInterval(refresh, 60 * 1000);
+        // Refresh the entire fan journey immediately on return from a map,
+        // background tab or back/forward cache, including an open visit panel.
+        root.addEventListener('visibilitychange', refresh);
+        global.addEventListener('pageshow', refresh);
         const stop = () => {
             global.clearInterval(interval);
+            root.removeEventListener('visibilitychange', refresh);
+            global.removeEventListener('pageshow', refresh);
             sharing.stop();
             activeDocuments.delete(root);
         };

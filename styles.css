@@ -457,6 +457,75 @@ html[data-show-phase="complete"] .show-moment {
     }
 }
 
+.show-visit {
+    min-width: 0;
+    margin-top: 1.1rem;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.show-visit > summary {
+    min-height: 2.75rem;
+    padding: 0.75rem 0.9rem;
+    color: var(--cream);
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.show-visit > summary:hover,
+.show-visit > summary::marker {
+    color: var(--lime);
+}
+
+.show-visit > summary:focus-visible {
+    outline: 3px solid var(--lime);
+    outline-offset: 3px;
+}
+
+.show-visit__body {
+    display: grid;
+    gap: 0.85rem;
+    min-width: 0;
+    padding: 0.25rem 0.9rem 1rem;
+    overflow-wrap: anywhere;
+}
+
+.show-visit__body p {
+    margin: 0;
+}
+
+.show-visit__date,
+.show-visit__help {
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.show-visit__address {
+    color: var(--cream);
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
+.show-visit__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+}
+
+.show-visit__links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    color: var(--lime);
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-underline-offset: 0.2rem;
+}
+
 .show-share {
     min-width: 0;
     margin-top: 1.1rem;

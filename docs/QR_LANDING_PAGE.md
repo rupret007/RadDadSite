@@ -87,6 +87,21 @@ video anchor. A missing action destination or label hides the action; it must
 not manufacture a URL. Never add `/show-control` or copy show-board data into
 this static site.
 
+## Visit planning
+
+The show panel's **Plan your visit** disclosure exposes the existing full
+Richardson address, September 19 date and Central time, plus the existing map
+and venue-information links. Keep these secondary actions inside the native
+disclosure so the primary lifecycle action remains focused. Directions remain
+available before show day and while the show is live. Expanding the disclosure
+does not contact either destination.
+
+After show end, the shared controller changes the summary to **Venue details**
+and hides directions without closing a panel the fan is reading. Page return
+refreshes the complete lifecycle immediately. No JavaScript leaves a working,
+explicitly dated disclosure, although automatic archive changes require it.
+See [SHOW_VISIT.md](SHOW_VISIT.md) for the verification and future-show handoff.
+
 ## Sharing the show
 
 The existing show panel includes the same secondary share/copy control as the

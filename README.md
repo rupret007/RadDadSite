@@ -68,6 +68,20 @@ the show, and after it ends. No JavaScript leaves a normal public show link.
 See [the sharing handoff](docs/SHOW_SHARING.md) for behavior, offline evidence,
 device checks still needed, and the source-only deployment boundary.
 
+## Plan a Visit
+
+Both show panels include a compact **Plan your visit** disclosure with the
+September 19 date and Central time, the full Richardson street address,
+directions, and venue information. Fans can check the address or open the map
+before show day and while the primary action shows the running order.
+Expanding the panel does not load a map or contact a provider.
+
+The native disclosure also works without JavaScript. With JavaScript, the
+shared show lifecycle changes its label to **Venue details** at show end and
+hides directions, retaining the dated venue information. Returning from a map
+or background tab refreshes the entire show state immediately. See
+[the visit-planning handoff](docs/SHOW_VISIT.md) for behavior and verification.
+
 ## Booking and Follow
 
 The homepage Connect panel is the booking surface. Email and phone stay the
@@ -190,6 +204,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 - Review-only fan participation links shared by the homepage and canonical QR landing page
 - Homepage Connect booking vs follow lanes, booking-subject mailto, and no-form contact honesty
 - Canonical show sharing, explicit fallback choices, clipboard denial, cancellation, stale completion, and no-JavaScript access on both pages
+- Visit planning on both show panels: full address, directions before/during the show, archive wording, keyboard disclosure, page-return refresh, and no-JavaScript access
 - Public HTML never exposing `/show-control`, board links limited to `#official-sets` and `#suggestions`, and the Worker failing closed on owner-only `/show-control` paths
 - The latest featured YouTube performance on both the homepage and canonical QR landing page
 - Progressive inline playback for verified-embeddable `/qr/` videos, including privacy-delayed loading, honest direct-only cards, close cleanup, and focus return
