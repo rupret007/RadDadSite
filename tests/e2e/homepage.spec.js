@@ -453,15 +453,20 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
     await expect(nav.getByRole('link', { name: 'Connect' })).toHaveAttribute('href', '#contact');
 
     const contact = page.locator('#contact');
+    await expect(contact.locator('.section-kicker')).toHaveText('Book a show');
+    await expect(contact.getByRole('heading', { level: 2, name: 'Bring Rad Dad to your stage.' })).toBeVisible();
+    await expect(contact).toContainText('Email or call with the venue, city, and date');
+    await expect(contact).toContainText('This page does not book the night.');
     await expect(contact.locator('.social-nav__kicker')).toHaveText('Just here for the band? Follow along.');
-    await expect(contact.getByRole('link', { name: 'Email Rad Dad' })).toHaveAttribute(
+    await expect(contact.getByRole('link', { name: 'Email about a show' })).toHaveAttribute(
         'href',
-        'mailto:rad.dad.band@gmail.com'
+        'mailto:rad.dad.band@gmail.com?subject=Rad%20Dad%20booking'
     );
     await expect(contact.getByRole('link', { name: 'Call (214) 697-0584' })).toHaveAttribute(
         'href',
         'tel:+12146970584'
     );
+    await expect(contact.locator('form')).toHaveCount(0);
 
     const socialLinks = contact.locator('.social-nav');
     await expect(socialLinks.getByRole('link', { name: 'Instagram' })).toHaveAttribute(
@@ -617,5 +622,59 @@ test('gives the flyer a strong side-by-side desktop presentation', async ({ page
 
     for (const key of ['x', 'y', 'width', 'height']) {
         expect(afterHover[key]).toBeCloseTo(beforeHover[key], 1);
+    }
+});
+
+test('keeps booking and follow as two usable contact lanes on phone and desktop', async ({ page }) => {
+    for (const viewport of [
+        { width: 390, height: 844 },
+        { width: 1440, height: 900 }
+    ]) {
+        await page.setViewportSize(viewport);
+        await page.goto('/#contact');
+
+        const contact = page.locator('#contact');
+        const booking = contact.getByRole('group', { name: 'Show booking' });
+        const email = booking.getByRole('link', { name: 'Email about a show' });
+        const phone = booking.getByRole('link', { name: 'Call (214) 697-0584' });
+        const follow = contact.getByRole('navigation', { name: 'Follow Rad Dad' });
+
+        await expect(contact.getByRole('heading', { level: 2, name: 'Bring Rad Dad to your stage.' })).toBeVisible();
+        await expect(contact).toContainText('This page does not book the night.');
+        await expect(email).toHaveAttribute('href', 'mailto:rad.dad.band@gmail.com?subject=Rad%20Dad%20booking');
+        await expect(phone).toHaveAttribute('href', 'tel:+12146970584');
+        await expect(follow.getByRole('link', { name: 'Instagram' })).toBeVisible();
+        await expect(contact.locator('form')).toHaveCount(0);
+        await expect(follow.getByRole('link', { name: /email|call/i })).toHaveCount(0);
+
+        const layout = await contact.locator('.contact-panel').evaluate((panel) => {
+            const emailButton = panel.querySelector('.contact-actions .button--primary');
+            const phoneButton = panel.querySelector('.contact-actions .button--secondary');
+            const followNav = panel.querySelector('.social-nav');
+            const panelRect = panel.getBoundingClientRect();
+            const emailRect = emailButton.getBoundingClientRect();
+            const phoneRect = phoneButton.getBoundingClientRect();
+            const followRect = followNav.getBoundingClientRect();
+
+            return {
+                bodyScrollWidth: document.body.scrollWidth,
+                emailHeight: emailRect.height,
+                emailWidth: emailRect.width,
+                followTop: followRect.top,
+                left: panelRect.left,
+                phoneHeight: phoneRect.height,
+                phoneTop: phoneRect.top,
+                right: panelRect.right,
+                viewportWidth: window.innerWidth
+            };
+        });
+
+        expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+        expect(layout.left).toBeGreaterThanOrEqual(-1);
+        expect(layout.right).toBeLessThanOrEqual(layout.viewportWidth + 1);
+        expect(layout.emailHeight).toBeGreaterThanOrEqual(44);
+        expect(layout.phoneHeight).toBeGreaterThanOrEqual(44);
+        expect(layout.emailWidth).toBeGreaterThan(200);
+        expect(layout.followTop).toBeGreaterThan(layout.phoneTop);
     }
 });
