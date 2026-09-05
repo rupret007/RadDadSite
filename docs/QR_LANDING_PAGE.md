@@ -87,6 +87,23 @@ video anchor. A missing action destination or label hides the action; it must
 not manufacture a URL. Never add `/show-control` or copy show-board data into
 this static site.
 
+## Sharing the show
+
+The existing show panel includes the same secondary share/copy control as the
+homepage. Its note names Rad Dad + Friends with The Fault Lines, the verified
+date, Central time, venue/address, free cover, and canonical public show URL.
+`show-state.js` supplies the facts and phase-aware wording on every gesture;
+never assemble a different invitation from QR page text or the visitor's URL.
+
+Native sharing requires a deliberate tap. Cancellation, unsupported sharing,
+or clipboard denial reveals explicit copy/select recovery without an automatic
+post, message, or fallback copy. After the show, the note says “Past show,”
+not an invented next date. A completion that crosses a show boundary warns the
+fan and offers updated details instead of claiming that old details are current.
+Keep the no-JavaScript public link and the permanent `/tap/` alias intact.
+
+See [SHOW_SHARING.md](SHOW_SHARING.md) for the product and verification handoff.
+
 ## Live-video playback
 
 Wildflower performance cards that have been manually verified as embeddable

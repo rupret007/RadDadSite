@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 
 test('ChatGPT Sites page features the Wildflower Tomorrow’s Another Day clip', async ({ page }) => {
     await page.goto('/GPT/index.html');

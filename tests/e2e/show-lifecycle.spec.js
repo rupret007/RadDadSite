@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 
 const PUBLIC_BOARD = 'https://rad-dad-show-night.jeffstory007.chatgpt.site/#official-sets';
 const DIRECTIONS = 'https://maps.app.goo.gl/Gr79GmmXAxMH5SkP6';

@@ -175,6 +175,21 @@
                         </div>
                     </dl>
 
+                    <div class="show-share" data-show-share>
+                        <button class="show-share__button" type="button" data-show-share-action hidden>Share show details</button>
+                        <p class="show-share__status" data-show-share-status role="status" aria-live="polite" aria-atomic="true"></p>
+                        <div class="show-share__fallback" data-show-share-fallback hidden>
+                            <label for="show-share-text">Show details to copy</label>
+                            <textarea id="show-share-text" data-show-share-text rows="7" readonly spellcheck="false" aria-describedby="show-share-help"></textarea>
+                            <div class="show-share__actions">
+                                <button class="show-share__button" type="button" data-show-share-copy>Copy details</button>
+                                <button class="show-share__button show-share__button--quiet" type="button" data-show-share-select>Select details</button>
+                            </div>
+                            <p id="show-share-help" class="show-share__help">You can select the note and copy it yourself. No automatic posts or messages.</p>
+                        </div>
+                        <noscript><p class="show-share__help">To share the show page, copy this link: <a href="https://raddadband.com/#show">raddadband.com/#show</a>.</p></noscript>
+                    </div>
+
                     <a class="text-link event-action--flyer" href="assets/rad-dad-friends-guitars-growlers-2026-v2-full.png" target="_blank" rel="noopener noreferrer">
                         View Full Flyer <span aria-hidden="true">↗</span>
                     </a>
@@ -541,7 +556,7 @@
         </div>
     </footer>
 
-    <script src="show-state.js?v=20260904-1" defer></script>
+    <script src="show-state.js?v=20260905-1" defer></script>
     <script src="script.js" defer></script>
 </body>
 </html>

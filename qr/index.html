@@ -29,7 +29,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Oswald:wght@500;600;700&amp;family=Permanent+Marker&amp;display=swap" rel="stylesheet">
     <link rel="preload" as="image" href="../assets/story-of-us-cover.webp">
-    <link rel="stylesheet" href="styles.css?v=20260904-1">
+    <link rel="stylesheet" href="styles.css?v=20260905-1">
 
     <script type="application/ld+json">
     {
@@ -284,6 +284,21 @@
                         </div>
                     </dl>
 
+                    <div class="show-share" data-show-share>
+                        <button class="show-share__button" type="button" data-show-share-action hidden>Share show details</button>
+                        <p class="show-share__status" data-show-share-status role="status" aria-live="polite" aria-atomic="true"></p>
+                        <div class="show-share__fallback" data-show-share-fallback hidden>
+                            <label for="show-share-text">Show details to copy</label>
+                            <textarea id="show-share-text" data-show-share-text rows="7" readonly spellcheck="false" aria-describedby="show-share-help"></textarea>
+                            <div class="show-share__actions">
+                                <button class="show-share__button" type="button" data-show-share-copy>Copy details</button>
+                                <button class="show-share__button show-share__button--quiet" type="button" data-show-share-select>Select details</button>
+                            </div>
+                            <p id="show-share-help" class="show-share__help">You can select the note and copy it yourself. No automatic posts or messages.</p>
+                        </div>
+                        <noscript><p class="show-share__help">To share the show page, copy this link: <a href="https://raddadband.com/#show">raddadband.com/#show</a>.</p></noscript>
+                    </div>
+
                     <nav class="next-show-paths" aria-label="Listen and show paths">
                         <a class="next-show-details" href="#song">Hear The Story Of Us</a>
                         <a class="next-show-details" href="../#show"><span data-show-details-link-label>See full show details</span> <span aria-hidden="true">&nearr;</span></a>
@@ -394,7 +409,7 @@
         </div>
     </footer>
 
-    <script src="../show-state.js?v=20260904-1" defer></script>
+    <script src="../show-state.js?v=20260905-1" defer></script>
     <script src="script.js?v=20260904-1" defer></script>
 </body>
 </html>
