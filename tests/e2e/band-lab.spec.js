@@ -47,7 +47,7 @@ test('opens the same-folder sewer full-page and keeps the WebJam hole empty on a
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(BAND_LAB_PATH);
 
-    await expect(page.getByRole('heading', { name: /Six games/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Six games\. One dirty flyer/i })).toBeVisible();
     await expect(page.getByText('No signal')).toBeVisible();
     await expect(page.locator('aside iframe')).toHaveCount(0);
 
