@@ -1,0 +1,8 @@
+Vendored playable snapshot of rupret007/Turdanoid.
+
+Pinned commit: 600b96caa3064368f44cc8b79eb8c97950211fee
+Published host for reference only: https://rupret007.github.io/Turdanoid/
+
+Copied as static files so the band-lab page can play the six-game hub
+same-origin (no Neon rewrite, no Turdanoid PR, no live fetch).
+Engine sources that the HTML never loads were left behind on purpose.
