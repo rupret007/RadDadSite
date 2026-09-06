@@ -42,14 +42,16 @@ configuration hides that action instead of guessing a destination. Live state
 may use only the review-safe `#official-sets` board anchor; owner controls remain
 forbidden.
 
-On `/qr/`, a normal tap on a verified-embeddable Wildflower performance opens
-a focused inline player so a fan can watch without losing their place in the
-song-to-show path. The privacy-enhanced YouTube frame is created only after
-that explicit tap. Videos that YouTube does not permit to embed—including the
-current featured upload—stay clearly labeled direct YouTube links instead of
-opening a broken player. Every card remains a real `youtube.com` link, so
-modified clicks, browsers without the dialog API, and visits without
-JavaScript keep the direct YouTube fallback.
+On the homepage and `/qr/`, a normal tap on a verified-embeddable Wildflower
+performance opens a focused inline player so a fan can watch without leaving
+the page. Both surfaces share `live-video.js`. The privacy-enhanced YouTube
+frame is created only after that explicit tap. Videos that YouTube does not
+permit to embed—including the current featured upload—stay clearly labeled
+direct YouTube links instead of opening a broken player. Every card remains a
+real `youtube.com` link, so modified clicks, browsers without the dialog API,
+and visits without JavaScript keep the direct YouTube fallback. The covers
+wall stay unlinkable; its footer now points at the Wildflower tapes as well as
+The Story Of Us. See [the homepage watch handoff](docs/HOME_WATCH.md).
 
 ## Share Show Details
 
@@ -200,14 +202,14 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 
 - Event-first section and focus order, page metadata, and structured event data
 - September 19 event facts, named participating bands, flyer assets, and the calendar → directions → live order → video lifecycle
-- Flyer-style recent-set artist wall with show and listen paths, homepage Story Of Us listen desk, leftover show-tape and QR listen loops, 2026 show history, videos, and a homepage contact panel that separates show booking from follow-only social links
+- Flyer-style recent-set artist wall with show and listen paths, including a covers-footer path to the Wildflower tapes, homepage Story Of Us listen desk, leftover show-tape and QR listen loops, 2026 show history, videos, and a homepage contact panel that separates show booking from follow-only social links
 - Review-only fan participation links shared by the homepage and canonical QR landing page
 - Homepage Connect booking vs follow lanes, booking-subject mailto, and no-form contact honesty
 - Canonical show sharing, explicit fallback choices, clipboard denial, cancellation, stale completion, and no-JavaScript access on both pages
 - Visit planning on both show panels: full address, directions before/during the show, archive wording, keyboard disclosure, page-return refresh, and no-JavaScript access
 - Public HTML never exposing `/show-control`, board links limited to `#official-sets` and `#suggestions`, and the Worker failing closed on owner-only `/show-control` paths
 - The latest featured YouTube performance on both the homepage and canonical QR landing page
-- Progressive inline playback for verified-embeddable `/qr/` videos, including privacy-delayed loading, honest direct-only cards, close cleanup, and focus return
+- Progressive inline playback for verified-embeddable homepage and `/qr/` videos, including privacy-delayed loading, honest direct-only cards, close cleanup, and focus return
 - Permanent `/tap/` and legacy `/nfc/` fallbacks converging on the canonical `/qr/` content
 - Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention
 - Desktop flyer-and-event-copy presentation
@@ -272,10 +274,12 @@ RadDad Website/
 |   |-- rad-dad-social-2026.png
 |   `-- wildflower-2026-poster-720.webp
 |-- docs/
+|   |-- HOME_WATCH.md
 |   |-- production-deployment.md
 |   |-- QR_LANDING_PAGE.md
 |   `-- raddad-deploy.conf.example
 |-- index.html
+|-- live-video.js
 |-- show-state.js
 |-- nfc/
 |   `-- index.html

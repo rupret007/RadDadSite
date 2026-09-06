@@ -16,6 +16,7 @@ const PUBLIC_CLIENT_TEXT = [
     ...PUBLIC_HTML,
     'script.js',
     'show-state.js',
+    'live-video.js',
     'qr/script.js',
     'styles.css',
     'qr/styles.css'
@@ -76,20 +77,24 @@ describe('public surface security', () => {
         }
     });
 
-    it('keeps the QR video frame dormant and narrowly sandboxed until a validated tap', async () => {
-        const html = await readFile(join(repoRoot, 'qr/index.html'), 'utf8');
-        const script = await readFile(join(repoRoot, 'qr/script.js'), 'utf8');
-        const videoFrame = html.match(/<iframe\b[^>]*\bdata-video-frame[^>]*>/i)?.[0];
+    it('keeps homepage and QR video frames dormant and narrowly sandboxed until a validated tap', async () => {
+        const script = await readFile(join(repoRoot, 'live-video.js'), 'utf8');
 
-        expect(videoFrame).toBeTruthy();
-        expect(videoFrame).not.toMatch(/\bsrc=/i);
-        expect(videoFrame).toContain('sandbox="allow-scripts allow-same-origin allow-presentation"');
-        expect(videoFrame).toContain('referrerpolicy="strict-origin-when-cross-origin"');
-        expect(videoFrame).not.toContain('allow-popups');
         expect(script).toContain('https://www.youtube-nocookie.com/embed/');
         expect(script).toContain("['www.youtube.com', 'youtube.com'].includes(watchUrl.hostname)");
         expect(script).toContain("watchUrl.pathname === '/watch'");
         expect(script).toContain('/^[A-Za-z0-9_-]{11}$/');
+
+        for (const relativePath of ['index.html', 'qr/index.html']) {
+            const html = await readFile(join(repoRoot, relativePath), 'utf8');
+            const videoFrame = html.match(/<iframe\b[^>]*\bdata-video-frame[^>]*>/i)?.[0];
+
+            expect(videoFrame, relativePath).toBeTruthy();
+            expect(videoFrame, relativePath).not.toMatch(/\bsrc=/i);
+            expect(videoFrame, relativePath).toContain('sandbox="allow-scripts allow-same-origin allow-presentation"');
+            expect(videoFrame, relativePath).toContain('referrerpolicy="strict-origin-when-cross-origin"');
+            expect(videoFrame, relativePath).not.toContain('allow-popups');
+        }
     });
 
     it('fails closed in the worker for /show-control instead of disguising it as the homepage', async () => {
