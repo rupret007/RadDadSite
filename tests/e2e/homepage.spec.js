@@ -554,7 +554,7 @@ test('keeps the mobile page overflow-free with a prominent, uncropped flyer', as
     expect(layout.documentScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
     expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
 
-    const leftoverCards = await page.locator('#our-song, .show-card--featured, #join-show .participation-pass, #covers .covers-poster__footer').evaluateAll((cards) => {
+    const leftoverCards = await page.locator('#our-song, .show-card--featured, #join-show .participation-pass, #covers .covers-poster__footer').evaluateAll((cards) =>
         cards.map((card) => {
             const rect = card.getBoundingClientRect();
             return {
