@@ -70,7 +70,7 @@
 
 .band-lab-bolt--pink {
     left: 0.85rem;
-    bottom: 7.5rem;
+    top: 16.5rem;
     background: var(--pink);
     transform: rotate(-14deg) scaleX(-1);
     filter: drop-shadow(5px 5px 0 rgba(181, 220, 8, 0.42));
