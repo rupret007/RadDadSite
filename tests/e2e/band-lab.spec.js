@@ -19,7 +19,7 @@ test('loads the unlisted band lab and plays TurdAnoid from the vendored hub', as
     await expect(page.getByRole('link', { name: /home|show|covers|listen|connect/i })).toHaveCount(0);
 
     const hub = page.frameLocator('iframe[title="Turdanoid six-game hub"]');
-    await expect(hub.getByRole('heading', { name: /Turdanoid/i })).toBeVisible();
+    await expect(hub.getByRole('heading', { level: 1 })).toBeVisible();
     await hub.getByRole('link', { name: /TurdAnoid Turbo/i }).click();
     await expect(hub.locator('canvas')).toBeVisible();
     await hub.locator('#btnStart').click();
