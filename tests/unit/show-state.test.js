@@ -36,6 +36,20 @@ function loadShowState() {
         <p data-show-participation-kicker>Make some noise before the show</p>
         <p data-show-section-kicker>Hear it live</p>
         <span data-show-link-label>September 19 show</span>
+        <h2 data-show-watch-title>Hear Rad Dad before the show</h2>
+        <p data-show-watch-lede>Start with the song that became ours, then the Wildflower tapes.</p>
+        <a
+            id="status-strip"
+            href="#next-show"
+            data-show-strip-action
+            data-upcoming-href="#next-show"
+            data-upcoming-label="Show details"
+            data-tonight-href="#next-show"
+            data-tonight-label="Show details"
+            data-complete-href="#wildflower"
+            data-complete-label="Watch Rad Dad live">
+            <span data-show-strip-label>Show details</span>
+        </a>
         <a id="calendar" href="assets/show.ics" download data-show-calendar>Add to Calendar</a>
         <a id="directions" href="https://maps.example/show" data-show-directions>Directions</a>
         <article id="show-card" class="show-card show-card--featured" data-show-card>
@@ -94,6 +108,10 @@ describe('September 19 show state', () => {
         expect(action.querySelector('[data-show-primary-label]').textContent).toBe('Add to Calendar');
         expect(document.querySelector('#calendar').hidden).toBe(false);
         expect(document.querySelector('#directions').hidden).toBe(false);
+        expect(document.querySelector('#status-strip').getAttribute('href')).toBe('#next-show');
+        expect(document.querySelector('#status-strip').hasAttribute('target')).toBe(false);
+        expect(document.querySelector('[data-show-strip-label]').textContent).toBe('Show details');
+        expect(document.querySelector('[data-show-watch-title]').textContent).toBe('Hear Rad Dad before the show');
     });
 
     it('uses the public running order while live and removes stale calendar actions', () => {
@@ -113,6 +131,13 @@ describe('September 19 show state', () => {
         expect(document.querySelector('#calendar').hidden).toBe(true);
         expect(document.querySelector('#directions').hidden).toBe(false);
         expect(document.querySelector('#card-actions').getAttribute('aria-label')).toBe('Live show actions');
+        expect(document.querySelector('#status-strip').getAttribute('href'))
+            .toBe('https://rad-dad-show-night.jeffstory007.chatgpt.site/#official-sets');
+        expect(document.querySelector('#status-strip').getAttribute('target')).toBe('_blank');
+        expect(document.querySelector('#status-strip').getAttribute('rel')).toBe('noopener noreferrer');
+        expect(document.querySelector('[data-show-strip-label]').textContent).toBe('See the running order');
+        expect(document.querySelector('#status-strip').hasAttribute('aria-label')).toBe(false);
+        expect(document.querySelector('[data-show-watch-title]').textContent).toBe('Hear Rad Dad before the show');
     });
 
     it('turns the featured show into an archive and sends the primary action to videos', () => {
@@ -136,6 +161,42 @@ describe('September 19 show state', () => {
         expect(card.classList.contains('show-card--past')).toBe(true);
         expect(document.querySelector('#card-actions').getAttribute('aria-label'))
             .toBe('September 19 show archive actions');
+        expect(document.querySelector('#status-strip').getAttribute('href')).toBe('#wildflower');
+        expect(document.querySelector('#status-strip').hasAttribute('target')).toBe(false);
+        expect(document.querySelector('[data-show-strip-label]').textContent).toBe('Watch Rad Dad live');
+        expect(document.querySelector('[data-show-watch-title]').textContent).toBe('Watch Rad Dad live');
+        expect(document.querySelector('[data-show-watch-lede]').textContent)
+            .toBe('The Wildflower tapes and The Story Of Us stay on this page.');
+    });
+
+    it('keeps a misconfigured status strip on its static show-panel fallback', () => {
+        const { document, RadDadShowState } = loadShowState();
+        const strip = document.querySelector('#status-strip');
+
+        strip.removeAttribute('data-complete-href');
+        RadDadShowState.apply(document, Date.parse('2026-09-20T12:00:00-05:00'));
+
+        expect(strip.hidden).toBe(false);
+        expect(strip.getAttribute('href')).toBe('#next-show');
+        expect(strip.querySelector('[data-show-strip-label]').textContent).toBe('Show details');
+    });
+
+    it('focuses an in-page strip landing and leaves the strip name intact', () => {
+        const { document, RadDadShowState } = loadShowState();
+        document.body.insertAdjacentHTML('beforeend', '<section id="wildflower">Tapes</section>');
+        const stop = RadDadShowState.start(document);
+
+        RadDadShowState.apply(document, Date.parse('2026-09-20T12:00:00-05:00'));
+        const strip = document.querySelector('#status-strip');
+        strip.dispatchEvent(new document.defaultView.MouseEvent('click', {
+            bubbles: true,
+            button: 0
+        }));
+
+        expect(strip.getAttribute('href')).toBe('#wildflower');
+        expect(document.activeElement).toBe(document.getElementById('wildflower'));
+        expect(strip.hasAttribute('aria-label')).toBe(false);
+        stop();
     });
 
     it('hides a misconfigured primary action instead of guessing a destination', () => {

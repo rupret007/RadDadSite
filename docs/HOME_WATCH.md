@@ -8,8 +8,11 @@ YouTube allows embedding.
 
 The flyer artist wall stays unlinkable and still names bands, not songs. The
 new path lives in the existing covers footer beside Hear Rad Dad, Help shape
-the night, and the September 19 show link. It uses the existing `#live-tapes`
-anchor. No song titles were added to `#covers`.
+the night, and the September 19 show link. The homepage listen desk and the QR
+song paths now use that same tapes landing after The Story Of Us. It uses the
+existing `#live-tapes` / `#wildflower` anchors. No song titles were added to
+`#covers`. After the show, the shared controller changes the homepage watch
+heading to match **Watch Rad Dad live**; see [NEXT_ACTION.md](NEXT_ACTION.md).
 
 The three Wildflower uploads already verified as embeddable on `/qr/` —
 All the Small Things, She, and The Middle — now use the same shared

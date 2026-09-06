@@ -76,13 +76,22 @@
         </div>
     </header>
 
-    <a class="next-show-strip" href="#next-show">
+    <a
+        class="next-show-strip"
+        href="#next-show"
+        data-show-strip-action
+        data-upcoming-href="#next-show"
+        data-upcoming-label="Show details"
+        data-tonight-href="#next-show"
+        data-tonight-label="Show details"
+        data-complete-href="#wildflower"
+        data-complete-label="Watch Rad Dad live">
         <span class="next-show-strip__inner page-shell">
             <span class="next-show-strip__label" data-show-status>Next show</span>
             <strong>Sep 19</strong>
             <span class="next-show-strip__venue">Guitars &amp; Growlers</span>
             <span class="next-show-strip__details" data-show-detail>7–10 PM · Free · Richardson</span>
-            <span class="next-show-strip__cta">Show details <span aria-hidden="true">↓</span></span>
+            <span class="next-show-strip__cta"><span data-show-strip-label>Show details</span> <span aria-hidden="true">↓</span></span>
         </span>
     </a>
 
@@ -138,6 +147,7 @@
                         <a href="https://music.amazon.com/tracks/B0FHPB9FN7" target="_blank" rel="noopener noreferrer">Amazon Music <span aria-hidden="true">↗</span></a>
                     </div>
                     <nav class="song-paths" aria-label="Show and listen paths">
+                        <a href="#wildflower">Hear the Wildflower tapes</a>
                         <a data-show-link-label href="#next-show">September 19 show</a>
                         <a href="#join-show">Help shape the night</a>
                     </nav>
@@ -145,7 +155,7 @@
             </div>
         </section>
 
-        <section class="wildflower-section" id="wildflower" aria-labelledby="wildflower-title">
+        <section class="wildflower-section" id="wildflower" tabindex="-1" aria-labelledby="wildflower-title">
             <div class="page-shell">
                 <header class="section-heading reveal" data-reveal>
                     <div>
@@ -240,7 +250,7 @@
             </div>
         </section>
 
-        <section class="next-show-section" id="next-show" aria-labelledby="next-show-title">
+        <section class="next-show-section" id="next-show" tabindex="-1" aria-labelledby="next-show-title">
             <div class="page-shell next-show-layout">
                 <div class="next-show-copy reveal" data-reveal>
                     <p class="section-kicker" data-show-section-kicker>Hear it live</p>
@@ -426,7 +436,7 @@
         </div>
     </footer>
 
-    <script src="../show-state.js?v=20260905-1" defer></script>
+    <script src="../show-state.js?v=20260906-3" defer></script>
     <script src="../live-video.js?v=20260906-2" defer></script>
     <script src="script.js?v=20260904-1" defer></script>
 </body>

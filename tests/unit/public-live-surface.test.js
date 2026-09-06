@@ -125,6 +125,7 @@ describe('public live surface honesty', () => {
         expect(desk).toContain('sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"');
         expect(desk).toContain('https://music.apple.com/us/album/the-story-of-us/1827102667?i=1827102893');
         expect(desk).toContain('https://music.amazon.com/tracks/B0FHPB9FN7');
+        expect(desk).toContain('href="#live-tapes">Hear the Wildflower tapes</a>');
         expect(desk).toContain('href="qr/#song"');
         expect(desk).toContain('href="#join-show"');
         expect(desk).toContain('Help shape the night');
@@ -163,6 +164,7 @@ describe('public live surface honesty', () => {
         expect(homepage).toContain('href="#live-tapes">Hear the Wildflower tapes</a>');
         expect(homepage).toContain('assets/wildflower-she-green-day.webp');
         expect(song).toContain('aria-label="Show and listen paths"');
+        expect(song).toContain('href="#wildflower">Hear the Wildflower tapes</a>');
         expect(song).toContain('href="#next-show">September 19 show</a>');
         expect(song).toContain('href="#join-show">Help shape the night</a>');
         expect(song).toContain('referrerpolicy="strict-origin-when-cross-origin"');
@@ -318,6 +320,9 @@ describe('public live surface honesty', () => {
         expect(homepage).toContain('id="live-video-dialog"');
         expect(homepage).toContain('live-video.js?v=20260906-2');
         expect(qr).toContain('class="next-show-strip"');
+        expect(qr).toContain('data-show-strip-action');
+        expect(qr).toContain('data-upcoming-href="#next-show"');
+        expect(qr).toContain('data-complete-href="#wildflower"');
         expect(qr).toContain('href="#next-show"');
         expect(qr.match(/data-inline-video/g)).toHaveLength(3);
         expect(qr).toContain('id="live-video-dialog"');
