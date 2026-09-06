@@ -236,6 +236,7 @@ REQUIRED_PRODUCTION_PATHS=(
     "assets/wildflower-2026-poster-720.webp"
     "assets/wildflower-she-green-day.webp"
     "index.html"
+    "live-video.js"
     "nfc/index.html"
     "qr/index.html"
     "qr/script.js"
@@ -283,6 +284,7 @@ with tempfile.TemporaryDirectory() as temporary:
         "assets/wildflower-2026-poster-720.webp",
         "assets/wildflower-she-green-day.webp",
         "index.html",
+        "live-video.js",
         "nfc/index.html",
         "qr/index.html",
         "qr/script.js",

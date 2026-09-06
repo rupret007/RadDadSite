@@ -101,6 +101,10 @@ test.describe('tap, NFC, and QR landing pages', () => {
             'src',
             '../show-state.js?v=20260905-1'
         );
+        await expect(page.locator('script[src^="../live-video.js"]')).toHaveAttribute(
+            'src',
+            '../live-video.js?v=20260906-1'
+        );
         await expect(page.locator('script[src^="script.js"]')).toHaveAttribute(
             'src',
             'script.js?v=20260904-1'

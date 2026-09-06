@@ -103,6 +103,7 @@ describe('public live surface honesty', () => {
         expect(covers).toContain('Playing hits from');
         expect(covers).toContain('Selections vary by show');
         expect(covers).toContain('aria-label="Cover note"');
+        expect(covers).toContain('href="#live-tapes">Hear the Wildflower tapes</a>');
         expect(covers).toContain('Green Day');
         expect(covers.toLowerCase()).not.toContain('setlist');
         expect(covers.toLowerCase()).not.toContain('part of the set');
@@ -312,12 +313,18 @@ describe('public live surface honesty', () => {
         expect(homepage).toContain('href="#our-song">Listen</a>');
         expect(homepage).toContain('aria-label="Show and listen paths"');
         expect(homepage).toContain('href="#our-song">Hear Rad Dad</a>');
+        expect(homepage).toContain('href="#live-tapes">Hear the Wildflower tapes</a>');
+        expect(homepage.match(/data-inline-video/g)).toHaveLength(3);
+        expect(homepage).toContain('id="live-video-dialog"');
+        expect(homepage).toContain('live-video.js?v=20260906-1');
         expect(qr).toContain('class="next-show-strip"');
         expect(qr).toContain('href="#next-show"');
         expect(qr.match(/data-inline-video/g)).toHaveLength(3);
         expect(qr).toContain('id="live-video-dialog"');
+        expect(qr).toContain('../live-video.js?v=20260906-1');
         expect(qr).toContain('data-video-frame');
         expect(qr).not.toMatch(/data-video-frame[^>]+src=/);
+        expect(homepage).not.toMatch(/data-video-frame[^>]+src=/);
         expect(qr).not.toContain('open.spotify.com/search');
         expect(qr).not.toContain('music.youtube.com/search');
         expect(calendar).toContain('SUMMARY:Rad Dad + Friends');

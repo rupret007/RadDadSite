@@ -166,6 +166,7 @@ describe('production artifact generation', () => {
         await expect(readFile(join(artifactRoot, 'qr/script.js'), 'utf8')).resolves.toBeTruthy();
         await expect(readFile(join(artifactRoot, 'qr/styles.css'), 'utf8')).resolves.toBeTruthy();
         await expect(readFile(join(artifactRoot, 'show-state.js'), 'utf8')).resolves.toContain('RadDadShowState');
+        await expect(readFile(join(artifactRoot, 'live-video.js'), 'utf8')).resolves.toContain('youtube-nocookie.com');
     });
 
     it('ships project-site-safe tag and NFC redirects in the production artifact', async () => {

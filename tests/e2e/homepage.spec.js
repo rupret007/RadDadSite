@@ -189,6 +189,7 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
     await expect(covers.locator('.covers-poster__footer')).toHaveAttribute('aria-label', 'Cover note');
     const coverPaths = covers.getByRole('navigation', { name: 'Show and listen paths' });
     await expect(coverPaths.getByRole('link', { name: 'Hear Rad Dad' })).toHaveAttribute('href', '#our-song');
+    await expect(coverPaths.getByRole('link', { name: 'Hear the Wildflower tapes' })).toHaveAttribute('href', '#live-tapes');
     await expect(coverPaths.getByRole('link', { name: 'Help shape the night' })).toHaveAttribute('href', '#join-show');
     await expect(coverPaths.getByRole('link', { name: 'September 19 show' })).toHaveAttribute('href', '#show');
     await expect(covers).not.toContainText(/setlist/i);
@@ -553,7 +554,7 @@ test('keeps the mobile page overflow-free with a prominent, uncropped flyer', as
     expect(layout.documentScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
     expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
 
-    const leftoverCards = await page.locator('#our-song, .show-card--featured, #join-show .participation-pass').evaluateAll((cards) =>
+    const leftoverCards = await page.locator('#our-song, .show-card--featured, #join-show .participation-pass, #covers .covers-poster__footer').evaluateAll((cards) => {
         cards.map((card) => {
             const rect = card.getBoundingClientRect();
             return {
@@ -677,4 +678,58 @@ test('keeps booking and follow as two usable contact lanes on phone and desktop'
         expect(layout.emailWidth).toBeGreaterThan(200);
         expect(layout.followTop).toBeGreaterThan(layout.phoneTop);
     }
+});
+
+test('plays a Wildflower tape inline from the covers listen path and keeps direct-only cards honest', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+
+    const tapesLink = page.locator('#covers').getByRole('link', { name: 'Hear the Wildflower tapes' });
+    await tapesLink.click();
+    await expect(page).toHaveURL(/#live-tapes$/);
+    await expect(page.locator('#live-tapes')).toBeInViewport();
+
+    const inlineCard = page.locator('#watch [data-inline-video]').first();
+    await inlineCard.scrollIntoViewIfNeeded();
+    await inlineCard.click();
+
+    const dialog = page.locator('#live-video-dialog');
+    const frame = dialog.locator('[data-video-frame]');
+    await expect(dialog).toBeVisible();
+    await expect(page).toHaveURL(/\/#live-tapes$/);
+    await expect(dialog.getByRole('heading', { name: 'All the Small Things — blink-182 cover' })).toBeVisible();
+    await expect(dialog.locator('[data-video-context]')).toContainText('Wildflower 2026 · Live performance');
+    await expect(frame).toHaveAttribute(
+        'src',
+        'https://www.youtube-nocookie.com/embed/9Re_0wjIbfQ?autoplay=1&rel=0'
+    );
+    await expect(dialog.getByRole('link', { name: /Watch on YouTube/ })).toHaveAttribute(
+        'href',
+        'https://www.youtube.com/watch?v=9Re_0wjIbfQ'
+    );
+    await expect(page.locator('html')).toHaveClass(/has-video-dialog/);
+
+    const openLayout = await page.evaluate(() => ({
+        bodyScrollWidth: document.body.scrollWidth,
+        documentScrollWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth
+    }));
+    expect(openLayout.documentScrollWidth).toBeLessThanOrEqual(openLayout.viewportWidth + 1);
+    expect(openLayout.bodyScrollWidth).toBeLessThanOrEqual(openLayout.viewportWidth + 1);
+
+    await dialog.getByRole('button', { name: 'Close video player' }).click();
+
+    await expect(dialog).toBeHidden();
+    await expect(frame).not.toHaveAttribute('src', /.+/);
+    await expect(inlineCard).toBeFocused();
+    await expect(page.locator('html')).not.toHaveClass(/has-video-dialog/);
+
+    const featured = page.locator('#watch .video-card').first();
+    const linoleum = page.locator('#watch .video-card').nth(4);
+    await expect(featured).not.toHaveAttribute('data-inline-video', '');
+    await expect(featured).toHaveAttribute('href', 'https://www.youtube.com/watch?v=4ReFoSZHL7o');
+    await expect(featured).toContainText('Watch on YouTube');
+    await expect(linoleum).not.toHaveAttribute('data-inline-video', '');
+    await expect(linoleum).toHaveAttribute('href', 'https://www.youtube.com/watch?v=e9mR2sgnJ00');
+    await expect(linoleum).toContainText('Watch on YouTube');
 });

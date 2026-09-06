@@ -475,6 +475,7 @@ CURRENT_PRODUCTION_FILES = {
     "assets/wildflower-2026-poster-720.webp",
     "assets/wildflower-she-green-day.webp",
     "index.html",
+    "live-video.js",
     "nfc/index.html",
     "qr/index.html",
     "qr/script.js",
@@ -499,6 +500,7 @@ RETAINED_ASSET_EXTENSIONS = {
     ".svg", ".webp", ".woff", ".woff2",
 }
 RETAINED_ROUTE_FILES = {
+    "live-video.js",
     "nfc/index.html",
     "qr/index.html",
     "qr/script.js",

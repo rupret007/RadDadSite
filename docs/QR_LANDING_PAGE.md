@@ -122,9 +122,9 @@ See [SHOW_SHARING.md](SHOW_SHARING.md) for the product and verification handoff.
 ## Live-video playback
 
 Wildflower performance cards that have been manually verified as embeddable
-are progressively enhanced on `/qr/`. An unmodified tap or click opens a native
-dialog and loads the matching video from the privacy-enhanced
-`youtube-nocookie.com` embed host. The iframe has no `src` before that explicit
+are progressively enhanced on `/qr/` and the homepage through shared
+`live-video.js`. An unmodified tap or click opens a native dialog and loads
+the matching video from the privacy-enhanced `youtube-nocookie.com` embed host. The iframe has no `src` before that explicit
 action and is cleared as soon as the dialog closes, which both avoids a
 premature third-party request and stops playback reliably. A card must not gain
 `data-inline-video` until its exact public video plays successfully in that
