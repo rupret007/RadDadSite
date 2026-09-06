@@ -51,6 +51,23 @@ describe('QR route aliases', () => {
         expect(assetFetch).not.toHaveBeenCalled();
     });
 
+    it('does not disguise a missing unlisted /private/ path as the homepage', async () => {
+        const assetResponse = new Response('missing', { status: 404 });
+        const assetFetch = vi.fn(async () => assetResponse);
+        const response = await worker.fetch(
+            new Request('https://raddadband.com/private/missing-band-lab', {
+                method: 'GET',
+                headers: { accept: 'text/html' }
+            }),
+            { ASSETS: { fetch: assetFetch } }
+        );
+
+        expect(response).toBe(assetResponse);
+        expect(response.status).toBe(404);
+        expect(response.headers.get('location')).toBeNull();
+        expect(assetFetch).toHaveBeenCalledOnce();
+    });
+
     it('recovers unknown public HTML paths at the real homepage address', async () => {
         const assetFetch = vi.fn(async () => new Response('missing', { status: 404 }));
 

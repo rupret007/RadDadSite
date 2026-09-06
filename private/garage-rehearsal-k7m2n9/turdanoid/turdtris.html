@@ -1,0 +1,2891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#120d0a">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="assets/turdsuite.css">
+<script src="games/table-continue-core.js"></script>
+<script src="assets/turdsuite.js"></script>
+<title>Turdtris Turbo</title>
+<style>
+:root {
+  --bg-a: #120d0a;
+  --bg-b: #2b1d16;
+  --bg-c: #4d3222;
+  --ink: #f6e4c5;
+  --accent: #ffcb87;
+  --accent-2: #8ee8c7;
+  --danger: #ff8f8f;
+  --panel: rgba(24, 14, 9, 0.76);
+  --panel-border: rgba(255, 203, 135, 0.3);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255, 185, 108, 0.24), transparent 35%),
+    radial-gradient(circle at 84% 10%, rgba(142, 232, 199, 0.18), transparent 30%),
+    linear-gradient(135deg, var(--bg-a), var(--bg-b) 45%, var(--bg-c));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(8px, 2.4vw, 18px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  isolation: isolate;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  border-radius: 999px;
+  filter: blur(14px);
+  opacity: 0.38;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body::before {
+  width: 240px;
+  height: 240px;
+  left: -54px;
+  top: 14vh;
+  background: radial-gradient(circle at 38% 34%, rgba(255, 203, 135, 0.46), transparent 30%), radial-gradient(circle at 60% 60%, rgba(142, 232, 199, 0.36), transparent 48%);
+}
+
+body::after {
+  width: 280px;
+  height: 280px;
+  right: -56px;
+  bottom: 8vh;
+  background: radial-gradient(circle at 44% 38%, rgba(255, 154, 88, 0.22), transparent 32%), radial-gradient(circle at 58% 62%, rgba(142, 232, 199, 0.26), transparent 48%);
+}
+
+.layout {
+  width: min(1120px, 96vw);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  padding: 14px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.layout::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 5px;
+  background: linear-gradient(90deg, transparent, rgba(255, 203, 135, 0.6) 25%, rgba(142, 232, 199, 0.55) 55%, rgba(255, 203, 135, 0.6) 80%, transparent);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.layout::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 22%, transparent 74%, rgba(255, 255, 255, 0.05)), radial-gradient(circle at 12% 18%, rgba(255, 203, 135, 0.08), transparent 28%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.topbar h1 {
+  font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #fff1d6 0%, var(--accent) 45%, #e39a4a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 16px rgba(255, 203, 135, 0.28)) drop-shadow(0 2px 0 rgba(60, 30, 0, 0.5));
+}
+
+.topbar p {
+  margin-top: 3px;
+  font-size: 0.84rem;
+  opacity: 0.86;
+}
+
+.top-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-menu {
+  display: none;
+  width: 100%;
+}
+
+.mobile-menu details {
+  border: 1px solid rgba(255, 203, 135, 0.35);
+  border-radius: 10px;
+  background: rgba(23, 14, 10, 0.84);
+  padding: 6px 8px;
+}
+
+.mobile-menu summary {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  user-select: none;
+}
+
+.mobile-menu-actions {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.btn {
+  border: 1px solid rgba(255, 203, 135, 0.45);
+  color: var(--accent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.01)), rgba(37, 22, 14, 0.78);
+  border-radius: 11px;
+  padding: 8px 12px;
+  min-height: 40px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 18px rgba(0, 0, 0, 0.25);
+  transition: transform 0.18s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn.subtle {
+  border-color: rgba(255, 203, 135, 0.28);
+  color: #f4dfbd;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)), rgba(29, 18, 12, 0.66);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)), rgba(52, 30, 18, 0.88);
+  border-color: rgba(255, 203, 135, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 22px rgba(0, 0, 0, 0.3), 0 0 16px rgba(255, 203, 135, 0.18);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.985);
+}
+
+.welcome-actions .btn:first-child,
+.overlay-card .btn {
+  background: linear-gradient(180deg, #ffe4b8 0%, #ffcb87 45%, #e39a4a 100%);
+  color: #3a2000;
+  border-color: rgba(255, 220, 160, 0.7);
+  box-shadow: 0 10px 24px rgba(255, 170, 80, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -2px 0 rgba(0, 0, 0, 0.18);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.welcome-actions .btn:first-child:hover,
+.overlay-card .btn:hover {
+  background: linear-gradient(180deg, #fff0d6 0%, #ffd79f 45%, #eba75a 100%);
+  border-color: rgba(255, 230, 180, 0.9);
+}
+
+.hud {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(90px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.card {
+  --tile-accent: rgba(255, 203, 135, 0.8);
+  position: relative;
+  border: 1px solid rgba(255, 203, 135, 0.22);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.012)), rgba(24, 14, 9, 0.74);
+  padding: 8px 8px 9px;
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 12px 24px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  left: 10px; right: 10px; top: 0;
+  height: 2px;
+  border-radius: 0 0 3px 3px;
+  background: var(--tile-accent);
+  opacity: 0.7;
+}
+
+.card .k {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0.72;
+}
+
+.card .v {
+  font-size: 1.2rem;
+  margin-top: 3px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 14px rgba(255, 203, 135, 0.25);
+}
+
+.card.warn { --tile-accent: var(--danger); }
+.card.good { --tile-accent: var(--accent-2); }
+.card.warn .v { color: var(--danger); text-shadow: 0 0 14px rgba(255, 143, 143, 0.35); }
+.card.good .v { color: var(--accent-2); text-shadow: 0 0 14px rgba(142, 232, 199, 0.35); }
+
+.game-grid {
+  display: grid;
+  grid-template-columns: auto minmax(260px, 400px);
+  justify-content: center;
+  gap: 14px;
+  align-items: start;
+}
+
+.board-wrap {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 203, 135, 0.42);
+  background: #12100f;
+  isolation: isolate;
+  margin: 6px;
+  padding: 8px;
+  width: fit-content;
+  box-shadow:
+    0 0 0 4px #3d2614,
+    0 0 0 5px rgba(255, 214, 150, 0.35),
+    0 0 0 8px #24160b,
+    0 26px 54px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.board-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.08), transparent 24%),
+    var(--suite-tiles, none);
+  background-size: auto, 96px 48px;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.board-wrap::after {
+  content: attr(data-motto);
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 156, 0.45);
+  background: linear-gradient(180deg, rgba(70, 44, 18, 0.9), rgba(43, 28, 13, 0.9));
+  color: #ffe1b0;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transform: rotate(-3deg);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+#game {
+  display: block;
+  width: min(440px, 78vw, 44dvh);
+  height: auto;
+  touch-action: none;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.45);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 4, 2, 0.82);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: none;
+  place-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.overlay-card {
+  width: min(360px, 100%);
+  border: 1px solid rgba(255, 203, 135, 0.42);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)),
+    var(--suite-tiles, none),
+    rgba(28, 18, 12, 0.97);
+  background-size: auto, 96px 48px, auto;
+  padding: 18px 16px;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 203, 135, 0.12), 0 0 40px rgba(255, 203, 135, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+  animation: overlayPop 0.34s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.overlay-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 24%, transparent 72%, rgba(255, 255, 255, 0.04)), radial-gradient(circle at 12% 18%, rgba(255, 203, 135, 0.1), transparent 28%);
+  pointer-events: none;
+}
+
+.overlay-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -30px -36px auto;
+  width: 150px;
+  height: 150px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 203, 135, 0.16), transparent 68%);
+  pointer-events: none;
+}
+
+.overlay-card[data-tone="victory"] {
+  border-color: rgba(142, 232, 199, 0.46);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(142, 232, 199, 0.18), 0 0 38px rgba(142, 232, 199, 0.16);
+}
+
+.overlay-card[data-tone="victory"]::after {
+  background: radial-gradient(circle, rgba(142, 232, 199, 0.22), transparent 68%);
+}
+
+.overlay-card[data-tone="gameover"] {
+  border-color: rgba(255, 143, 143, 0.38);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 143, 143, 0.12), 0 0 30px rgba(255, 104, 104, 0.12);
+}
+
+.overlay-kicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 203, 135, 0.34);
+  background: rgba(52, 31, 18, 0.74);
+  color: #ffe4b5;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.overlay-card[data-tone="victory"] .overlay-kicker {
+  border-color: rgba(142, 232, 199, 0.34);
+  background: rgba(24, 54, 44, 0.78);
+  color: #d3fff0;
+}
+
+.overlay-card h2 {
+  margin-bottom: 12px;
+  font-size: 1.7rem;
+  letter-spacing: 0.04em;
+  background: linear-gradient(180deg, #fff1d6 0%, var(--accent) 45%, #e39a4a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 14px rgba(255, 203, 135, 0.3));
+}
+
+.overlay-card[data-tone="victory"] h2 {
+  background: linear-gradient(180deg, #e9fff5 0%, var(--accent-2) 45%, #3cbd93 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.overlay-card p {
+  margin-bottom: 8px;
+}
+
+.overlay-flavor {
+  color: #e8d7b7;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.overlay-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.overlay-stat {
+  border: 1px solid rgba(255, 203, 135, 0.24);
+  border-radius: 12px;
+  background: rgba(19, 12, 8, 0.82);
+  padding: 9px;
+}
+
+.overlay-stat .k {
+  color: rgba(246, 228, 197, 0.72);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+}
+
+.overlay-stat .v {
+  margin-top: 4px;
+  font-size: 1.18rem;
+}
+
+@keyframes overlayPop {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.panel {
+  border: 1px solid rgba(255, 203, 135, 0.25);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)), rgba(24, 14, 9, 0.7);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 14px 30px rgba(0, 0, 0, 0.22);
+}
+
+.panel h3 {
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.preview-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.preview-box {
+  border: 1px solid rgba(255, 203, 135, 0.3);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)), rgba(18, 12, 8, 0.85);
+  padding: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.preview-box h3 {
+  margin-bottom: 5px;
+}
+
+.preview-box canvas {
+  width: 100%;
+  max-width: 180px;
+  margin: 0 auto;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+  background: #12100f;
+  box-shadow: inset 0 0 0 1px rgba(255, 203, 135, 0.2), inset 0 6px 14px rgba(0, 0, 0, 0.45);
+}
+
+.status {
+  border: 1px solid rgba(255, 203, 135, 0.22);
+  border-left: 3px solid rgba(255, 203, 135, 0.7);
+  border-radius: 10px;
+  background: rgba(16, 10, 6, 0.72);
+  padding: 8px 10px;
+  min-height: 64px;
+  font-size: 0.83rem;
+  line-height: 1.35;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+.status.hype {
+  border-color: rgba(255, 214, 156, 0.72);
+  box-shadow: 0 0 0 1px rgba(255, 214, 156, 0.35), 0 0 18px rgba(255, 154, 88, 0.24);
+  background: rgba(36, 21, 12, 0.76);
+  animation: statusPulse 0.9s ease-in-out infinite alternate;
+}
+
+.run-progress {
+  border: 1px solid rgba(143, 245, 198, 0.26);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(143, 245, 198, 0.08), rgba(16, 10, 6, 0.76));
+  padding: 9px 10px;
+}
+
+.run-progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.run-progress-head strong {
+  color: #8ff5c6;
+  font-variant-numeric: tabular-nums;
+}
+
+.run-progress-track {
+  height: 8px;
+  margin-top: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(143, 245, 198, 0.2);
+  border-radius: 999px;
+  background: rgba(4, 12, 9, 0.72);
+}
+
+.run-progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6ee7b7, #ffd68f);
+  box-shadow: 0 0 12px rgba(110, 231, 183, 0.4);
+  transition: width 0.24s ease;
+}
+
+.run-progress-copy {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+@keyframes statusPulse {
+  from { transform: translateY(0); }
+  to { transform: translateY(-1px); }
+}
+
+.controls {
+  font-size: 0.78rem;
+  opacity: 0.88;
+  line-height: 1.45;
+}
+
+.mobile-controls {
+  display: none;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.mobile-level-progress {
+  display: none;
+}
+
+.mobile-run-strip,
+.mobile-piece-queue {
+  display: none;
+}
+
+.control-btn.is-used {
+  opacity: 0.48;
+  filter: saturate(0.55);
+}
+
+.mobile-controls-main,
+.mobile-controls-meta {
+  display: grid;
+  gap: 8px;
+}
+
+.mobile-controls-main {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.mobile-controls-meta {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.control-btn {
+  border: 1px solid rgba(255, 203, 135, 0.45);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01)), rgba(20, 12, 8, 0.85);
+  color: var(--ink);
+  border-radius: 12px;
+  width: 100%;
+  min-width: 86px;
+  min-height: 44px;
+  padding: 9px 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -2px 0 rgba(0, 0, 0, 0.25), 0 6px 14px rgba(0, 0, 0, 0.3);
+  transition: transform 0.12s ease, background 0.15s ease;
+}
+
+.control-btn:active {
+  transform: translateY(1px) scale(0.97);
+  background: linear-gradient(180deg, rgba(255, 203, 135, 0.22), rgba(255, 203, 135, 0.08)), rgba(20, 12, 8, 0.9);
+}
+
+.welcome-guide {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 5, 3, 0.8);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 80;
+}
+
+.welcome-card {
+  width: min(560px, 100%);
+  border: 1px solid rgba(255, 203, 135, 0.45);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)),
+    var(--suite-tiles, none),
+    rgba(30, 18, 12, 0.97);
+  background-size: auto, 96px 48px, auto;
+  padding: 18px 20px;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 203, 135, 0.12), 0 0 44px rgba(255, 203, 135, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: overlayPop 0.34s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.welcome-card h2 {
+  margin-bottom: 8px;
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+  background: linear-gradient(180deg, #fff1d6 0%, var(--accent) 45%, #e39a4a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 14px rgba(255, 203, 135, 0.3));
+}
+
+.welcome-card p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.welcome-card ul {
+  margin: 6px 0 12px 18px;
+  line-height: 1.45;
+  font-size: 0.88rem;
+}
+
+.welcome-card li {
+  margin-bottom: 5px;
+}
+
+.welcome-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 980px) {
+  body {
+    padding: clamp(8px, 2.5vw, 12px);
+    padding-bottom: calc(232px + env(safe-area-inset-bottom));
+  }
+  .layout {
+    width: min(900px, 94vw);
+    padding: 10px;
+    border-radius: 18px;
+  }
+  .game-grid { grid-template-columns: 1fr; }
+  .board-wrap { margin: 6px auto; }
+  .board-wrap::after {
+    content: none;
+  }
+  .hud { grid-template-columns: repeat(3, minmax(90px, 1fr)); }
+  #game {
+    width: min(380px, 92vw, 42dvh);
+  }
+  .card .v {
+    font-size: 1rem;
+  }
+  .btn {
+    padding: 8px 11px;
+    font-size: 12px;
+    min-height: 42px;
+  }
+  .mobile-controls {
+    display: grid;
+    position: fixed;
+    left: 50%;
+    width: min(560px, calc(100vw - 16px));
+    margin: 0;
+    transform: translateX(-50%);
+    bottom: max(8px, env(safe-area-inset-bottom));
+    z-index: 30;
+    border: 1px solid rgba(255, 203, 135, 0.25);
+    border-radius: 12px;
+    background: rgba(26, 16, 10, 0.92);
+    padding: 7px;
+    padding-bottom: max(7px, env(safe-area-inset-bottom));
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  .mobile-run-strip {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+  }
+  .mobile-piece-queue {
+    display: grid;
+    grid-template-columns: 64px 64px;
+    gap: 6px;
+  }
+  .mobile-preview-box {
+    border: 1px solid rgba(255, 203, 135, 0.28);
+    border-radius: 8px;
+    background: rgba(12, 8, 6, 0.88);
+    padding: 3px 4px 4px;
+    text-align: center;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .mobile-preview-box span {
+    display: block;
+    color: #ffe4b5;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .mobile-preview-box canvas {
+    display: block;
+    width: 100%;
+    height: 36px;
+    border-radius: 5px;
+    background: #12100f;
+  }
+  .mobile-preview-box.is-used {
+    opacity: 0.62;
+  }
+  .mobile-level-progress {
+    display: grid;
+    grid-template-columns: auto minmax(48px, 1fr) auto;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+  }
+  .mobile-level-progress strong {
+    color: #8ff5c6;
+    font-variant-numeric: tabular-nums;
+  }
+  .mobile-level-track {
+    height: 5px;
+    overflow: hidden;
+    border: 1px solid rgba(143, 245, 198, 0.25);
+    border-radius: 999px;
+    background: rgba(4, 12, 9, 0.86);
+  }
+  .mobile-level-fill {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #6ee7b7, #ffd68f);
+    transition: width 0.24s ease;
+  }
+  .suite-back-pill {
+    bottom: max(218px, calc(var(--suite-safe-bot) + 214px));
+  }
+  .control-btn {
+    min-width: 82px;
+    min-height: 44px;
+    padding: 8px 10px;
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 680px) {
+  .layout {
+    width: min(760px, 94vw);
+    padding: 8px;
+  }
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .top-actions {
+    display: none;
+  }
+  .mobile-menu {
+    display: block;
+  }
+  .hud {
+    grid-template-columns: repeat(2, minmax(70px, 1fr));
+    gap: 6px;
+  }
+  #game {
+    width: min(360px, 94vw, 44dvh);
+  }
+  .status {
+    font-size: 0.76rem;
+    min-height: 52px;
+  }
+  .mobile-menu-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mobile-controls-main {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .mobile-controls-meta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .welcome-actions .btn {
+    flex: 1 1 140px;
+  }
+  .control-btn {
+    min-width: 78px;
+    min-height: 44px;
+    padding: 7px 9px;
+    font-size: 0.84rem;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .btn,
+  .control-btn {
+    min-height: 44px;
+  }
+}
+
+    /* === pb mascot + bonus banners === */
+    .pb-boss{position:fixed;right:max(12px,env(safe-area-inset-right) + 8px);bottom:max(64px,env(safe-area-inset-bottom) + 56px);z-index:9999;width:74px;height:74px;display:flex;align-items:flex-end;justify-content:center;pointer-events:none;font-size:54px;line-height:1;filter:drop-shadow(0 6px 16px rgba(0,0,0,.5));transition:transform .25s cubic-bezier(.2,1.6,.4,1);user-select:none}
+    .pb-boss.bounce{animation:pbBounce .55s ease}
+    .pb-boss.shake{animation:pbShake .35s ease}
+    .pb-boss.cheer{animation:pbCheer .7s ease}
+    @keyframes pbBounce{0%{transform:translateY(0)}30%{transform:translateY(-12px) scale(1.08)}60%{transform:translateY(2px) scale(.96)}100%{transform:translateY(0) scale(1)}}
+    @keyframes pbShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px) rotate(-4deg)}50%{transform:translateX(5px) rotate(4deg)}75%{transform:translateX(-3px) rotate(-2deg)}}
+    @keyframes pbCheer{0%{transform:translateY(0) rotate(0)}25%{transform:translateY(-8px) rotate(-12deg)}50%{transform:translateY(-12px) rotate(8deg)}75%{transform:translateY(-6px) rotate(-6deg)}100%{transform:translateY(0) rotate(0)}}
+    .pb-bubble{position:fixed;right:max(98px,env(safe-area-inset-right) + 92px);bottom:max(104px,env(safe-area-inset-bottom) + 96px);z-index:9998;max-width:240px;padding:10px 14px;font:600 13px/1.35 'Trebuchet MS','Segoe UI',system-ui,sans-serif;color:#0f1914;background:linear-gradient(180deg,#fffaf0,#fbe7c1);border:1px solid rgba(0,0,0,.15);border-radius:14px;box-shadow:0 12px 28px rgba(0,0,0,.4);opacity:0;transform:translateY(8px) scale(.92);transform-origin:bottom right;transition:opacity .22s ease,transform .25s cubic-bezier(.2,1.6,.4,1);pointer-events:none;letter-spacing:.01em}
+    .pb-bubble::after{content:"";position:absolute;right:-6px;bottom:14px;width:14px;height:14px;background:linear-gradient(135deg,#fbe7c1,#fffaf0);border-right:1px solid rgba(0,0,0,.15);border-bottom:1px solid rgba(0,0,0,.15);transform:rotate(-45deg)}
+    .pb-bubble.show{opacity:1;transform:translateY(0) scale(1)}
+    .pb-banner{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%) scale(.4);z-index:9997;font:900 clamp(20px,5vw,28px) 'Trebuchet MS','Segoe UI',system-ui,sans-serif;color:#fff;text-shadow:0 0 24px rgba(255,215,106,.95),0 4px 14px rgba(0,0,0,.7);text-align:center;letter-spacing:.06em;pointer-events:none;opacity:0;transition:opacity .25s ease,transform .35s cubic-bezier(.2,1.6,.4,1);text-transform:uppercase;white-space:nowrap}
+    .pb-banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    .pb-banner.cold{color:#cdd5ff;text-shadow:0 0 22px rgba(122,230,255,.85),0 4px 12px rgba(0,0,0,.7)}
+
+    /* danger-zone overlay */
+    .pb-danger{position:fixed;inset:0;pointer-events:none;z-index:9996;border:6px solid transparent;box-sizing:border-box;transition:border-color .2s ease,box-shadow .25s ease}
+    .pb-danger.warn{border-color:rgba(255,140,80,.55);box-shadow:inset 0 0 60px rgba(255,140,80,.25);animation:pbPulse 1.2s infinite}
+    .pb-danger.alarm{border-color:rgba(255,80,80,.85);box-shadow:inset 0 0 80px rgba(255,80,80,.4);animation:pbPulse .55s infinite}
+    @keyframes pbPulse{0%,100%{opacity:.45}50%{opacity:1}}
+
+    @media (max-width: 980px) {
+      .pb-boss{bottom:max(218px,calc(env(safe-area-inset-bottom) + 212px))}
+      .pb-bubble{bottom:max(258px,calc(env(safe-area-inset-bottom) + 252px))}
+    }
+
+  </style>
+</head>
+<body class="suite-ambient suite-no-zoom">
+<div class="welcome-guide" id="welcomeGuide">
+  <div class="welcome-card">
+    <h2>Turdtris Turbo</h2>
+    <p>Stack clean, survive level modifiers, and score big with combos and back-to-back clears.</p>
+    <ul>
+      <li><strong>Move:</strong> Left/Right arrows</li>
+      <li><strong>Rotate:</strong> Up or <strong>X</strong> (clockwise), <strong>Z</strong> (counterclockwise)</li>
+      <li><strong>Soft Drop:</strong> Down arrow</li>
+      <li><strong>Hard Drop:</strong> Space</li>
+      <li><strong>Hold Piece:</strong> <strong>C</strong></li>
+      <li><strong>Pause:</strong> <strong>P</strong></li>
+    </ul>
+    <p>Tip: Use hold + ghost piece to plan Tetrises and T-Spins instead of panic-drops.</p>
+    <div class="welcome-actions">
+      <button class="btn" onclick="quickStartRun()">Quick Start</button>
+      <button class="btn subtle" onclick="hideWelcomeGuide()">Review Then Start</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="topbar">
+    <div>
+      <h1>Turdtris Turbo</h1>
+      <p>Hold system, ghost piece, chaos modifiers, and the energy of a suspiciously spicy arcade booth.</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn subtle" onclick="location.href='./'">🏠 Hub</button>
+      <button class="btn" onclick="showWelcomeGuide()">❓ How To Play</button>
+      <button class="btn" onclick="togglePause()">⏯ Pause / Resume</button>
+      <button class="btn" data-sound-toggle onclick="toggleSound()">🔊 Sound On</button>
+      <button class="btn" onclick="restartGame()">↻ Restart</button>
+    </div>
+    <div class="mobile-menu">
+      <details>
+        <summary>Run Menu</summary>
+        <div class="mobile-menu-actions">
+          <button class="btn subtle" onclick="location.href='./'">🏠 Hub</button>
+          <button class="btn" onclick="showWelcomeGuide()">❓ Guide</button>
+          <button class="btn" onclick="togglePause()">⏯ Pause</button>
+          <button class="btn" data-sound-toggle onclick="toggleSound()">🔊 Sound</button>
+          <button class="btn" onclick="restartGame()">↻ Restart</button>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="hud">
+    <div class="card"><div class="k">Score</div><div class="v" id="score">0</div></div>
+    <div class="card"><div class="k">High</div><div class="v" id="highScore">0</div></div>
+    <div class="card"><div class="k">Level</div><div class="v" id="level">1</div></div>
+    <div class="card"><div class="k">Lines</div><div class="v" id="lines">0</div></div>
+    <div class="card warn"><div class="k">Combo</div><div class="v" id="combo">0</div></div>
+    <div class="card good"><div class="k">B2B</div><div class="v" id="b2b">0</div></div>
+  </div>
+
+  <div class="game-grid">
+    <div class="board-wrap" data-motto="Stack clean. Panic dirty.">
+      <canvas width="320" height="640" id="game"></canvas>
+
+      <div class="overlay" id="pauseOverlay">
+        <div class="overlay-card">
+          <div class="overlay-kicker">Breather Break</div>
+          <h2>Paused</h2>
+          <p>Press P or Space to resume.</p>
+          <button class="btn" onclick="togglePause()">Resume</button>
+        </div>
+      </div>
+
+      <div class="overlay" id="gameOverOverlay">
+        <div class="overlay-card" id="endOverlayCard" data-tone="gameover">
+          <div class="overlay-kicker" id="endKicker">Pipe Jam</div>
+          <h2 id="endTitle">Game Over</h2>
+          <p class="overlay-flavor" id="endFlavor">The stack fought back.</p>
+          <div class="overlay-stats">
+            <div class="overlay-stat"><div class="k">Final Score</div><div class="v" id="finalScore">0</div></div>
+            <div class="overlay-stat"><div class="k">Lines Cleared</div><div class="v" id="finalLines">0</div></div>
+            <div class="overlay-stat"><div class="k" id="endBestLabel">Best</div><div class="v" id="endBest">0</div></div>
+          </div>
+          <p class="overlay-flavor">Space or Enter runs it back.</p>
+          <button class="btn" onclick="restartGame()">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <div class="preview-row">
+        <div class="preview-box">
+          <h3>Hold</h3>
+          <canvas width="120" height="80" id="hold"></canvas>
+        </div>
+        <div class="preview-box">
+          <h3>Next</h3>
+          <canvas width="120" height="80" id="next"></canvas>
+        </div>
+      </div>
+
+      <div class="run-progress">
+        <div class="run-progress-head"><span>Next flush</span><strong id="levelProgressText">0 / 8 lines</strong></div>
+        <div class="run-progress-track" id="levelProgressBar" role="progressbar" aria-label="Lines toward the next Turdtris level" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" aria-valuetext="0 of 8 lines">
+          <div class="run-progress-fill" id="levelProgressFill"></div>
+        </div>
+        <p class="run-progress-copy" id="nextLevelPreview">Clear 8 more lines to reach Level 2. Warmup Flow adds no garbage yet.</p>
+      </div>
+
+      <div>
+        <h3>Status</h3>
+        <div class="status" id="statusText">Stack clean, survive long, and chain line clears.</div>
+      </div>
+
+      <div>
+        <h3>Controls</h3>
+        <div class="controls">
+          Left/Right: Move<br>
+          Up or X: Rotate<br>
+          Z: Rotate CCW<br>
+          Down: Soft Drop<br>
+          Space: Hard Drop<br>
+          C: Hold Piece<br>
+          P: Pause<br>
+          M: Sound
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="mobile-controls" id="mobileControls">
+    <div class="mobile-run-strip">
+      <div class="mobile-piece-queue" id="mobilePieceQueue">
+        <div class="mobile-preview-box" id="mobileHoldBox">
+          <span>Hold</span>
+          <canvas width="120" height="80" id="mobileHold" aria-label="Held piece"></canvas>
+        </div>
+        <div class="mobile-preview-box">
+          <span>Next</span>
+          <canvas width="120" height="80" id="mobileNext" aria-label="Next piece"></canvas>
+        </div>
+      </div>
+      <div class="mobile-level-progress">
+        <span>Next flush</span>
+        <div class="mobile-level-track" id="mobileLevelProgressBar" role="progressbar" aria-label="Lines toward the next Turdtris level on mobile" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" aria-valuetext="0 of 8 lines">
+          <div class="mobile-level-fill" id="mobileLevelProgressFill"></div>
+        </div>
+        <strong id="mobileLevelProgressText">0 / 8</strong>
+      </div>
+    </div>
+    <div class="mobile-controls-main">
+      <button class="control-btn" data-action="left">Left</button>
+      <button class="control-btn" data-action="rotate">Rotate</button>
+      <button class="control-btn" data-action="right">Right</button>
+      <button class="control-btn" data-action="drop">Drop</button>
+    </div>
+    <div class="mobile-controls-meta">
+      <button class="control-btn" data-action="down">Down</button>
+      <button class="control-btn" data-action="hold">Hold</button>
+      <button class="control-btn" data-action="pause">Pause</button>
+    </div>
+</div>
+
+<script>
+// Turdtris Turbo - enhanced with Tetris Guideline-inspired systems.
+let score = 0;
+function readStoredHighScore() {
+  try {
+    const parsed = parseInt(localStorage.getItem('turdtrisHighScore') || '0', 10);
+    if (!Number.isFinite(parsed) || parsed < 0) return 0;
+    return Math.min(Number.MAX_SAFE_INTEGER, parsed);
+  } catch (err) {
+    return 0;
+  }
+}
+
+let highScore = readStoredHighScore();
+let runBestAtStart = highScore;
+let level = 1;
+let linesCleared = 0;
+let levelLines = 0;
+let levelGoal = 8;
+let combo = 0;
+let b2b = 0;
+let softDrop = false;
+let paused = false;
+let gameOver = false;
+let statusText = 'Guideline-inspired run: SRS, bag randomizer, and escalating garbage.';
+let activeMutator = 'Warmup Flow';
+let sceneShake = 0;
+let hypeText = '';
+let hypeTimer = 0;
+const SOUND_STORAGE_KEY = 'turdtrisSoundOn_v1';
+let soundEnabled = true;
+let audioCtx = null;
+
+const TURDTRIS_BALANCE = {
+  linesGoalBands: [
+    { maxLevel: 5, goal: 8 },
+    { maxLevel: 15, goal: 10 },
+    { maxLevel: 30, goal: 12 },
+    { maxLevel: 45, goal: 14 },
+    { maxLevel: 60, goal: 16 },
+    { maxLevel: 80, goal: 18 },
+    { maxLevel: 999, goal: 20 }
+  ],
+  clutch: {
+    stackHeightThreshold: 14,
+    scoreScale: 0.2
+  },
+  modifiers: {
+    baseDivisor: 3,
+    maxGarbageLines: 8,
+    cheeseBase: 0.06,
+    cheeseScale: 0.012
+  }
+};
+
+const grid = 32;
+const rows = 22; // 20 visible + 2 hidden
+const cols = 10;
+const MAX_LEVEL = 69;
+const lockDelayMs = 500;
+const maxMoveResets = 12;
+
+const themes = [
+  { name: 'Amber Brick', bgA: '#140f0c', bgB: '#2d1f17', grid: 'rgba(255,225,190,0.08)', ghost: 'rgba(255,219,175,0.2)' },
+  { name: 'Mint Sewer', bgA: '#0d1a16', bgB: '#123328', grid: 'rgba(180,255,220,0.08)', ghost: 'rgba(170,255,210,0.2)' },
+  { name: 'Neon Flush', bgA: '#151227', bgB: '#2a1f45', grid: 'rgba(204,184,255,0.08)', ghost: 'rgba(220,200,255,0.2)' },
+  { name: 'Deep Rust', bgA: '#24140f', bgB: '#4a2d1f', grid: 'rgba(255,200,160,0.08)', ghost: 'rgba(255,214,180,0.2)' }
+];
+
+const pieceColors = {
+  I: '#72dbff',
+  J: '#7f9dff',
+  L: '#ffb274',
+  O: '#ffe181',
+  S: '#83f7ae',
+  Z: '#ff8f99',
+  T: '#d6a2ff',
+  G: '#6f5d4f'
+};
+
+const lineScores = [0, 100, 300, 500, 800];
+const tspinScores = [0, 400, 800, 1200, 1600];
+
+const gravityTable = [
+  1000, 793, 618, 473, 355, 262, 190, 135, 94, 64,
+  43, 28, 18, 11, 7, 5, 4, 3, 2, 1
+];
+
+const canvas = document.getElementById('game');
+const context = canvas ? canvas.getContext('2d') : null;
+const nextCanvas = document.getElementById('next');
+const nextContext = nextCanvas ? nextCanvas.getContext('2d') : null;
+const holdCanvas = document.getElementById('hold');
+const holdContext = holdCanvas ? holdCanvas.getContext('2d') : null;
+const mobileNextCanvas = document.getElementById('mobileNext');
+const mobileNextContext = mobileNextCanvas ? mobileNextCanvas.getContext('2d') : null;
+const mobileHoldCanvas = document.getElementById('mobileHold');
+const mobileHoldContext = mobileHoldCanvas ? mobileHoldCanvas.getContext('2d') : null;
+
+// Render-only: the board is drawn in logical 320x640 units; the canvas
+// backing store is scaled by devicePixelRatio so tiles stay crisp on phones.
+const BOARD_W = cols * grid;
+const BOARD_H = 20 * grid;
+const PREVIEW_W = 120;
+const PREVIEW_H = 80;
+const DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
+function setupHiDpi(target, w, h) {
+  if (!target) return;
+  target.width = Math.round(w * DPR);
+  target.height = Math.round(h * DPR);
+}
+setupHiDpi(canvas, BOARD_W, BOARD_H);
+setupHiDpi(nextCanvas, PREVIEW_W, PREVIEW_H);
+setupHiDpi(holdCanvas, PREVIEW_W, PREVIEW_H);
+setupHiDpi(mobileNextCanvas, PREVIEW_W, PREVIEW_H);
+setupHiDpi(mobileHoldCanvas, PREVIEW_W, PREVIEW_H);
+
+// Render-only effect lists (never read by game logic).
+let lockFlashes = [];
+let clearSparks = [];
+
+const playfield = [];
+for (let row = 0; row < rows; row++) {
+  playfield[row] = new Array(cols).fill(0);
+}
+
+const tetrominos = {
+  I: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+  J: [[1,0,0],[1,1,1],[0,0,0]],
+  L: [[0,0,1],[1,1,1],[0,0,0]],
+  O: [[1,1],[1,1]],
+  S: [[0,1,1],[1,1,0],[0,0,0]],
+  Z: [[1,1,0],[0,1,1],[0,0,0]],
+  T: [[0,1,0],[1,1,1],[0,0,0]]
+};
+
+const srsJlstz = {
+  '0>1': [[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],
+  '1>0': [[0,0],[1,0],[1,-1],[0,2],[1,2]],
+  '1>2': [[0,0],[1,0],[1,-1],[0,2],[1,2]],
+  '2>1': [[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],
+  '2>3': [[0,0],[1,0],[1,1],[0,-2],[1,-2]],
+  '3>2': [[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],
+  '3>0': [[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],
+  '0>3': [[0,0],[1,0],[1,1],[0,-2],[1,-2]]
+};
+
+const srsI = {
+  '0>1': [[0,0],[-2,0],[1,0],[-2,-1],[1,2]],
+  '1>0': [[0,0],[2,0],[-1,0],[2,1],[-1,-2]],
+  '1>2': [[0,0],[-1,0],[2,0],[-1,2],[2,-1]],
+  '2>1': [[0,0],[1,0],[-2,0],[1,-2],[-2,1]],
+  '2>3': [[0,0],[2,0],[-1,0],[2,1],[-1,-2]],
+  '3>2': [[0,0],[-2,0],[1,0],[-2,-1],[1,2]],
+  '3>0': [[0,0],[1,0],[-2,0],[1,-2],[-2,1]],
+  '0>3': [[0,0],[-1,0],[2,0],[-1,2],[2,-1]]
+};
+
+const tetrominoSequence = [];
+let tetromino = null;
+let nextTetromino = null;
+let holdName = null;
+let canHold = true;
+
+let clearEffects = [];
+let floatTexts = [];
+let recentMoveWasRotate = false;
+let lastKickUsed = false;
+
+let dropAccumulator = 0;
+let lockAccumulator = 0;
+let lockResets = 0;
+const MAX_FRAME_MS = 33;
+let lastFrameTime = 0;
+let rAF = null;
+let onboardingOpen = false;
+let guidePausedGame = false;
+let clearHoldIntervalRef = () => {};
+
+function stopLoop() {
+  if (rAF) {
+    cancelAnimationFrame(rAF);
+    rAF = null;
+  }
+}
+
+function clampFrameDelta(delta) {
+  if (!Number.isFinite(delta) || delta <= 0) return 0;
+  return Math.min(MAX_FRAME_MS, delta);
+}
+
+function ensureLoopRunning() {
+  if (rAF || gameOver || paused) return;
+  lastFrameTime = performance.now();
+  rAF = requestAnimationFrame(loop);
+}
+
+function showWelcomeGuide() {
+  const guide = document.getElementById('welcomeGuide');
+  if (guide) guide.style.display = 'flex';
+  onboardingOpen = true;
+  guidePausedGame = !paused && !gameOver;
+  if (guidePausedGame) {
+    paused = true;
+    stopLoop();
+    const overlayEl = document.getElementById('pauseOverlay');
+    if (overlayEl) overlayEl.style.display = 'none';
+  }
+}
+
+function hideWelcomeGuide() {
+  const guide = document.getElementById('welcomeGuide');
+  if (guide) guide.style.display = 'none';
+  onboardingOpen = false;
+  if (window.Suite && Suite.guide) Suite.guide.mark('turdtris.html');
+  if (guidePausedGame && !gameOver) paused = false;
+  const overlayEl = document.getElementById('pauseOverlay');
+  if (overlayEl) overlayEl.style.display = paused ? 'grid' : 'none';
+  guidePausedGame = false;
+  ensureLoopRunning();
+}
+
+function quickStartRun() {
+  hideWelcomeGuide();
+  unlockAudio();
+  statusText = 'Quick start live. Stack clean and trust your ghost piece.';
+  setHype('Quick start active. Build filthy combos.', 90);
+  playSfx('level');
+  ensureLoopRunning();
+  updateScore();
+}
+
+function handleWindowBlur() {
+  softDrop = false;
+  clearHoldIntervalRef();
+  stopLoop();
+  if (!paused && !gameOver && !onboardingOpen) {
+    paused = true;
+    const overlayEl = document.getElementById('pauseOverlay');
+    if (overlayEl) overlayEl.style.display = 'grid';
+    setHype('Auto-paused. The stack held its nose.', 84);
+  }
+}
+
+function loadSoundPref() {
+  try {
+    const raw = localStorage.getItem(SOUND_STORAGE_KEY);
+    if (raw === null) return true;
+    return raw !== '0';
+  } catch (err) {
+    return true;
+  }
+}
+
+function saveSoundPref() {
+  try {
+    localStorage.setItem(SOUND_STORAGE_KEY, soundEnabled ? '1' : '0');
+  } catch (err) {}
+}
+
+function updateSoundButtons() {
+  document.querySelectorAll('[data-sound-toggle]').forEach((btn) => {
+    btn.textContent = soundEnabled ? '🔊 Sound On' : '🔈 Sound Off';
+  });
+}
+
+function ensureAudio() {
+  if (audioCtx) return audioCtx;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  try {
+    audioCtx = new Ctx();
+  } catch (err) {
+    audioCtx = null;
+  }
+  return audioCtx;
+}
+
+function unlockAudio() {
+  if (!soundEnabled) return;
+  const ctx = ensureAudio();
+  if (!ctx) return;
+  if (ctx.state === 'suspended') {
+    ctx.resume().catch(() => {});
+  }
+}
+
+function playSfx(type) {
+  if (!soundEnabled) return;
+  const ctx = ensureAudio();
+  if (!ctx || ctx.state !== 'running') return;
+
+  const profileMap = {
+    rotate: { f: 520, dur: 0.05, wave: 'triangle', vol: 0.03 },
+    hold: { f: 430, dur: 0.08, wave: 'triangle', vol: 0.04 },
+    drop: { f: 280, dur: 0.08, wave: 'square', vol: 0.04 },
+    lock: { f: 210, dur: 0.06, wave: 'sawtooth', vol: 0.03 },
+    clear: { f: 760, dur: 0.11, wave: 'triangle', vol: 0.05 },
+    level: { f: 900, dur: 0.14, wave: 'triangle', vol: 0.05 },
+    pause: { f: 310, dur: 0.08, wave: 'square', vol: 0.035 },
+    victory: { f: 1040, dur: 0.2, wave: 'triangle', vol: 0.06 },
+    gameover: { f: 120, dur: 0.2, wave: 'sawtooth', vol: 0.055 }
+  };
+
+  const p = profileMap[type] || profileMap.lock;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = p.wave;
+    osc.frequency.setValueAtTime(p.f, now);
+    gain.gain.setValueAtTime(p.vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + p.dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + p.dur);
+  } catch (err) {}
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  saveSoundPref();
+  updateSoundButtons();
+  if (soundEnabled) {
+    unlockAudio();
+    setHype('Sound online. Sewer orchestra armed.', 84);
+    playSfx('level');
+  } else {
+    setHype('Sound muted. Silent stink mode.', 84);
+  }
+  updateScore();
+}
+
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generateSequence() {
+  const sequence = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
+  while (sequence.length) {
+    const rand = getRandomInt(0, sequence.length - 1);
+    tetrominoSequence.push(sequence.splice(rand, 1)[0]);
+  }
+}
+
+function getGravityMs() {
+  if (level <= gravityTable.length) return gravityTable[level - 1];
+  return 1;
+}
+
+function getLinesGoalForLevel(currentLevel) {
+  for (let i = 0; i < TURDTRIS_BALANCE.linesGoalBands.length; i++) {
+    const band = TURDTRIS_BALANCE.linesGoalBands[i];
+    if (currentLevel <= band.maxLevel) return band.goal;
+  }
+  return 20;
+}
+
+function setHype(message, durationMs) {
+  if (!message) return;
+  hypeText = message;
+  hypeTimer = Math.max(hypeTimer, durationMs || 90);
+}
+
+function triggerSceneShake(amount) {
+  sceneShake = Math.min(16, Math.max(sceneShake, amount || 0));
+}
+
+function updateSceneFx() {
+  if (hypeTimer > 0) hypeTimer--;
+  else hypeText = '';
+
+  if (sceneShake > 0) {
+    sceneShake *= 0.86;
+    if (sceneShake < 0.2) sceneShake = 0;
+  }
+}
+
+function getDangerRatio() {
+  return Math.max(0, Math.min(1, (getStackHeight() - 10) / 10));
+}
+
+function copyMatrix(matrix) {
+  return matrix.map((row) => row.slice());
+}
+
+function getNextTetromino() {
+  if (tetrominoSequence.length === 0) generateSequence();
+  const name = tetrominoSequence.pop();
+  const matrix = tetrominos[name];
+  if (!matrix) return getNextTetromino();
+
+  const matrixWidth = matrix[0] ? matrix[0].length : 0;
+  const col = Math.max(0, Math.floor((cols - matrixWidth) / 2));
+  const row = name === 'I' ? -1 : -2;
+
+  return {
+    name,
+    matrix: copyMatrix(matrix),
+    row,
+    col,
+    rotation: 0,
+    lastActionRotate: false,
+    lastKick: false
+  };
+}
+
+function rotateCW(matrix) {
+  const N = matrix.length - 1;
+  return matrix.map((row, i) => row.map((val, j) => matrix[N - j][i]));
+}
+
+function rotateCCW(matrix) {
+  const N = matrix.length - 1;
+  return matrix.map((row, i) => row.map((val, j) => matrix[j][N - i]));
+}
+
+function isValidMove(matrix, cellRow, cellCol) {
+  for (let row = 0; row < matrix.length; row++) {
+    for (let col = 0; col < matrix[row].length; col++) {
+      if (!matrix[row][col]) continue;
+      const targetRow = cellRow + row;
+      const targetCol = cellCol + col;
+      if (targetCol < 0 || targetCol >= cols || targetRow >= rows) return false;
+      if (targetRow >= 0 && playfield[targetRow][targetCol]) return false;
+    }
+  }
+  return true;
+}
+
+function recoverSpawnPlacement(piece) {
+  if (!piece) return false;
+  const rowShifts = [0, -1, -2];
+  const colOffsets = [0, -1, 1, -2, 2, -3, 3];
+  for (let r = 0; r < rowShifts.length; r++) {
+    for (let c = 0; c < colOffsets.length; c++) {
+      const testRow = piece.row + rowShifts[r];
+      const testCol = piece.col + colOffsets[c];
+      if (isValidMove(piece.matrix, testRow, testCol)) {
+        piece.row = testRow;
+        piece.col = testCol;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function getKickData(pieceName, from, to) {
+  const key = `${from}>${to}`;
+  if (pieceName === 'O') return [[0, 0]];
+  if (pieceName === 'I') return srsI[key] || [[0, 0]];
+  return srsJlstz[key] || [[0, 0]];
+}
+
+function tryRotate(direction) {
+  if (!tetromino || gameOver || paused) return;
+
+  const from = tetromino.rotation;
+  const to = (from + direction + 4) % 4;
+  const rotated = direction > 0 ? rotateCW(tetromino.matrix) : rotateCCW(tetromino.matrix);
+  const kicks = getKickData(tetromino.name, from, to);
+
+  for (let i = 0; i < kicks.length; i++) {
+    const [kickX, kickY] = kicks[i];
+    const testCol = tetromino.col + kickX;
+    const testRow = tetromino.row - kickY;
+    if (isValidMove(rotated, testRow, testCol)) {
+      tetromino.matrix = rotated;
+      tetromino.col = testCol;
+      tetromino.row = testRow;
+      tetromino.rotation = to;
+      tetromino.lastActionRotate = true;
+      tetromino.lastKick = i > 0;
+      recentMoveWasRotate = true;
+      lastKickUsed = i > 0;
+      resetLockDelayOnAction();
+      playSfx('rotate');
+      return;
+    }
+  }
+}
+
+function spawnNextPiece() {
+  if (!nextTetromino) nextTetromino = getNextTetromino();
+  tetromino = nextTetromino;
+  nextTetromino = getNextTetromino();
+
+  canHold = true;
+  recentMoveWasRotate = false;
+  lastKickUsed = false;
+  lockAccumulator = 0;
+  lockResets = 0;
+
+  drawNextPreview();
+  drawHoldPreview();
+
+  if (!isValidMove(tetromino.matrix, tetromino.row, tetromino.col)) {
+    if (!recoverSpawnPlacement(tetromino)) {
+      showGameOver();
+      return;
+    }
+    statusText = 'Spawn squeeze saved. Keep stacking.';
+  }
+}
+
+function holdCurrentPiece() {
+  if (!tetromino || gameOver || paused) return;
+  if (!canHold) {
+    statusText = 'Hold already used this piece.';
+    updateScore();
+    return;
+  }
+
+  const currentName = tetromino.name;
+  if (!holdName) {
+    holdName = currentName;
+    spawnNextPiece();
+  } else {
+    const swap = holdName;
+    holdName = currentName;
+    const matrix = tetrominos[swap];
+    if (!matrix) return;
+
+    tetromino = {
+      name: swap,
+      matrix: copyMatrix(matrix),
+      row: swap === 'I' ? -1 : -2,
+      col: Math.max(0, Math.floor((cols - matrix[0].length) / 2)),
+      rotation: 0,
+      lastActionRotate: false,
+      lastKick: false
+    };
+
+    if (!isValidMove(tetromino.matrix, tetromino.row, tetromino.col)) {
+      if (!recoverSpawnPlacement(tetromino)) {
+        showGameOver();
+        return;
+      }
+      statusText = `Holding ${holdName}. Spawn squeeze saved.`;
+    }
+  }
+
+  statusText = `Holding ${holdName}.`;
+  canHold = false;
+  lockAccumulator = 0;
+  drawHoldPreview();
+  playSfx('hold');
+}
+
+function movePiece(offset) {
+  if (!tetromino || gameOver || paused) return;
+  const nextCol = tetromino.col + offset;
+  if (isValidMove(tetromino.matrix, tetromino.row, nextCol)) {
+    tetromino.col = nextCol;
+    tetromino.lastActionRotate = false;
+    resetLockDelayOnAction();
+  }
+}
+
+function softDropStep() {
+  if (!tetromino || gameOver || paused) return;
+
+  const nextRow = tetromino.row + 1;
+  if (isValidMove(tetromino.matrix, nextRow, tetromino.col)) {
+    tetromino.row = nextRow;
+    score = Math.min(Number.MAX_SAFE_INTEGER, score + 1);
+    tetromino.lastActionRotate = false;
+  } else {
+    lockPiece();
+  }
+}
+
+function hardDrop() {
+  if (!tetromino || gameOver || paused) return;
+  let distance = 0;
+  while (isValidMove(tetromino.matrix, tetromino.row + 1, tetromino.col)) {
+    tetromino.row++;
+    distance++;
+  }
+  score = Math.min(Number.MAX_SAFE_INTEGER, score + distance * 2);
+  playSfx('drop');
+  lockPiece();
+}
+
+function resetLockDelayOnAction() {
+  if (lockResets < maxMoveResets) {
+    lockAccumulator = 0;
+    lockResets++;
+  }
+}
+
+function isGrounded(piece) {
+  return !isValidMove(piece.matrix, piece.row + 1, piece.col);
+}
+
+function isTSpin(piece) {
+  if (!piece || piece.name !== 'T' || !piece.lastActionRotate) return false;
+
+  const centerRow = piece.row + 1;
+  const centerCol = piece.col + 1;
+  const corners = [
+    [centerRow - 1, centerCol - 1],
+    [centerRow - 1, centerCol + 1],
+    [centerRow + 1, centerCol - 1],
+    [centerRow + 1, centerCol + 1]
+  ];
+
+  let occupied = 0;
+  for (const [r, c] of corners) {
+    if (r < 0 || r >= rows || c < 0 || c >= cols || playfield[r][c]) occupied++;
+  }
+
+  return occupied >= 3;
+}
+
+function buildLevelMutator(newLevel) {
+  const cfg = TURDTRIS_BALANCE.modifiers;
+  const baseLines = Math.min(cfg.maxGarbageLines, Math.floor((newLevel - 1) / cfg.baseDivisor));
+  const cheeseChance = Math.min(0.35, cfg.cheeseBase + newLevel * cfg.cheeseScale);
+
+  if (newLevel >= 64 && newLevel % 2 === 0) {
+    return {
+      name: 'Abyss Funnel',
+      lines: Math.min(cfg.maxGarbageLines, baseLines + 3),
+      dualHoles: true,
+      horizontalDrift: 2,
+      cheeseChance: Math.min(0.45, cheeseChance + 0.14)
+    };
+  }
+
+  if (newLevel >= 58 && newLevel % 5 === 0) {
+    return {
+      name: 'Madness Surge',
+      lines: Math.min(cfg.maxGarbageLines, baseLines + 2),
+      dualHoles: true,
+      horizontalDrift: 2,
+      cheeseChance: Math.min(0.42, cheeseChance + 0.12)
+    };
+  }
+
+  if (newLevel >= 46 && newLevel % 4 === 0) {
+    return {
+      name: 'Chaos Drift',
+      lines: Math.min(cfg.maxGarbageLines, baseLines + 1),
+      dualHoles: true,
+      horizontalDrift: 2,
+      cheeseChance: Math.min(0.38, cheeseChance + 0.08)
+    };
+  }
+
+  if (newLevel >= 28 && newLevel % 3 === 0) {
+    return {
+      name: 'Twin Sewer',
+      lines: Math.min(cfg.maxGarbageLines, baseLines + 1),
+      dualHoles: true,
+      horizontalDrift: 1,
+      cheeseChance: Math.min(0.32, cheeseChance + 0.05)
+    };
+  }
+
+  return {
+    name: 'Sewer Rise',
+    lines: baseLines,
+    dualHoles: false,
+    horizontalDrift: 1,
+    cheeseChance
+  };
+}
+
+function applyLevelModifier(newLevel) {
+  const mutator = buildLevelMutator(newLevel);
+  if (mutator.lines <= 0) {
+    activeMutator = 'Warmup Flow';
+    return;
+  }
+
+  let holeA = getRandomInt(0, cols - 1);
+  let holeB = getRandomInt(0, cols - 1);
+
+  for (let i = 0; i < mutator.lines; i++) {
+    playfield.shift();
+    const garbage = new Array(cols).fill('G');
+
+    if (mutator.dualHoles) {
+      while (Math.abs(holeB - holeA) < 2) {
+        holeB = getRandomInt(0, cols - 1);
+      }
+      garbage[holeA] = 0;
+      garbage[holeB] = 0;
+    } else {
+      garbage[holeA] = 0;
+    }
+
+    for (let c = 0; c < cols; c++) {
+      if (garbage[c] && Math.random() < mutator.cheeseChance) garbage[c] = 0;
+    }
+
+    if (!garbage.some((cell) => cell === 0)) garbage[getRandomInt(0, cols - 1)] = 0;
+    playfield.push(garbage);
+
+    holeA = Math.max(0, Math.min(cols - 1, holeA + getRandomInt(-mutator.horizontalDrift, mutator.horizontalDrift)));
+    holeB = Math.max(0, Math.min(cols - 1, holeB + getRandomInt(-mutator.horizontalDrift, mutator.horizontalDrift)));
+  }
+
+  activeMutator = mutator.name;
+  statusText = `Level ${newLevel} mutator: ${mutator.name} (+${mutator.lines} garbage lines).`;
+  if (mutator.lines >= 5) {
+    setHype(`${mutator.name}! Sewer is collapsing.`, 118);
+    triggerSceneShake(4.4);
+  } else if (newLevel >= 20) {
+    setHype(`${mutator.name} engaged.`, 84);
+  }
+}
+
+function lockPiece() {
+  if (!tetromino) return;
+
+  for (let row = 0; row < tetromino.matrix.length; row++) {
+    for (let col = 0; col < tetromino.matrix[row].length; col++) {
+      if (!tetromino.matrix[row][col]) continue;
+
+      const targetRow = tetromino.row + row;
+      const targetCol = tetromino.col + col;
+      if (targetRow < 0) {
+        showGameOver();
+        return;
+      }
+      playfield[targetRow][targetCol] = tetromino.name;
+    }
+  }
+
+  // Render-only: brief white flash on the cells that just locked.
+  lockFlashes.push({
+    cells: tetromino.matrix.flatMap((r, ri) => r.map((v, ci) => (v ? [tetromino.row + ri, tetromino.col + ci] : null)).filter(Boolean)),
+    life: 9
+  });
+
+  const tSpin = isTSpin(tetromino);
+
+  let linesClearedThisTurn = 0;
+  for (let row = rows - 1; row >= 0; row--) {
+    if (playfield[row].every((cell) => !!cell)) {
+      clearEffects.push({ row, life: 18, colorSeed: playfield[row].slice() });
+      playfield.splice(row, 1);
+      playfield.unshift(new Array(cols).fill(0));
+      linesClearedThisTurn++;
+      row++;
+    }
+  }
+
+  let turnScore = 0;
+  let clutchBonus = 0;
+  if (linesClearedThisTurn > 0) {
+    playSfx('clear');
+    try {
+      if (window.Suite) {
+        if (tSpin) Suite.hype(Suite.quip('tspin') || 'T-SPIN!');
+        else if (linesClearedThisTurn === 4) { Suite.hype(Suite.quip('tetris') || 'TETRIS!'); Suite.win(); }
+        else if (linesClearedThisTurn >= 2) Suite.toast('💩 ' + linesClearedThisTurn + '× ' + (Suite.quip('line') || 'CLEAR'));
+      }
+    } catch (e) {}
+    const levelBefore = level;
+    const lineIndex = Math.min(linesClearedThisTurn, 4);
+
+    if (tSpin) {
+      turnScore = (tspinScores[lineIndex] || 0) * level;
+    } else {
+      turnScore = (lineScores[lineIndex] || 0) * level;
+    }
+
+    const eligibleB2B = tSpin || linesClearedThisTurn === 4;
+    if (eligibleB2B) {
+      b2b++;
+      if (b2b > 1) turnScore = Math.floor(turnScore * 1.5);
+    } else {
+      b2b = 0;
+    }
+
+    combo++;
+    if (combo > 1) {
+      turnScore += combo * 50 * level;
+    }
+
+    linesCleared += linesClearedThisTurn;
+    levelLines += linesClearedThisTurn;
+
+    const perfectClear = playfield.every((r) => r.every((cell) => !cell));
+    if (perfectClear) {
+      turnScore += 1200 * level;
+      floatTexts.push({ text: 'PERFECT CLEAR', x: BOARD_W / 2, y: BOARD_H * 0.3, life: 52, color: '#8ee8c7' });
+      setHype('Perfect clear! The bowl sparkles.', 122);
+      triggerSceneShake(3.9);
+      try { if (window.Suite) { Suite.hype(Suite.quip('perfect') || 'PERFECT CLEAR!'); Suite.win(); } } catch (e) {}
+    }
+
+    const stackHeight = getStackHeight();
+    if (stackHeight >= TURDTRIS_BALANCE.clutch.stackHeightThreshold) {
+      clutchBonus = Math.floor(turnScore * TURDTRIS_BALANCE.clutch.scoreScale);
+      turnScore += clutchBonus;
+      floatTexts.push({ text: `CLUTCH +${clutchBonus}`, x: BOARD_W / 2, y: BOARD_H * 0.38, life: 48, color: '#ffd68f' });
+    }
+
+    while (levelLines >= levelGoal && level < MAX_LEVEL) {
+      levelLines -= levelGoal;
+      level++;
+      if (level >= MAX_LEVEL) break;
+      levelGoal = getLinesGoalForLevel(level);
+      applyLevelModifier(level);
+    }
+
+    if (level > levelBefore && level < MAX_LEVEL) {
+      setHype(`Level ${level} online: ${activeMutator}.`, 102);
+      triggerSceneShake(2.6);
+      playSfx('level');
+    }
+
+    if (level >= MAX_LEVEL) {
+      level = MAX_LEVEL;
+      statusText = `Level ${MAX_LEVEL} reached. Turdtris conquered.`;
+      setHype('Level 69 claimed. Absolute filth mastery.', 130);
+      triggerSceneShake(6);
+      showGameOver(true);
+      return;
+    }
+
+    statusText = tSpin
+      ? `T-Spin x${linesClearedThisTurn}! +${turnScore}`
+      : `Cleared ${linesClearedThisTurn} line(s) +${turnScore}`;
+    if (clutchBonus > 0) statusText += ` (Clutch +${clutchBonus})`;
+
+    if (linesClearedThisTurn === 4) {
+      setHype('TURDTRIS! Pipe blast!', 118);
+      triggerSceneShake(5.1);
+    } else if (tSpin && linesClearedThisTurn >= 2) {
+      setHype('Stink-spin combo executed.', 108);
+      triggerSceneShake(4.2);
+    } else if (combo >= 5 && combo % 3 === 0) {
+      setHype(`Combo chain x${combo}!`, 92);
+      triggerSceneShake(2.3);
+    }
+  } else {
+    combo = 0;
+    if (tSpin) {
+      turnScore = 100 * level;
+      statusText = `T-Spin no line +${turnScore}`;
+      playSfx('clear');
+    } else {
+      playSfx('lock');
+    }
+  }
+
+  score = Math.min(Number.MAX_SAFE_INTEGER, score + turnScore);
+  updateScore();
+  spawnNextPiece();
+}
+
+function getStackHeight() {
+  let firstFilled = rows;
+  for (let row = 0; row < rows; row++) {
+    if (playfield[row].some((cell) => !!cell)) {
+      firstFilled = row;
+      break;
+    }
+  }
+  return firstFilled === rows ? 0 : rows - firstFilled;
+}
+
+function roundRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  if (w <= 0 || h <= 0) return;
+  const rr = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+// Beveled, glossy tile. Used for the stack, the active piece, previews and
+// the ghost (dashed outline). Garbage cells render as cracked sewer stone.
+function drawTile(ctx, x, y, size, colorHex, alpha, opts) {
+  if (size < 4) return;
+  const o = opts || {};
+  const inset = 1;
+  const r = Math.max(3, size * 0.16);
+  const w = size - inset * 2;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  if (o.ghost) {
+    ctx.fillStyle = colorHex;
+    ctx.globalAlpha = alpha * 0.14;
+    roundRectPath(ctx, x + inset, y + inset, w, w, r);
+    ctx.fill();
+    ctx.globalAlpha = alpha * 0.85;
+    ctx.setLineDash([4, 3]);
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = colorHex;
+    roundRectPath(ctx, x + inset + 1.5, y + inset + 1.5, w - 3, w - 3, r - 1);
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
+
+  const isGarbage = colorHex === pieceColors.G;
+  const body = ctx.createLinearGradient(x, y, x, y + size);
+  body.addColorStop(0, shadeColor(colorHex, isGarbage ? 8 : 24));
+  body.addColorStop(0.5, colorHex);
+  body.addColorStop(1, shadeColor(colorHex, -30));
+  ctx.fillStyle = body;
+  roundRectPath(ctx, x + inset, y + inset, w, w, r);
+  ctx.fill();
+
+  // Bevel edges
+  ctx.lineWidth = Math.max(1.5, size * 0.06);
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.beginPath();
+  ctx.moveTo(x + inset + r, y + inset + 1);
+  ctx.lineTo(x + size - inset - r, y + inset + 1);
+  ctx.moveTo(x + inset + 1, y + inset + r);
+  ctx.lineTo(x + inset + 1, y + size - inset - r);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(0,0,0,0.34)';
+  ctx.beginPath();
+  ctx.moveTo(x + inset + r, y + size - inset - 1);
+  ctx.lineTo(x + size - inset - r, y + size - inset - 1);
+  ctx.moveTo(x + size - inset - 1, y + inset + r);
+  ctx.lineTo(x + size - inset - 1, y + size - inset - r);
+  ctx.stroke();
+
+  if (isGarbage) {
+    // Cracked stone: a couple of dark fissures and a mossy corner
+    ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x + size * 0.2, y + size * 0.3);
+    ctx.lineTo(x + size * 0.45, y + size * 0.55);
+    ctx.lineTo(x + size * 0.38, y + size * 0.82);
+    ctx.moveTo(x + size * 0.62, y + size * 0.18);
+    ctx.lineTo(x + size * 0.72, y + size * 0.48);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(120,170,90,0.22)';
+    ctx.beginPath();
+    ctx.arc(x + size * 0.78, y + size * 0.78, size * 0.16, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // Gloss on the upper half + a specular dot
+    const gloss = ctx.createLinearGradient(x, y, x, y + size * 0.55);
+    gloss.addColorStop(0, 'rgba(255,255,255,0.36)');
+    gloss.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gloss;
+    roundRectPath(ctx, x + inset + 3, y + inset + 2, w - 6, size * 0.42, Math.max(2, r - 1));
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath();
+    ctx.arc(x + size * 0.27, y + size * 0.26, Math.max(1.2, size * 0.055), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = shadeColor(colorHex, -48);
+  roundRectPath(ctx, x + inset + 0.5, y + inset + 0.5, w - 1, w - 1, r);
+  ctx.stroke();
+
+  if (o.flash > 0) {
+    ctx.fillStyle = `rgba(255,255,255,${Math.min(1, o.flash).toFixed(3)})`;
+    roundRectPath(ctx, x + inset, y + inset, w, w, r);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawCell(x, y, colorHex, alpha, opts) {
+  if (!context) return;
+  drawTile(context, x, y, grid, colorHex, alpha === undefined ? 1 : alpha, opts);
+}
+
+function getGhostRow() {
+  if (!tetromino) return 0;
+  let ghostRow = tetromino.row;
+  while (isValidMove(tetromino.matrix, ghostRow + 1, tetromino.col)) {
+    ghostRow++;
+  }
+  return ghostRow;
+}
+
+function drawPlayfield() {
+  if (!context || !canvas) return;
+
+  context.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const theme = themes[(level - 1) % themes.length];
+  const bg = context.createLinearGradient(0, 0, 0, BOARD_H);
+  bg.addColorStop(0, theme.bgA);
+  bg.addColorStop(1, theme.bgB);
+  context.fillStyle = bg;
+  context.fillRect(0, 0, BOARD_W, BOARD_H);
+
+  // Faint checker of well tiles + a soft spotlight down the middle columns
+  context.fillStyle = 'rgba(255,255,255,0.022)';
+  for (let row = 0; row < 20; row++) {
+    for (let col = 0; col < cols; col++) {
+      if ((row + col) % 2 === 0) context.fillRect(col * grid, row * grid, grid, grid);
+    }
+  }
+  const spot = context.createRadialGradient(BOARD_W / 2, BOARD_H * 0.2, 10, BOARD_W / 2, BOARD_H * 0.45, BOARD_H * 0.75);
+  spot.addColorStop(0, 'rgba(255,255,255,0.075)');
+  spot.addColorStop(1, 'rgba(255,255,255,0)');
+  context.fillStyle = spot;
+  context.fillRect(0, 0, BOARD_W, BOARD_H);
+
+  // Grid as crosshair ticks at the intersections (lighter than full lines)
+  context.strokeStyle = theme.grid;
+  context.lineWidth = 1;
+  context.beginPath();
+  for (let row = 1; row < 20; row++) {
+    for (let col = 1; col < cols; col++) {
+      const x = col * grid + 0.5;
+      const y = row * grid + 0.5;
+      context.moveTo(x - 3, y); context.lineTo(x + 3, y);
+      context.moveTo(x, y - 3); context.lineTo(x, y + 3);
+    }
+  }
+  context.stroke();
+
+  // Well walls: inner shadow on both sides and a floor glow
+  const wallL = context.createLinearGradient(0, 0, 18, 0);
+  wallL.addColorStop(0, 'rgba(0,0,0,0.42)');
+  wallL.addColorStop(1, 'rgba(0,0,0,0)');
+  context.fillStyle = wallL;
+  context.fillRect(0, 0, 18, BOARD_H);
+  const wallR = context.createLinearGradient(BOARD_W - 18, 0, BOARD_W, 0);
+  wallR.addColorStop(0, 'rgba(0,0,0,0)');
+  wallR.addColorStop(1, 'rgba(0,0,0,0.42)');
+  context.fillStyle = wallR;
+  context.fillRect(BOARD_W - 18, 0, 18, BOARD_H);
+  const floor = context.createLinearGradient(0, BOARD_H - 40, 0, BOARD_H);
+  floor.addColorStop(0, 'rgba(255,203,135,0)');
+  floor.addColorStop(1, 'rgba(255,203,135,0.12)');
+  context.fillStyle = floor;
+  context.fillRect(0, BOARD_H - 40, BOARD_W, 40);
+
+  const dangerRatio = getDangerRatio();
+  if (dangerRatio > 0) {
+    const pulse = 0.55 + Math.sin(Date.now() / 130) * 0.35;
+    const alpha = (0.08 + dangerRatio * 0.3) * Math.max(0.2, pulse);
+    const danger = context.createLinearGradient(0, 0, 0, BOARD_H * 0.55);
+    danger.addColorStop(0, `rgba(255, 70, 70, ${alpha.toFixed(3)})`);
+    danger.addColorStop(1, 'rgba(255, 70, 70, 0)');
+    context.fillStyle = danger;
+    context.fillRect(0, 0, BOARD_W, BOARD_H);
+  }
+
+  context.save();
+  if (sceneShake > 0) {
+    const shakeX = (Math.random() * 2 - 1) * sceneShake;
+    const shakeY = (Math.random() * 2 - 1) * sceneShake;
+    context.translate(shakeX, shakeY);
+  }
+
+  // Lock flashes are looked up per cell while drawing the stack
+  const flashMap = new Map();
+  for (let i = lockFlashes.length - 1; i >= 0; i--) {
+    const lf = lockFlashes[i];
+    lf.life--;
+    if (lf.life <= 0) { lockFlashes.splice(i, 1); continue; }
+    const strength = (lf.life / 9) * 0.55;
+    for (const [r, c] of lf.cells) flashMap.set(r * 100 + c, strength);
+  }
+
+  for (let row = 2; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const cell = playfield[row][col];
+      if (!cell) continue;
+      const cellColor = pieceColors[cell] || '#b0a498';
+      const flash = flashMap.get(row * 100 + col) || 0;
+      drawCell(col * grid, (row - 2) * grid, cellColor, 1, flash ? { flash } : undefined);
+    }
+  }
+
+  for (let i = clearEffects.length - 1; i >= 0; i--) {
+    const fx = clearEffects[i];
+    if (!fx.sparked) {
+      // First frame of a clear: burst of sparks in the row's colours
+      fx.sparked = true;
+      const y = (fx.row - 2) * grid + grid / 2;
+      for (let k = 0; k < 26; k++) {
+        const name = fx.colorSeed[Math.floor(Math.random() * cols)] || 'O';
+        clearSparks.push({
+          x: Math.random() * BOARD_W, y: y + (Math.random() - 0.5) * grid,
+          vx: (Math.random() - 0.5) * 6, vy: -1.5 - Math.random() * 3.5,
+          size: 2 + Math.random() * 4, life: 22 + Math.random() * 16, max: 38,
+          color: pieceColors[name] || '#ffe1a6', spin: (Math.random() - 0.5) * 0.4, rot: Math.random() * 6.28
+        });
+      }
+    }
+    fx.life--;
+    const t = Math.max(0, fx.life / 18);
+    const rowY = (fx.row - 2) * grid;
+    for (let col = 0; col < cols; col++) {
+      const name = fx.colorSeed[col] || 'O';
+      // Cells shrink toward their centre while fading out
+      const shrink = grid * (1 - t) * 0.5;
+      drawTile(context, col * grid + shrink, rowY + shrink, grid - shrink * 2, pieceColors[name] || '#ffe1a6', t, { flash: t > 0.6 ? (t - 0.6) * 2 : 0 });
+    }
+    // Horizontal light sweep
+    context.save();
+    context.globalAlpha = t * 0.85;
+    const sweep = context.createLinearGradient(0, rowY, 0, rowY + grid);
+    sweep.addColorStop(0, 'rgba(255,255,255,0)');
+    sweep.addColorStop(0.5, 'rgba(255,255,255,0.9)');
+    sweep.addColorStop(1, 'rgba(255,255,255,0)');
+    context.fillStyle = sweep;
+    context.fillRect(0, rowY, BOARD_W, grid);
+    context.restore();
+    if (fx.life <= 0) clearEffects.splice(i, 1);
+  }
+
+  // Sparks from line clears (render-only)
+  for (let i = clearSparks.length - 1; i >= 0; i--) {
+    const sp = clearSparks[i];
+    sp.x += sp.vx; sp.y += sp.vy; sp.vy += 0.22; sp.rot += sp.spin; sp.life--;
+    if (sp.life <= 0) { clearSparks.splice(i, 1); continue; }
+    context.save();
+    context.globalAlpha = Math.max(0, sp.life / sp.max);
+    context.translate(sp.x, sp.y);
+    context.rotate(sp.rot);
+    context.fillStyle = sp.color;
+    context.fillRect(-sp.size / 2, -sp.size / 2, sp.size, sp.size);
+    context.restore();
+  }
+
+  if (tetromino) {
+    const ghostRow = getGhostRow();
+    for (let row = 0; row < tetromino.matrix.length; row++) {
+      for (let col = 0; col < tetromino.matrix[row].length; col++) {
+        if (!tetromino.matrix[row][col]) continue;
+        const drawY = ghostRow + row - 2;
+        if (drawY < 0) continue;
+        drawCell((tetromino.col + col) * grid, drawY * grid, pieceColors[tetromino.name], 0.9, { ghost: true });
+      }
+    }
+
+    for (let row = 0; row < tetromino.matrix.length; row++) {
+      for (let col = 0; col < tetromino.matrix[row].length; col++) {
+        if (!tetromino.matrix[row][col]) continue;
+        const drawY = tetromino.row + row - 2;
+        if (drawY < 0) continue;
+        drawCell((tetromino.col + col) * grid, drawY * grid, pieceColors[tetromino.name], 1);
+      }
+    }
+  }
+
+  drawFloatTexts();
+  context.restore();
+}
+
+function drawPreview(ctx, targetCanvas, piece, options) {
+  if (!ctx || !targetCanvas) return;
+  const dim = !!(options && options.dim);
+
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, PREVIEW_W, PREVIEW_H);
+  const bg = ctx.createLinearGradient(0, 0, 0, PREVIEW_H);
+  bg.addColorStop(0, '#110d0a');
+  bg.addColorStop(1, '#1c1310');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, PREVIEW_W, PREVIEW_H);
+  const glow = ctx.createRadialGradient(PREVIEW_W / 2, PREVIEW_H / 2, 4, PREVIEW_W / 2, PREVIEW_H / 2, PREVIEW_W * 0.55);
+  glow.addColorStop(0, 'rgba(255,203,135,0.14)');
+  glow.addColorStop(1, 'rgba(255,203,135,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, PREVIEW_W, PREVIEW_H);
+
+  if (!piece) {
+    if (dim) {
+      ctx.fillStyle = 'rgba(8, 5, 3, 0.45)';
+      ctx.fillRect(0, 0, PREVIEW_W, PREVIEW_H);
+    }
+    return;
+  }
+
+  const matrix = piece.matrix;
+  const blockSize = 18;
+  // Trim empty rows/cols so the piece sits visually centred
+  let minR = matrix.length, maxR = -1, minC = Infinity, maxC = -1;
+  for (let r = 0; r < matrix.length; r++) {
+    for (let c = 0; c < matrix[r].length; c++) {
+      if (!matrix[r][c]) continue;
+      if (r < minR) minR = r; if (r > maxR) maxR = r;
+      if (c < minC) minC = c; if (c > maxC) maxC = c;
+    }
+  }
+  if (maxR < 0) return;
+  const pw = (maxC - minC + 1) * blockSize;
+  const ph = (maxR - minR + 1) * blockSize;
+  const offsetX = (PREVIEW_W - pw) / 2 - minC * blockSize;
+  const offsetY = (PREVIEW_H - ph) / 2 - minR * blockSize;
+  const colorHex = pieceColors[piece.name];
+
+  // Drop shadow under the piece
+  ctx.save();
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = '#000';
+  for (let row = 0; row < matrix.length; row++) {
+    for (let col = 0; col < matrix[row].length; col++) {
+      if (!matrix[row][col]) continue;
+      ctx.fillRect(offsetX + col * blockSize + 2, offsetY + row * blockSize + 4, blockSize - 2, blockSize - 2);
+    }
+  }
+  ctx.restore();
+
+  if (dim) ctx.globalAlpha = 0.42;
+  for (let row = 0; row < matrix.length; row++) {
+    for (let col = 0; col < matrix[row].length; col++) {
+      if (!matrix[row][col]) continue;
+      drawTile(ctx, offsetX + col * blockSize, offsetY + row * blockSize, blockSize, colorHex, 1);
+    }
+  }
+  ctx.globalAlpha = 1;
+  if (dim) {
+    ctx.fillStyle = 'rgba(10, 6, 4, 0.38)';
+    ctx.fillRect(0, 0, PREVIEW_W, PREVIEW_H);
+  }
+}
+
+function holdPreviewPiece() {
+  if (!holdName || !tetrominos[holdName]) return null;
+  return { name: holdName, matrix: tetrominos[holdName] };
+}
+
+function syncHoldControl() {
+  const used = !canHold;
+  const holdBtn = document.querySelector('#mobileControls [data-action="hold"]');
+  if (holdBtn) {
+    holdBtn.classList.toggle('is-used', used);
+    holdBtn.setAttribute('aria-disabled', used ? 'true' : 'false');
+  }
+  const holdBox = document.getElementById('mobileHoldBox');
+  if (holdBox) holdBox.classList.toggle('is-used', used);
+}
+
+function drawNextPreview() {
+  drawPreview(nextContext, nextCanvas, nextTetromino);
+  drawPreview(mobileNextContext, mobileNextCanvas, nextTetromino);
+}
+
+function drawHoldPreview() {
+  const piece = holdPreviewPiece();
+  const dim = !canHold && !!piece;
+  drawPreview(holdContext, holdCanvas, piece, { dim });
+  drawPreview(mobileHoldContext, mobileHoldCanvas, piece, { dim });
+  syncHoldControl();
+}
+
+function drawFloatTexts() {
+  for (let i = floatTexts.length - 1; i >= 0; i--) {
+    const f = floatTexts[i];
+    f.life--;
+    const alpha = Math.max(0, f.life / 52);
+    context.save();
+    context.globalAlpha = alpha;
+    context.font = 'bold 16px Trebuchet MS, system-ui, sans-serif';
+    context.textAlign = 'center';
+    context.lineJoin = 'round';
+    context.lineWidth = 4;
+    context.strokeStyle = 'rgba(10,6,4,0.75)';
+    context.strokeText(f.text, f.x, f.y);
+    context.fillStyle = f.color || '#ffe8c4';
+    context.fillText(f.text, f.x, f.y);
+    context.restore();
+    f.y -= 0.5;
+    if (f.life <= 0) floatTexts.splice(i, 1);
+  }
+}
+
+function updateScore() {
+  if (score > highScore) {
+    highScore = score;
+    try { localStorage.setItem('turdtrisHighScore', String(highScore)); } catch (e) {}
+  }
+
+  const scoreEl = document.getElementById('score');
+  const highScoreEl = document.getElementById('highScore');
+  const levelEl = document.getElementById('level');
+  const linesEl = document.getElementById('lines');
+  const comboEl = document.getElementById('combo');
+  const b2bEl = document.getElementById('b2b');
+  const statusEl = document.getElementById('statusText');
+  const levelProgressTextEl = document.getElementById('levelProgressText');
+  const levelProgressBarEl = document.getElementById('levelProgressBar');
+  const levelProgressFillEl = document.getElementById('levelProgressFill');
+  const nextLevelPreviewEl = document.getElementById('nextLevelPreview');
+  const mobileLevelProgressBarEl = document.getElementById('mobileLevelProgressBar');
+  const mobileLevelProgressFillEl = document.getElementById('mobileLevelProgressFill');
+  const mobileLevelProgressTextEl = document.getElementById('mobileLevelProgressText');
+
+  if (scoreEl) scoreEl.textContent = String(score);
+  if (highScoreEl) highScoreEl.textContent = String(highScore);
+  if (levelEl) levelEl.textContent = String(level);
+  if (linesEl) linesEl.textContent = String(linesCleared);
+  if (comboEl) comboEl.textContent = String(combo);
+  if (b2bEl) b2bEl.textContent = String(b2b);
+  const boundedGoal = Math.max(1, Number.isFinite(levelGoal) ? Math.floor(levelGoal) : 1);
+  const boundedProgress = Math.max(0, Math.min(boundedGoal, Number.isFinite(levelLines) ? Math.floor(levelLines) : 0));
+  const progressPercent = Math.round((boundedProgress / boundedGoal) * 100);
+  if (levelProgressTextEl) levelProgressTextEl.textContent = `${boundedProgress} / ${boundedGoal} lines`;
+  if (levelProgressBarEl) {
+    levelProgressBarEl.setAttribute('aria-valuemax', String(boundedGoal));
+    levelProgressBarEl.setAttribute('aria-valuenow', String(boundedProgress));
+    levelProgressBarEl.setAttribute('aria-valuetext', `${boundedProgress} of ${boundedGoal} lines`);
+  }
+  if (levelProgressFillEl) levelProgressFillEl.style.width = `${progressPercent}%`;
+  if (mobileLevelProgressTextEl) mobileLevelProgressTextEl.textContent = `${boundedProgress} / ${boundedGoal}`;
+  if (mobileLevelProgressBarEl) {
+    mobileLevelProgressBarEl.setAttribute('aria-valuemax', String(boundedGoal));
+    mobileLevelProgressBarEl.setAttribute('aria-valuenow', String(boundedProgress));
+    mobileLevelProgressBarEl.setAttribute('aria-valuetext', `${boundedProgress} of ${boundedGoal} lines`);
+  }
+  if (mobileLevelProgressFillEl) mobileLevelProgressFillEl.style.width = `${progressPercent}%`;
+  if (nextLevelPreviewEl) {
+    if (level >= MAX_LEVEL) {
+      nextLevelPreviewEl.textContent = `Level ${MAX_LEVEL} reached. The sewer run is complete.`;
+    } else {
+      const remaining = Math.max(0, boundedGoal - boundedProgress);
+      const nextLevel = level + 1;
+      const nextMutator = buildLevelMutator(nextLevel);
+      const challenge = nextMutator.lines > 0
+        ? `${nextMutator.name} adds ${nextMutator.lines} garbage line${nextMutator.lines === 1 ? '' : 's'}.`
+        : 'Warmup Flow adds no garbage yet.';
+      nextLevelPreviewEl.textContent = `Clear ${remaining} more line${remaining === 1 ? '' : 's'} to reach Level ${nextLevel}. ${challenge}`;
+    }
+  }
+  if (statusEl) {
+    const hypeTag = hypeTimer > 0 && hypeText ? ` Hype: ${hypeText}` : '';
+    const dangerTag = getDangerRatio() > 0.65 ? ' DANGER: stack is feral.' : '';
+    statusEl.textContent = `${statusText}${hypeTag}${dangerTag} Theme: ${themes[(level - 1) % themes.length].name}. Mutator: ${activeMutator}. Gravity: ${getGravityMs()}ms. Goal: ${levelLines}/${levelGoal} lines.`;
+    statusEl.classList.toggle('hype', hypeTimer > 0);
+  }
+}
+
+function showGameOver(won) {
+  const isWin = !!won;
+  gameOver = true;
+  paused = false;
+  if (rAF) {
+    cancelAnimationFrame(rAF);
+    rAF = null;
+  }
+  try {
+    if (window.Suite) {
+      if (isWin) { Suite.hype(Suite.quip('win') || 'CERTIFIED FLUSHER'); Suite.win(); }
+      else        { Suite.hype(Suite.quip('lose') || 'FLUSHED'); Suite.fart(); }
+    }
+  } catch (e) {}
+
+  const overlayEl = document.getElementById('gameOverOverlay');
+  const overlayCardEl = document.getElementById('endOverlayCard');
+  const endKickerEl = document.getElementById('endKicker');
+  const endTitleEl = document.getElementById('endTitle');
+  const endFlavorEl = document.getElementById('endFlavor');
+  const finalScoreEl = document.getElementById('finalScore');
+  const finalLinesEl = document.getElementById('finalLines');
+  const endBestLabelEl = document.getElementById('endBestLabel');
+  const endBestEl = document.getElementById('endBest');
+  const isNewBest = score > runBestAtStart;
+
+  if (endTitleEl) endTitleEl.textContent = isWin ? `Level ${MAX_LEVEL} Cleared!` : 'Game Over';
+  if (overlayCardEl) overlayCardEl.dataset.tone = isWin ? 'victory' : 'gameover';
+  if (endKickerEl) endKickerEl.textContent = isWin ? 'Pipe Royalty' : 'Sewer Wipeout';
+  if (endFlavorEl) {
+    endFlavorEl.textContent = isWin
+      ? 'You hit level 69, made the stack panic, and left the whole arcade smelling victory.'
+      : 'The stack finally buckled you. Take a breath, then bring the filth back cleaner.';
+  }
+  if (overlayEl) overlayEl.style.display = 'grid';
+  if (finalScoreEl) finalScoreEl.textContent = String(score);
+  if (finalLinesEl) finalLinesEl.textContent = String(linesCleared);
+  if (endBestLabelEl) endBestLabelEl.textContent = isNewBest ? 'New best' : 'Best';
+  if (endBestEl) endBestEl.textContent = String(Math.max(score, runBestAtStart, highScore));
+
+  playSfx(isWin ? 'victory' : 'gameover');
+  updateScore();
+}
+
+function togglePause() {
+  if (gameOver) return;
+  paused = !paused;
+  playSfx('pause');
+
+  const overlayEl = document.getElementById('pauseOverlay');
+  if (overlayEl) overlayEl.style.display = paused ? 'grid' : 'none';
+
+  if (paused) stopLoop();
+  else ensureLoopRunning();
+}
+
+function restartGame() {
+  score = 0;
+  level = 1;
+  linesCleared = 0;
+  levelLines = 0;
+  levelGoal = getLinesGoalForLevel(level);
+  combo = 0;
+  b2b = 0;
+  softDrop = false;
+  paused = false;
+  gameOver = false;
+  statusText = 'Fresh stack. Watch the level modifiers.';
+  activeMutator = 'Warmup Flow';
+  sceneShake = 0;
+  hypeText = '';
+  hypeTimer = 0;
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      playfield[row][col] = 0;
+    }
+  }
+
+  tetrominoSequence.length = 0;
+  holdName = null;
+  canHold = true;
+  clearEffects = [];
+  floatTexts = [];
+  lockFlashes = [];
+  clearSparks = [];
+  tetromino = null;
+  nextTetromino = getNextTetromino();
+
+  dropAccumulator = 0;
+  lockAccumulator = 0;
+  lockResets = 0;
+  runBestAtStart = highScore;
+
+  spawnNextPiece();
+
+  const overlayEl = document.getElementById('gameOverOverlay');
+  const pauseEl = document.getElementById('pauseOverlay');
+  if (overlayEl) overlayEl.style.display = 'none';
+  if (pauseEl) pauseEl.style.display = 'none';
+
+  updateScore();
+  drawPlayfield();
+
+  if (!rAF) {
+    lastFrameTime = performance.now();
+    rAF = requestAnimationFrame(loop);
+  }
+}
+
+function shadeColor(hex, percent) {
+  if (!hex || !hex.startsWith('#')) return hex;
+  const num = parseInt(hex.slice(1), 16);
+  const amt = Math.round(2.55 * percent);
+  const r = Math.max(0, Math.min(255, (num >> 16) + amt));
+  const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amt));
+  const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amt));
+  return `#${(0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)}`;
+}
+
+function loop(timestamp) {
+  if (gameOver) return;
+
+  if (!lastFrameTime) lastFrameTime = timestamp;
+  const delta = clampFrameDelta(timestamp - lastFrameTime);
+  lastFrameTime = timestamp;
+
+  if (!paused && tetromino) {
+    const gravity = softDrop ? Math.max(20, Math.floor(getGravityMs() / 15)) : getGravityMs();
+    dropAccumulator += delta;
+
+    while (dropAccumulator >= gravity) {
+      dropAccumulator -= gravity;
+      if (isValidMove(tetromino.matrix, tetromino.row + 1, tetromino.col)) {
+        tetromino.row++;
+        tetromino.lastActionRotate = false;
+      } else {
+        break;
+      }
+    }
+
+    if (isGrounded(tetromino)) {
+      lockAccumulator += delta;
+      if (lockAccumulator >= lockDelayMs) {
+        lockPiece();
+      }
+    } else {
+      lockAccumulator = 0;
+      lockResets = 0;
+    }
+  }
+
+  updateSceneFx();
+  drawPlayfield();
+  rAF = requestAnimationFrame(loop);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (onboardingOpen) {
+    if (e.code === 'Escape' || e.code === 'Enter' || e.code === 'Space') {
+      e.preventDefault();
+      hideWelcomeGuide();
+    }
+    return;
+  }
+
+  unlockAudio();
+  if (gameOver) {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault();
+      restartGame();
+    }
+    return;
+  }
+
+  if (e.code === 'KeyM') {
+    e.preventDefault();
+    toggleSound();
+    return;
+  }
+
+  if (e.code === 'KeyP') {
+    e.preventDefault();
+    togglePause();
+    return;
+  }
+
+  if (paused && e.code !== 'Space' && e.code !== 'KeyP') return;
+
+  switch (e.code) {
+    case 'ArrowLeft':
+      e.preventDefault();
+      movePiece(-1);
+      break;
+    case 'ArrowRight':
+      e.preventDefault();
+      movePiece(1);
+      break;
+    case 'ArrowUp':
+    case 'KeyX':
+      e.preventDefault();
+      tryRotate(1);
+      break;
+    case 'KeyZ':
+      e.preventDefault();
+      tryRotate(-1);
+      break;
+    case 'ArrowDown':
+      e.preventDefault();
+      softDrop = true;
+      softDropStep();
+      break;
+    case 'Space':
+      e.preventDefault();
+      if (paused) togglePause();
+      else hardDrop();
+      break;
+    case 'KeyC':
+      e.preventDefault();
+      holdCurrentPiece();
+      break;
+  }
+
+  updateScore();
+});
+
+document.addEventListener('keyup', (e) => {
+  if (e.code === 'ArrowDown') softDrop = false;
+});
+
+const mobileControls = document.getElementById('mobileControls');
+let holdInterval = null;
+if (mobileControls) {
+  const clearHoldInterval = () => {
+    if (holdInterval) {
+      clearInterval(holdInterval);
+      holdInterval = null;
+    }
+  };
+  clearHoldIntervalRef = clearHoldInterval;
+
+  mobileControls.addEventListener('pointerdown', (e) => {
+    if (onboardingOpen) return;
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    e.preventDefault();
+    unlockAudio();
+
+    const action = target.getAttribute('data-action');
+    clearHoldInterval();
+    if (action !== 'down') softDrop = false;
+    const run = () => {
+      if (action === 'left') movePiece(-1);
+      if (action === 'right') movePiece(1);
+      if (action === 'rotate') tryRotate(1);
+      if (action === 'down') {
+        softDrop = true;
+        softDropStep();
+      }
+      if (action === 'drop') hardDrop();
+      if (action === 'hold') holdCurrentPiece();
+      if (action === 'pause') togglePause();
+    };
+
+    run();
+    if (action === 'left' || action === 'right' || action === 'down') {
+      holdInterval = setInterval(run, 90);
+    }
+  });
+
+  const endHold = () => {
+    softDrop = false;
+    clearHoldInterval();
+  };
+
+  mobileControls.addEventListener('pointerup', endHold);
+  mobileControls.addEventListener('pointercancel', endHold);
+  mobileControls.addEventListener('pointerleave', endHold);
+}
+
+window.addEventListener('blur', handleWindowBlur);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) handleWindowBlur();
+});
+
+if (canvas) {
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+
+  canvas.addEventListener('touchstart', (e) => {
+    if (onboardingOpen) return;
+    if (gameOver) return;
+    unlockAudio();
+    const touch = e.touches[0];
+    if (!touch) return;
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchStartTime = Date.now();
+  }, { passive: true });
+
+  canvas.addEventListener('touchend', (e) => {
+    if (onboardingOpen) return;
+    if (gameOver || paused) return;
+
+    const touch = e.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+    const dt = Date.now() - touchStartTime;
+
+    if (dt < 180 && Math.abs(dx) < 20 && Math.abs(dy) < 20) {
+      tryRotate(1);
+      return;
+    }
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 25) movePiece(1);
+      if (dx < -25) movePiece(-1);
+      return;
+    }
+
+    if (dy > 25) hardDrop();
+  }, { passive: true });
+}
+
+soundEnabled = loadSoundPref();
+updateSoundButtons();
+restartGame();
+if (!(window.Suite && Suite.guide && Suite.guide.hasSeen('turdtris.html'))) {
+  showWelcomeGuide();
+}
+
+
+// ============================================================
+// === Turdtris Plunger Boss enhancement ======================
+// ============================================================
+(function () {
+  'use strict';
+
+  // ---- Mascot DOM ----
+  const _boss = document.createElement('div');
+  _boss.className = 'pb-boss';
+  _boss.textContent = '🚽';
+  _boss.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(_boss);
+  const _bubble = document.createElement('div');
+  _bubble.className = 'pb-bubble';
+  document.body.appendChild(_bubble);
+  let _bubbleT = null;
+  function bossSay(text, dur) {
+    if (!text) return;
+    _bubble.textContent = text;
+    _bubble.classList.remove('show'); void _bubble.offsetWidth;
+    _bubble.classList.add('show');
+    clearTimeout(_bubbleT);
+    _bubbleT = setTimeout(() => _bubble.classList.remove('show'), dur || 2400);
+  }
+  function bossMood(emoji, anim) {
+    _boss.textContent = emoji;
+    if (anim) { _boss.classList.remove('bounce','shake','cheer'); void _boss.offsetWidth; _boss.classList.add(anim); }
+  }
+  function showBanner(text, cold) {
+    let el = document.getElementById('pbBanner');
+    if (!el) { el = document.createElement('div'); el.id = 'pbBanner'; el.className = 'pb-banner'; document.body.appendChild(el); }
+    el.textContent = text;
+    el.classList.toggle('cold', !!cold);
+    el.classList.remove('show'); void el.offsetWidth;
+    el.classList.add('show');
+    clearTimeout(showBanner._t);
+    showBanner._t = setTimeout(() => el.classList.remove('show'), 1700);
+  }
+
+  // Danger-zone overlay
+  const _danger = document.createElement('div');
+  _danger.className = 'pb-danger';
+  document.body.appendChild(_danger);
+
+  const QUIPS = {
+    spawn:  ["Stack 'em.", "Don't choke.", "Light touch.", "Eyes on the well.", "Plumber's watching."],
+    line1:  ["Tidy.", "Scrub.", "Cleaner already."],
+    line2:  ["Ooo two.", "Double-flush!", "We rolling."],
+    line3:  ["Triple? Showoff."],
+    tetris: ["TETRIS!! HOW DARE.", "Plunger weeps.", "Four down. Felt that."],
+    tspin:  ["A T-SPIN?? In MY toilet??", "Showy showy showy.", "Twirl flush."],
+    perfect:["Immaculate. Smelly.", "PERFECT CLEAR. The bowl shines.", "Plumber jealous."],
+    over:   ["Stack overflow. Literally.", "Plunger wins.", "Should've kept it tidy."],
+    win:    ["Sewer royalty.", "Champion of bowl management.", "Plunger bows."],
+    near:   ["Easy easy easy.", "Overflow incoming.", "Your stack is yelling."],
+    danger: ["DANGER. DANGER.", "BAIL. BAIL. BAIL.", "Slow down!!"]
+  };
+  const pick = k => (QUIPS[k] || [''])[Math.floor(Math.random() * (QUIPS[k] || ['']).length)];
+
+  // Streak bonus ladder (back-to-back tetrises grow more dramatic)
+  let _btbCount = 0;
+  if (typeof showGameOver === 'function') {
+    const _orig = showGameOver;
+    showGameOver = function (won) {
+      _orig(won);
+      if (won) { bossMood('👑', 'cheer'); bossSay(pick('win'), 3000); }
+      else     { bossMood('🪠', 'shake'); bossSay(pick('over'), 3000); }
+    };
+  }
+  // Hook lockPiece for spawn-time chatter and danger reactions
+  if (typeof lockPiece === 'function') {
+    const _origLock = lockPiece;
+    lockPiece = function () {
+      const before = (typeof getStackHeight === 'function') ? getStackHeight() : 0;
+      _origLock();
+      try {
+        const h = (typeof getStackHeight === 'function') ? getStackHeight() : 0;
+        // Update danger overlay
+        if (h >= 16) { _danger.className = 'pb-danger alarm'; if (Math.random() < 0.45) { bossMood('😰', 'shake'); bossSay(pick('danger'), 1800); } }
+        else if (h >= 12) { _danger.className = 'pb-danger warn'; if (Math.random() < 0.25) { bossMood('😬', 'shake'); bossSay(pick('near'), 1800); } }
+        else { _danger.className = 'pb-danger'; }
+      } catch (e) {}
+    };
+  }
+  // Tap into Suite hype (which already fires for tetris/tspin/perfect) — also drive mascot
+  // We watch for the suite's hype div content changes
+  function watchHype() {
+    const tries = setInterval(() => {
+      const el = document.querySelector('.suite-hype');
+      if (!el) return;
+      clearInterval(tries);
+      const obs = new MutationObserver(() => {
+        const txt = (el.textContent || '').toUpperCase();
+        if (txt.includes('TETRIS')) {
+          _btbCount++;
+          bossMood(_btbCount >= 3 ? '🤯' : '😱', 'shake');
+          bossSay(pick('tetris'), 2400);
+          if (_btbCount === 2) showBanner('🔥 BACK-TO-BACK TETRIS');
+          if (_btbCount === 3) showBanner('🔥🔥 TRIPLE TETRIS BUDDY');
+          if (_btbCount >= 4)  showBanner('🔥🔥🔥 TETRIS GOD');
+        } else if (txt.includes('T-SPIN')) {
+          _btbCount++;
+          bossMood('😵', 'shake');
+          bossSay(pick('tspin'), 2400);
+        } else if (txt.includes('PERFECT')) {
+          bossMood('✨', 'cheer');
+          bossSay(pick('perfect'), 2800);
+          showBanner('💎 PERFECT CLEAR');
+        } else if (txt) {
+          // any other clear: small reaction
+          if (Math.random() < 0.3) bossSay(pick('line1'), 1600);
+        }
+      });
+      obs.observe(el, { childList: true, characterData: true, subtree: true });
+    }, 400);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', watchHype);
+  } else {
+    watchHype();
+  }
+
+  // Reset back-to-back when a non-clearing piece locks (i.e., line drop with 0 lines clears)
+  // We simply reset whenever a "line drop with no clear" happens — heuristic via watching for non-tetris hype absence
+  // Skip — keep simple, don't reset.
+
+  // Greeting
+  setTimeout(() => { bossMood('🪠', 'bounce'); bossSay('Stack carefully, sewer kid.', 2400); }, 700);
+})();
+
+</script>
+</body>
+</html>

@@ -47,6 +47,16 @@ describe('public surface security', () => {
         }
     });
 
+    it('keeps the unlisted band-lab path off every public client surface', async () => {
+        for (const relativePath of PUBLIC_CLIENT_TEXT) {
+            const source = await readFile(join(repoRoot, relativePath), 'utf8');
+
+            expect(source, relativePath).not.toContain('/private/');
+            expect(source, relativePath).not.toContain('garage-rehearsal-k7m2n9');
+            expect(source, relativePath).not.toMatch(/band-lab|Turdanoid|WebJam/i);
+        }
+    });
+
     it('limits homepage and QR board links to the two public review-safe anchors', async () => {
         for (const relativePath of PUBLIC_HTML) {
             const html = await readFile(join(repoRoot, relativePath), 'utf8');

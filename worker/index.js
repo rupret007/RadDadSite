@@ -80,7 +80,7 @@ function isRecoverablePagePath(pathname) {
     if (!/^\/[a-z0-9_-]+(?:\/[a-z0-9_-]+)*(?:\.html|\/)?$/i.test(pathname)) return false;
     const first = pathname.split('/')[1].toLowerCase();
     return !new Set([
-        'index.html', 'qr', 'tap', 'nfc', 'assets', 'api', 'worker', 'scripts', 'tests'
+        'index.html', 'qr', 'tap', 'nfc', 'assets', 'api', 'worker', 'scripts', 'tests', 'private'
     ]).has(first);
 }
 

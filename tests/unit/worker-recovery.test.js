@@ -40,7 +40,8 @@ describe('working canonical recovery from an old public page link', () => {
     it.each([
         '/assets/lost.ics', '/assets/missing/', '/missing.js', '/missing.css',
         '/missing.webp', '/missing.json', '/api/missing', '/worker/missing',
-        '/scripts/missing', '/tests/missing', '/.git/config', '/package.json',
+        '/scripts/missing', '/tests/missing', '/private/missing',
+        '/private/garage-rehearsal-k7m2n9/lost.html', '/.git/config', '/package.json',
         '/%73how-control/', '/old%2fpath/', '/old%2epage'
     ])('keeps missing resource or reserved path %s as a real 404', async (path) => {
         const { response, result } = await request(path);
