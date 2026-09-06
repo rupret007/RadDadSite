@@ -2625,8 +2625,17 @@ html[data-show-phase="complete"] .show-moment {
         padding: 0.85rem;
     }
 
+    .video-dialog__header span,
+    .video-dialog__footer p {
+        white-space: normal;
+        line-height: 1.35;
+    }
+
     .video-dialog__header h2 {
-        font-size: 1.45rem;
+        font-size: 1.25rem;
+        line-height: 1.15;
+        white-space: normal;
+        text-overflow: unset;
     }
 
     .video-dialog__footer {

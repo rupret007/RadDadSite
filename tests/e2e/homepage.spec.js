@@ -697,8 +697,20 @@ test('plays a Wildflower tape inline from the covers listen path and keeps direc
     const frame = dialog.locator('[data-video-frame]');
     await expect(dialog).toBeVisible();
     await expect(page).toHaveURL(/\/#live-tapes$/);
-    await expect(dialog.getByRole('heading', { name: 'All the Small Things — blink-182 cover' })).toBeVisible();
-    await expect(dialog.locator('[data-video-context]')).toContainText('Wildflower 2026 · Live performance');
+    const dialogTitle = dialog.getByRole('heading', { name: 'All the Small Things — blink-182 cover' });
+    const dialogContext = dialog.locator('[data-video-context]');
+    await expect(dialogTitle).toBeVisible();
+    await expect(dialogContext).toHaveText('Wildflower 2026 · Live performance');
+    const dialogCopy = await dialog.evaluate((root) => {
+        const title = root.querySelector('#live-video-title');
+        const context = root.querySelector('[data-video-context]');
+        return {
+            contextOverflow: context.scrollWidth - context.clientWidth,
+            titleOverflow: title.scrollWidth - title.clientWidth
+        };
+    });
+    expect(dialogCopy.titleOverflow).toBeLessThanOrEqual(1);
+    expect(dialogCopy.contextOverflow).toBeLessThanOrEqual(1);
     await expect(frame).toHaveAttribute(
         'src',
         'https://www.youtube-nocookie.com/embed/9Re_0wjIbfQ?autoplay=1&rel=0'
