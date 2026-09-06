@@ -130,6 +130,23 @@ content.
 See [docs/QR_LANDING_PAGE.md](./docs/QR_LANDING_PAGE.md) for the physical QR
 specification, copy guardrails, and routing notes.
 
+## Old Public Links on Worker-Backed Hosting
+
+When an old public page URL is missing, the Sites Worker now redirects an HTML
+navigation to the same site's real homepage. It no longer serves homepage HTML
+under a nested missing address where styles, scripts, flyer links, and calendar
+downloads resolve incorrectly. Recovery works without JavaScript.
+
+The temporary redirect drops the stale query and fragment and suppresses the
+redirect-hop referrer; it does not erase the original request from history or
+server logs. Missing files, reserved/API paths, owner routes, non-HTML requests,
+and missing canonical pages keep their errors instead of becoming homepages.
+Permanent QR aliases keep their existing behavior. See
+[the broken-link recovery handoff](docs/PUBLIC_LINK_RECOVERY.md).
+
+This applies to Worker-backed Sites hosting only. It does not change the
+separate legacy server, publish a new build, or authorize a Pages/server cutover.
+
 ## Local Preview
 
 1. Open [index.html](./index.html) directly in a browser for a quick preview.
@@ -225,6 +242,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 - Progressive inline playback for verified-embeddable homepage and `/qr/` videos, including privacy-delayed loading, honest direct-only cards, close cleanup, and focus return
 - Inline-player stall/error recovery, explicit retry without loops, retired frame events, native YouTube handoff cleanup, and phone/keyboard access
 - Permanent `/tap/` and legacy `/nfc/` fallbacks converging on the canonical `/qr/` content
+- Actual Worker-backed nested-link recovery, real local CSS/scripts/flyer/calendar downloads, no-JavaScript use, and preservation of error/owner boundaries
 - Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention
 - Desktop flyer-and-event-copy presentation
 - Logo fallback behavior when the brand image cannot load

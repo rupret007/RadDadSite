@@ -107,7 +107,7 @@ describe('public surface security', () => {
         expect(source).toContain("'cache-control': 'no-store'");
         expect(source).not.toContain('chatgpt.site');
         expect(source.indexOf('isClosedOwnerPath(requestUrl.pathname)')).toBeLessThan(
-            source.indexOf("fallbackUrl.pathname = '/index.html'")
+            source.indexOf("const recoveryUrl = new URL('/#', request.url)")
         );
     });
 

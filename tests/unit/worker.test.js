@@ -51,18 +51,8 @@ describe('QR route aliases', () => {
         expect(assetFetch).not.toHaveBeenCalled();
     });
 
-    it('still uses the homepage fallback for unknown public HTML paths', async () => {
-        const assetResponse = new Response('<h1>Rad Dad</h1>', {
-            status: 200,
-            headers: { 'content-type': 'text/html' }
-        });
-        const assetFetch = vi.fn(async (request) => {
-            if (new URL(request.url).pathname === '/index.html') {
-                return assetResponse;
-            }
-
-            return new Response('missing', { status: 404 });
-        });
+    it('recovers unknown public HTML paths at the real homepage address', async () => {
+        const assetFetch = vi.fn(async () => new Response('missing', { status: 404 }));
 
         const response = await worker.fetch(
             new Request('https://raddadband.com/missing-public-page', {
@@ -71,10 +61,10 @@ describe('QR route aliases', () => {
             { ASSETS: { fetch: assetFetch } }
         );
 
-        expect(response).toBe(assetResponse);
-        expect(assetFetch).toHaveBeenCalledTimes(2);
+        expect(response.status).toBe(302);
+        expect(response.headers.get('location')).toBe('https://raddadband.com/#');
+        expect(assetFetch).toHaveBeenCalledOnce();
         expect(new URL(assetFetch.mock.calls[0][0].url).pathname).toBe('/missing-public-page');
-        expect(new URL(assetFetch.mock.calls[1][0].url).pathname).toBe('/index.html');
     });
 
     it('serves /qr/ through the asset binding instead of redirecting it', async () => {
