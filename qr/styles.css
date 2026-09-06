@@ -1098,6 +1098,7 @@ a {
 }
 
 .video-dialog__frame {
+    width: 100%;
     aspect-ratio: 16 / 9;
     max-height: 55dvh;
     border-block: 1px solid var(--line);

@@ -144,6 +144,8 @@ for (const path of ['/', '/qr/']) {
                 expect(dimensions.left).toBeGreaterThanOrEqual(0);
                 expect(dimensions.right).toBeLessThanOrEqual(dimensions.viewport + 1);
                 expect(dimensions.retry).toBeGreaterThanOrEqual(44);
+                const frameBounds = await controls.frame.boundingBox();
+                expect(frameBounds.width).toBeCloseTo(dimensions.client, 0);
                 const fallbackBounds = await controls.fallback.boundingBox();
                 expect(fallbackBounds.y).toBeGreaterThanOrEqual(0);
                 expect(fallbackBounds.y + fallbackBounds.height).toBeLessThanOrEqual(844);
