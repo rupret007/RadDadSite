@@ -22,6 +22,11 @@ links. Every card stays a real `youtube.com/watch` link, so modified clicks,
 missing `HTMLDialogElement.showModal`, and no-JavaScript visits keep the
 direct fallback.
 
+The subsequent [player-recovery slice](VIDEO_RECOVERY.md) adds a bounded opening
+attempt, honest status and explicit retry to this same shared player. It does
+not add recordings or change which videos may embed. A loaded iframe is not
+proof that YouTube accepted playback; the direct fallback remains available.
+
 ## Privacy and scope
 
 The player iframe has no `src` until the fan taps a verified card. It sends
