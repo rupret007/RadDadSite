@@ -127,6 +127,8 @@ test('QR surface follows the same lifecycle without duplicating show truth', asy
     await expect(strip).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(strip.locator('[data-show-strip-label]')).toHaveText('See the running order');
     await expect(strip).not.toHaveAttribute('aria-label');
+    await expect(strip.locator('[data-show-strip-label]')).toHaveCSS('font-size', '0px');
+    await expect(strip.locator('.next-show-strip__venue')).toHaveText('Guitars & Growlers');
     await expect(page.locator('#next-show [data-show-calendar]')).toHaveCount(0);
     await expect(page.locator('#next-show [data-show-directions]')).toHaveCount(0);
 
@@ -137,6 +139,8 @@ test('QR surface follows the same lifecycle without duplicating show truth', asy
     await expect(strip).toHaveAttribute('href', '#wildflower');
     await expect(strip).not.toHaveAttribute('target', '_blank');
     await expect(strip.locator('[data-show-strip-label]')).toHaveText('Watch Rad Dad live');
+    await expect(strip.locator('[data-show-strip-label]')).toHaveCSS('font-size', '0px');
+    await expect(strip.locator('.next-show-strip__venue')).toHaveText('Guitars & Growlers');
     await expect(page.locator('#join-show [data-show-reference-prefix]')).toHaveText('That show was at');
     await expect(page.locator('#next-show [data-show-section-kicker]')).toHaveText('From the show');
     await expectNoHorizontalOverflow(page);

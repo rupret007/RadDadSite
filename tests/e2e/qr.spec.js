@@ -95,7 +95,7 @@ test.describe('tap, NFC, and QR landing pages', () => {
         );
         await expect(page.locator('link[rel="stylesheet"][href^="styles.css"]')).toHaveAttribute(
             'href',
-            'styles.css?v=20260906-2'
+            'styles.css?v=20260906-3'
         );
         await expect(page.locator('script[src^="../show-state.js"]')).toHaveAttribute(
             'src',

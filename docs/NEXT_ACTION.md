@@ -8,10 +8,12 @@ action the show panels already use.
 On `/qr/`, the sticky strip still jumps to the show panel before the show and
 on show day before 7 PM Central. From 7–10 PM it uses the existing public
 `#official-sets` running-order link. After 10 PM it lands on `#wildflower`.
-The CTA label matches that destination. The strip does not receive an
-`aria-label`, so the visible status, date, venue, and CTA stay in the
-accessible name. A missing phase destination leaves the static `#next-show`
-fallback in place instead of hiding the strip.
+The CTA label matches that destination. On a phone the words stay in the
+accessible name and only the arrow is drawn, so a longer live or after-show
+label cannot crowd the venue. The strip does not receive an `aria-label`, so
+the visible status, date, venue, and CTA stay in the accessible name. A
+missing phase destination leaves the static `#next-show` fallback in place
+instead of hiding the strip.
 
 The homepage watch heading stays **Hear Rad Dad before the show** until the
 show ends. After 10 PM it matches the primary action: **Watch Rad Dad live**,
