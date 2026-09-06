@@ -246,6 +246,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 - Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention
 - Desktop flyer-and-event-copy presentation
 - Logo fallback behavior when the brand image cannot load
+- Unlisted band-lab desk: playable Turdanoid hub, honest WebJam hole, no public-surface links, and a clean production artifact that still excludes `/private/`
 
 Browser tests isolate external network access: known font, thumbnail, and
 media responses are synthetic, and unexpected external requests fail the test.
@@ -306,11 +307,14 @@ RadDad Website/
 |   |-- rad-dad-social-2026.png
 |   `-- wildflower-2026-poster-720.webp
 |-- docs/
+|   |-- BAND_LAB.md
 |   |-- HOME_WATCH.md
 |   |-- NEXT_ACTION.md
 |   |-- production-deployment.md
 |   |-- QR_LANDING_PAGE.md
 |   `-- raddad-deploy.conf.example
+|-- private/
+|   `-- garage-rehearsal-k7m2n9/   # unlisted band desk; not in the public artifact
 |-- index.html
 |-- live-video.js
 |-- show-state.js

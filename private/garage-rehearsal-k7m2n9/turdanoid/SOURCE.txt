@@ -6,3 +6,7 @@ Published host for reference only: https://rupret007.github.io/Turdanoid/
 Copied as static files so the band-lab page can play the six-game hub
 same-origin (no Neon rewrite, no Turdanoid PR, no live fetch).
 Engine sources that the HTML never loads were left behind on purpose.
+
+Do not silently re-pin. A later slice may move this pin to a newer
+Turdanoid main tip only when SOURCE.txt and the band-lab blob-match
+test change together. Arcade mid-run saves stay parked with PR #8.

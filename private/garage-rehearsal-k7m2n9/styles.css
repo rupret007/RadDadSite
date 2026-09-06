@@ -7,6 +7,75 @@
         var(--ink);
 }
 
+.skip-link--stage {
+    left: 8.5rem;
+}
+
+.band-lab-poster {
+    --poster-cream: #f4efdd;
+    position: relative;
+    margin: clamp(1.4rem, 3vw, 2.4rem) 0 3rem;
+    padding: clamp(1.4rem, 3.6vw, 2.8rem) clamp(1rem, 3vw, 2.2rem) 1.4rem;
+    border: 2px solid rgba(243, 242, 238, 0.72);
+    background:
+        linear-gradient(135deg, rgba(0, 158, 232, 0.09), transparent 32%),
+        linear-gradient(315deg, rgba(237, 39, 101, 0.1), transparent 34%),
+        #050a10;
+    box-shadow:
+        14px 14px 0 rgba(0, 158, 232, 0.22),
+        -10px -10px 0 rgba(237, 39, 101, 0.14),
+        var(--shadow);
+    isolation: isolate;
+}
+
+.band-lab-poster::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.26;
+    background:
+        radial-gradient(circle at 20% 18%, rgba(243, 242, 238, 0.16) 0 0.7px, transparent 0.9px),
+        radial-gradient(circle at 78% 74%, rgba(243, 242, 238, 0.11) 0 0.8px, transparent 1px);
+    background-size: 5px 5px, 7px 7px;
+    pointer-events: none;
+}
+
+.band-lab-poster::after {
+    content: "";
+    position: absolute;
+    inset: 0.7rem -0.75rem -0.75rem 0.7rem;
+    z-index: -2;
+    border: 1px solid rgba(181, 220, 8, 0.42);
+    transform: rotate(-0.18deg);
+    pointer-events: none;
+}
+
+.band-lab-bolt {
+    position: absolute;
+    z-index: 1;
+    width: clamp(2.1rem, 3.6vw, 3.2rem);
+    height: clamp(4.4rem, 7vw, 6.2rem);
+    clip-path: polygon(44% 0, 100% 0, 65% 39%, 100% 39%, 22% 100%, 43% 52%, 0 52%);
+    pointer-events: none;
+}
+
+.band-lab-bolt--blue {
+    top: 1.1rem;
+    right: 1rem;
+    background: var(--blue-bright);
+    transform: rotate(12deg);
+    filter: drop-shadow(5px 5px 0 rgba(237, 39, 101, 0.5));
+}
+
+.band-lab-bolt--pink {
+    left: 0.85rem;
+    top: 16.5rem;
+    background: var(--pink);
+    transform: rotate(-14deg) scaleX(-1);
+    filter: drop-shadow(5px 5px 0 rgba(181, 220, 8, 0.42));
+}
+
 .band-lab-stamp {
     display: inline-flex;
     align-items: center;
@@ -23,7 +92,9 @@
 }
 
 .band-lab-hero {
-    padding: clamp(1.6rem, 4vw, 3.4rem) 0 1.2rem;
+    position: relative;
+    z-index: 2;
+    padding: 0 0 1.1rem;
 }
 
 .band-lab-hero h1 {
@@ -35,6 +106,9 @@
     line-height: 0.9;
     letter-spacing: 0.03em;
     text-transform: uppercase;
+    text-shadow:
+        4px 4px 0 rgba(237, 39, 101, 0.68),
+        -3px -2px 0 rgba(0, 158, 232, 0.4);
 }
 
 .band-lab-hero h1 em {
@@ -48,11 +122,115 @@
     color: var(--muted);
 }
 
+.band-lab-return {
+    max-width: 46rem;
+    margin-top: 1rem !important;
+    padding: 0.75rem 0.9rem 0.8rem;
+    border: 2px solid rgba(201, 138, 36, 0.55);
+    background: rgba(201, 138, 36, 0.1);
+    color: var(--poster-cream) !important;
+    font-size: 0.92rem;
+    font-weight: 600;
+    transform: rotate(-0.6deg);
+}
+
+.band-lab-return strong {
+    color: var(--lime);
+}
+
+.band-lab-set {
+    position: relative;
+    z-index: 2;
+    margin: 0 0 1.4rem;
+    padding-top: 0.4rem;
+    border-top: 2px solid var(--poster-cream);
+}
+
+.band-lab-set h2,
+.band-lab-card h2 {
+    margin: 0 0 0.45rem;
+    font-family: var(--display);
+    font-size: 1.5rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.band-lab-set > p {
+    max-width: 46rem;
+    margin: 0 0 1rem;
+    color: var(--muted);
+}
+
+.band-lab-setlist {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0.35rem 0 0.2rem;
+    list-style: none;
+}
+
+.band-lab-sticker {
+    min-height: 4.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 0.45rem;
+    border: 3px solid var(--poster-cream);
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: clamp(0.78rem, 1.4vw, 1rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.05;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.band-lab-sticker--anoid {
+    background: var(--lime);
+    transform: rotate(-2.4deg);
+    box-shadow: 6px 6px 0 rgba(0, 158, 232, 0.35);
+}
+
+.band-lab-sticker--tris {
+    background: var(--blue-bright);
+    transform: rotate(1.8deg);
+    box-shadow: 6px 6px 0 rgba(237, 39, 101, 0.32);
+}
+
+.band-lab-sticker--jack {
+    background: var(--amber);
+    transform: rotate(-1.1deg);
+    box-shadow: 6px 6px 0 rgba(181, 220, 8, 0.28);
+}
+
+.band-lab-sticker--eights {
+    background: var(--pink);
+    color: var(--cream);
+    transform: rotate(2.2deg);
+    box-shadow: 6px 6px 0 rgba(0, 158, 232, 0.3);
+}
+
+.band-lab-sticker--rummy {
+    background: var(--poster-cream);
+    transform: rotate(-1.6deg);
+    box-shadow: 6px 6px 0 rgba(237, 39, 101, 0.28);
+}
+
+.band-lab-sticker--spades {
+    background: #8dffb7;
+    transform: rotate(1.4deg);
+    box-shadow: 6px 6px 0 rgba(178, 144, 255, 0.35);
+}
+
 .band-lab-grid {
+    position: relative;
+    z-index: 2;
     display: grid;
     grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.7fr);
     gap: 1.4rem;
-    padding-bottom: 3rem;
+    padding-bottom: 1.2rem;
 }
 
 .band-lab-card {
@@ -66,18 +244,24 @@
 }
 
 .band-lab-card--soon {
+    position: relative;
     align-self: start;
     transform: rotate(1.2deg);
     border-style: dashed;
     border-color: rgba(201, 138, 36, 0.55);
 }
 
-.band-lab-card h2 {
-    margin: 0 0 0.45rem;
-    font-family: var(--display);
-    font-size: 1.5rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+.band-lab-card--soon::before {
+    content: "";
+    position: absolute;
+    top: -0.28rem;
+    left: 50%;
+    width: 3.2rem;
+    height: 1.02rem;
+    background: linear-gradient(rgba(243, 242, 238, 0.42), rgba(243, 242, 238, 0.22));
+    clip-path: polygon(2% 0, 98% 8%, 100% 86%, 95% 100%, 3% 92%, 0 16%);
+    transform: translateX(-50%) rotate(-6deg);
+    pointer-events: none;
 }
 
 .band-lab-card p {
@@ -88,8 +272,33 @@
 .band-lab-stage {
     position: relative;
     min-height: min(72vh, 46rem);
-    border: 1px solid rgba(0, 158, 232, 0.35);
+    border: 2px solid rgba(243, 242, 238, 0.55);
     background: #061018;
+    box-shadow: 8px 8px 0 rgba(0, 158, 232, 0.2);
+}
+
+.band-lab-stage::before,
+.band-lab-stage::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    width: 2.6rem;
+    height: 0.85rem;
+    background: linear-gradient(rgba(243, 242, 238, 0.4), rgba(243, 242, 238, 0.2));
+    clip-path: polygon(3% 0, 97% 10%, 100% 88%, 94% 100%, 4% 90%, 0 14%);
+    pointer-events: none;
+}
+
+.band-lab-stage::before {
+    top: -0.35rem;
+    left: 1.1rem;
+    transform: rotate(-8deg);
+}
+
+.band-lab-stage::after {
+    top: -0.28rem;
+    right: 1.3rem;
+    transform: rotate(7deg);
 }
 
 .band-lab-stage iframe {
@@ -98,6 +307,39 @@
     height: min(72vh, 46rem);
     border: 0;
     background: #061018;
+}
+
+.band-lab-fullpage-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.65rem 1rem;
+    margin: 1rem 0 0 !important;
+}
+
+.band-lab-fullpage {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.45rem 0.9rem;
+    background: var(--lime);
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.band-lab-fullpage:hover,
+.band-lab-fullpage:focus-visible {
+    background: var(--blue-bright);
+}
+
+.band-lab-fullpage-wrap span {
+    color: var(--muted);
+    font-size: 0.78rem;
 }
 
 .band-lab-soon-mark {
@@ -112,6 +354,76 @@
     text-transform: uppercase;
 }
 
+.band-lab-jack {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 0.55rem;
+    margin: 0.2rem 0 0.3rem;
+}
+
+.band-lab-jack__ring {
+    width: 5.4rem;
+    height: 5.4rem;
+    border: 3px dashed rgba(201, 138, 36, 0.7);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 0.85rem rgba(2, 8, 16, 0.72);
+    background:
+        radial-gradient(circle at 50% 50%, transparent 28%, rgba(201, 138, 36, 0.18) 29% 46%, transparent 47%);
+}
+
+.band-lab-jack__void {
+    position: absolute;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: 2.1rem;
+    border-radius: 50%;
+    background: #020810;
+    box-shadow: 0 0 0 2px rgba(243, 242, 238, 0.35);
+}
+
+.band-lab-jack__label {
+    color: var(--amber);
+    font-family: "Permanent Marker", var(--display), sans-serif;
+    font-size: 0.86rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transform: rotate(2deg);
+}
+
+.band-lab-leftovers {
+    position: relative;
+    z-index: 2;
+    margin: 0 0 0.4rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px dashed rgba(243, 242, 238, 0.28);
+    background: rgba(2, 8, 16, 0.42);
+}
+
+.band-lab-leftovers summary {
+    cursor: pointer;
+    color: var(--lime);
+    font-family: var(--display);
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.band-lab-leftovers ul {
+    margin: 0.8rem 0 0;
+    padding-left: 1.15rem;
+    color: var(--muted);
+}
+
+.band-lab-leftovers li + li {
+    margin-top: 0.55rem;
+}
+
+.band-lab-leftovers code {
+    color: var(--poster-cream);
+}
+
 .band-lab-footer {
     border-top: 1px solid var(--line);
 }
@@ -122,12 +434,49 @@
     font-size: 0.82rem;
 }
 
+@media (max-width: 1100px) {
+    .band-lab-setlist {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 900px) {
     .band-lab-grid {
         grid-template-columns: 1fr;
     }
 
     .band-lab-card--soon {
+        transform: none;
+    }
+
+    .band-lab-bolt--pink {
+        display: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .band-lab-setlist {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .band-lab-hero h1 {
+        max-width: 12ch;
+    }
+
+    .band-lab-stage,
+    .band-lab-stage iframe {
+        min-height: min(78vh, 34rem);
+        height: min(78vh, 34rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .band-lab-stamp,
+    .band-lab-return,
+    .band-lab-card--soon,
+    .band-lab-sticker,
+    .band-lab-jack__label,
+    .band-lab-poster::after {
         transform: none;
     }
 }
