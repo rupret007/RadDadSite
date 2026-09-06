@@ -53,6 +53,14 @@ and visits without JavaScript keep the direct YouTube fallback. The covers
 wall stay unlinkable; its footer now points at the Wildflower tapes as well as
 The Story Of Us. See [the homepage watch handoff](docs/HOME_WATCH.md).
 
+Both inline players also offer an explicit **Try again** and keep the selected
+video's **Watch on YouTube** link visible. An opening attempt is bounded to ten
+seconds; a stalled or failed frame is stopped before offering a manual retry.
+A frame load is not described as successful playback. Taking the normal
+YouTube fallback closes the inline player so the two do not keep running
+together. See [the player-recovery handoff](docs/VIDEO_RECOVERY.md) for behavior,
+offline tests and the remaining real-device/provider limits.
+
 ## Share Show Details
 
 The homepage show panel and `/qr/` offer one secondary sharing action without
@@ -210,6 +218,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 - Public HTML never exposing `/show-control`, board links limited to `#official-sets` and `#suggestions`, and the Worker failing closed on owner-only `/show-control` paths
 - The latest featured YouTube performance on both the homepage and canonical QR landing page
 - Progressive inline playback for verified-embeddable homepage and `/qr/` videos, including privacy-delayed loading, honest direct-only cards, close cleanup, and focus return
+- Inline-player stall/error recovery, explicit retry without loops, retired frame events, native YouTube handoff cleanup, and phone/keyboard access
 - Permanent `/tap/` and legacy `/nfc/` fallbacks converging on the canonical `/qr/` content
 - Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention
 - Desktop flyer-and-event-copy presentation

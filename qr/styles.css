@@ -1017,6 +1017,7 @@ a {
 .video-dialog__panel {
     position: relative;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     background:
         linear-gradient(135deg, rgba(0, 158, 232, 0.1), transparent 34%),
         linear-gradient(315deg, rgba(237, 39, 101, 0.1), transparent 38%),
@@ -1097,7 +1098,9 @@ a {
 }
 
 .video-dialog__frame {
+    width: 100%;
     aspect-ratio: 16 / 9;
+    max-height: 55dvh;
     border-block: 1px solid var(--line);
     background: #000;
 }
@@ -1119,8 +1122,52 @@ a {
     text-transform: uppercase;
 }
 
-.video-dialog__footer a:hover {
+.video-dialog__footer a:hover,
+.video-dialog__footer a:focus-visible {
     color: var(--blue-bright);
+}
+
+.video-dialog__recovery {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    padding: 1rem 1.15rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.video-dialog__recovery p {
+    flex: 1 1 18rem;
+    min-width: 0;
+    margin: 0;
+    color: var(--cream);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.video-dialog__recovery button {
+    flex: 1 0 auto;
+    min-height: 2.8rem;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--blue-bright);
+    color: var(--cream);
+    background: rgba(32, 186, 255, 0.12);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.video-dialog__recovery button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+.video-dialog__recovery button:not(:disabled):hover,
+.video-dialog__recovery button:focus-visible {
+    outline: 2px solid var(--lime);
+    outline-offset: 3px;
 }
 
 .js [data-reveal] {

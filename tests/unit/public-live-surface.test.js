@@ -316,12 +316,12 @@ describe('public live surface honesty', () => {
         expect(homepage).toContain('href="#live-tapes">Hear the Wildflower tapes</a>');
         expect(homepage.match(/data-inline-video/g)).toHaveLength(3);
         expect(homepage).toContain('id="live-video-dialog"');
-        expect(homepage).toContain('live-video.js?v=20260906-1');
+        expect(homepage).toContain('live-video.js?v=20260906-2');
         expect(qr).toContain('class="next-show-strip"');
         expect(qr).toContain('href="#next-show"');
         expect(qr.match(/data-inline-video/g)).toHaveLength(3);
         expect(qr).toContain('id="live-video-dialog"');
-        expect(qr).toContain('../live-video.js?v=20260906-1');
+        expect(qr).toContain('../live-video.js?v=20260906-2');
         expect(qr).toContain('data-video-frame');
         expect(qr).not.toMatch(/data-video-frame[^>]+src=/);
         expect(homepage).not.toMatch(/data-video-frame[^>]+src=/);
