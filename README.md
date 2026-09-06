@@ -35,12 +35,16 @@ one useful fan action at a time:
 - from 7–10 PM: open the public running order;
 - after 10 PM: watch the current Rad Dad live-video section.
 
-The status copy, show-history language, and featured-show treatment change with
-the same state, so the two surfaces cannot drift into conflicting “next show”
-claims. The HTML fallback remains the pre-show calendar action. Missing action
-configuration hides that action instead of guessing a destination. Live state
-may use only the review-safe `#official-sets` board anchor; owner controls remain
-forbidden.
+The status copy, show-history language, featured-show treatment, and homepage
+watch heading change with the same state, so the two surfaces cannot drift into
+conflicting “next show” or “before the show” claims. The `/qr/` status strip
+uses that same useful action: the show panel before and on show day, the public
+running order while live, and the Wildflower tapes after the show. The HTML
+fallback remains the pre-show calendar action and a show-panel strip. Missing
+action configuration hides a panel action instead of guessing a destination; a
+misconfigured strip keeps its static show-panel link. Live state may use only
+the review-safe `#official-sets` board anchor; owner controls remain forbidden.
+See [the useful-action handoff](docs/NEXT_ACTION.md).
 
 On the homepage and `/qr/`, a normal tap on a verified-embeddable Wildflower
 performance opens a focused inline player so a fan can watch without leaving
@@ -50,8 +54,9 @@ permit to embed—including the current featured upload—stay clearly labeled
 direct YouTube links instead of opening a broken player. Every card remains a
 real `youtube.com` link, so modified clicks, browsers without the dialog API,
 and visits without JavaScript keep the direct YouTube fallback. The covers
-wall stay unlinkable; its footer now points at the Wildflower tapes as well as
-The Story Of Us. See [the homepage watch handoff](docs/HOME_WATCH.md).
+wall stay unlinkable; its footer, the homepage listen desk, and the QR song
+paths now point at the Wildflower tapes as well as The Story Of Us. See
+[the homepage watch handoff](docs/HOME_WATCH.md).
 
 Both inline players also offer an explicit **Try again** and keep the selected
 video's **Watch on YouTube** link visible. An opening attempt is bounded to ten
@@ -210,7 +215,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 
 - Event-first section and focus order, page metadata, and structured event data
 - September 19 event facts, named participating bands, flyer assets, and the calendar → directions → live order → video lifecycle
-- Flyer-style recent-set artist wall with show and listen paths, including a covers-footer path to the Wildflower tapes, homepage Story Of Us listen desk, leftover show-tape and QR listen loops, 2026 show history, videos, and a homepage contact panel that separates show booking from follow-only social links
+- Flyer-style recent-set artist wall with show and listen paths, including covers-footer, listen-desk, and QR song paths to the Wildflower tapes, leftover show-tape and QR listen loops, a QR status strip that follows the useful show action, 2026 show history, videos, and a homepage contact panel that separates show booking from follow-only social links
 - Review-only fan participation links shared by the homepage and canonical QR landing page
 - Homepage Connect booking vs follow lanes, booking-subject mailto, and no-form contact honesty
 - Canonical show sharing, explicit fallback choices, clipboard denial, cancellation, stale completion, and no-JavaScript access on both pages
@@ -284,6 +289,7 @@ RadDad Website/
 |   `-- wildflower-2026-poster-720.webp
 |-- docs/
 |   |-- HOME_WATCH.md
+|   |-- NEXT_ACTION.md
 |   |-- production-deployment.md
 |   |-- QR_LANDING_PAGE.md
 |   `-- raddad-deploy.conf.example

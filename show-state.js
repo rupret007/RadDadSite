@@ -25,6 +25,14 @@
         url: 'https://raddadband.com/#show'
     });
 
+    function isPlainActivation(event) {
+        return event.button === 0
+            && !event.metaKey
+            && !event.ctrlKey
+            && !event.shiftKey
+            && !event.altKey;
+    }
+
     function getShowState(now = Date.now()) {
         const timestamp = Number(now);
 
@@ -53,6 +61,8 @@
                 seeLinkLabel: tomorrow ? 'See tomorrow’s show' : 'See the September 19 show',
                 detailsLinkLabel: tomorrow ? 'See tomorrow’s show details' : 'See full show details',
                 cardActionsLabel: tomorrow ? 'Tomorrow’s show actions' : 'Next show actions',
+                watchTitle: 'Hear Rad Dad before the show',
+                watchLede: 'Start with the song that became ours, then the Wildflower tapes.',
                 primaryActionKey: 'upcoming',
                 hideCalendar: false,
                 hideDirections: false,
@@ -73,6 +83,8 @@
                 seeLinkLabel: 'See tonight’s show',
                 detailsLinkLabel: 'See tonight’s show details',
                 cardActionsLabel: 'Tonight’s show actions',
+                watchTitle: 'Hear Rad Dad before the show',
+                watchLede: 'Start with the song that became ours, then the Wildflower tapes.',
                 primaryActionKey: 'tonight',
                 hideCalendar: false,
                 hideDirections: false,
@@ -93,6 +105,8 @@
                 seeLinkLabel: 'See the live show',
                 detailsLinkLabel: 'See live show details',
                 cardActionsLabel: 'Live show actions',
+                watchTitle: 'Hear Rad Dad before the show',
+                watchLede: 'Start with the song that became ours, then the Wildflower tapes.',
                 primaryActionKey: 'live',
                 hideCalendar: true,
                 hideDirections: false,
@@ -112,6 +126,8 @@
             seeLinkLabel: 'See the September 19 show archive',
             detailsLinkLabel: 'See the September 19 show archive',
             cardActionsLabel: 'September 19 show archive actions',
+            watchTitle: 'Watch Rad Dad live',
+            watchLede: 'The Wildflower tapes and The Story Of Us stay on this page.',
             primaryActionKey: 'complete',
             hideCalendar: true,
             hideDirections: true,
@@ -291,38 +307,77 @@
         };
     }
 
+    function configuredAction(action, state) {
+        const key = state.primaryActionKey;
+        const liveAction = key === 'live' ? LIVE_PRIMARY_ACTION : null;
+        const href = liveAction?.href || action.dataset[`${key}Href`];
+        const label = liveAction?.label || action.dataset[`${key}Label`];
+
+        return href && label ? { href, label, key } : null;
+    }
+
+    function applyExternalLinkAttrs(action, href) {
+        if (href.startsWith('https://')) {
+            action.setAttribute('target', '_blank');
+            action.setAttribute('rel', 'noopener noreferrer');
+        } else {
+            action.removeAttribute('target');
+            action.removeAttribute('rel');
+        }
+    }
+
     function applyPrimaryActions(root, state) {
         root.querySelectorAll('[data-show-primary-action]').forEach((action) => {
-            const key = state.primaryActionKey;
-            const liveAction = key === 'live' ? LIVE_PRIMARY_ACTION : null;
-            const href = liveAction?.href || action.dataset[`${key}Href`];
-            const label = liveAction?.label || action.dataset[`${key}Label`];
+            const configured = configuredAction(action, state);
             const labelNode = action.querySelector('[data-show-primary-label]');
 
-            if (!href || !label || !labelNode) {
+            if (!configured || !labelNode) {
                 action.hidden = true;
                 return;
             }
 
             action.hidden = false;
-            action.setAttribute('href', href);
-            action.setAttribute('aria-label', label);
-            labelNode.textContent = label;
+            action.setAttribute('href', configured.href);
+            action.setAttribute('aria-label', configured.label);
+            labelNode.textContent = configured.label;
 
-            if (key === 'upcoming' && action.dataset.upcomingDownload === 'true') {
+            if (configured.key === 'upcoming' && action.dataset.upcomingDownload === 'true') {
                 action.setAttribute('download', '');
             } else {
                 action.removeAttribute('download');
             }
 
-            if (href.startsWith('https://')) {
-                action.setAttribute('target', '_blank');
-                action.setAttribute('rel', 'noopener noreferrer');
-            } else {
-                action.removeAttribute('target');
-                action.removeAttribute('rel');
-            }
+            applyExternalLinkAttrs(action, configured.href);
         });
+    }
+
+    function applyStripActions(root, state) {
+        root.querySelectorAll('[data-show-strip-action]').forEach((action) => {
+            const configured = configuredAction(action, state);
+            const labelNode = action.querySelector('[data-show-strip-label]');
+
+            // Keep the persistent status strip visible if a phase is
+            // misconfigured; the static HTML fallback remains the show panel.
+            if (!configured || !labelNode) return;
+
+            action.setAttribute('href', configured.href);
+            labelNode.textContent = configured.label;
+            applyExternalLinkAttrs(action, configured.href);
+        });
+    }
+
+    function focusInPageAction(root, action) {
+        const href = action.getAttribute('href');
+
+        if (!href || !href.startsWith('#') || href.length < 2) return;
+
+        const target = root.getElementById(href.slice(1));
+        if (!target) return;
+
+        if (!target.hasAttribute('tabindex')) {
+            target.tabIndex = -1;
+        }
+        target.focus({ preventScroll: false });
     }
 
     function applyShowState(root = global.document, now = Date.now()) {
@@ -342,6 +397,8 @@
         setText(root, '[data-show-link-label]', state.linkLabel);
         setText(root, '[data-show-see-link-label]', state.seeLinkLabel);
         setText(root, '[data-show-details-link-label]', state.detailsLinkLabel);
+        setText(root, '[data-show-watch-title]', state.watchTitle);
+        setText(root, '[data-show-watch-lede]', state.watchLede);
 
         root.querySelectorAll('[data-show-calendar]').forEach((element) => {
             element.hidden = state.hideCalendar;
@@ -373,6 +430,7 @@
         });
 
         applyPrimaryActions(root, state);
+        applyStripActions(root, state);
         return state;
     }
 
@@ -386,15 +444,27 @@
             applyShowState(root, Date.now());
             sharing.refresh();
         };
+        const onInPageAction = (event) => {
+            const origin = event.target?.nodeType === 1
+                ? event.target
+                : event.target?.parentElement;
+            const action = origin?.closest?.(
+                '[data-show-primary-action], [data-show-strip-action]'
+            );
+            if (!action || !root.contains(action) || !isPlainActivation(event)) return;
+            focusInPageAction(root, action);
+        };
         const interval = global.setInterval(refresh, 60 * 1000);
         // Refresh the entire fan journey immediately on return from a map,
         // background tab or back/forward cache, including an open visit panel.
         root.addEventListener('visibilitychange', refresh);
         global.addEventListener('pageshow', refresh);
+        root.addEventListener('click', onInPageAction);
         const stop = () => {
             global.clearInterval(interval);
             root.removeEventListener('visibilitychange', refresh);
             global.removeEventListener('pageshow', refresh);
+            root.removeEventListener('click', onInPageAction);
             sharing.stop();
             activeDocuments.delete(root);
         };

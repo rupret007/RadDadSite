@@ -1512,7 +1512,13 @@ a {
         font-size: 0;
     }
 
-    .next-show-strip__cta span {
+    /* Keep only the arrow visible on a phone so a longer live/complete
+       label cannot crowd the venue. The label stays in the accessible name. */
+    .next-show-strip__cta [data-show-strip-label] {
+        font-size: 0;
+    }
+
+    .next-show-strip__cta [aria-hidden="true"] {
         font-size: 1rem;
     }
 }

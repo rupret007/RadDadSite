@@ -95,11 +95,11 @@ test.describe('tap, NFC, and QR landing pages', () => {
         );
         await expect(page.locator('link[rel="stylesheet"][href^="styles.css"]')).toHaveAttribute(
             'href',
-            'styles.css?v=20260906-2'
+            'styles.css?v=20260906-3'
         );
         await expect(page.locator('script[src^="../show-state.js"]')).toHaveAttribute(
             'src',
-            '../show-state.js?v=20260905-1'
+            '../show-state.js?v=20260906-3'
         );
         await expect(page.locator('script[src^="../live-video.js"]')).toHaveAttribute(
             'src',
@@ -165,6 +165,10 @@ test.describe('tap, NFC, and QR landing pages', () => {
         );
 
         const songPaths = songSection.getByRole('navigation', { name: 'Show and listen paths' });
+        await expect(songPaths.getByRole('link', { name: 'Hear the Wildflower tapes' })).toHaveAttribute(
+            'href',
+            '#wildflower'
+        );
         await expect(songPaths.getByRole('link', { name: 'September 19 show' })).toHaveAttribute(
             'href',
             '#next-show'
@@ -173,6 +177,10 @@ test.describe('tap, NFC, and QR landing pages', () => {
             'href',
             '#join-show'
         );
+
+        await songPaths.getByRole('link', { name: 'Hear the Wildflower tapes' }).click();
+        await expect(page).toHaveURL(/#wildflower$/);
+        await expect(page.locator('#wildflower')).toBeInViewport();
     });
 
     test('/qr/ features the latest Wildflower video and earlier live performances', async ({ page }) => {

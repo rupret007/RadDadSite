@@ -77,8 +77,11 @@ links, and tag links cannot drift into separate landing-page experiences.
 show panel must present one primary action rather than parallel calendar and
 directions buttons: calendar before show day, directions on show day before
 7 PM Central, the public running order from 7–10 PM, and the current live-video
-section after the show. Its status strip and show copy must come from that same
-state.
+section after the show. Its status strip must offer that same useful action —
+the show panel before and on show day, the review-safe public `#official-sets`
+anchor while live, and `#wildflower` after the show — without replacing the
+strip’s visible status in the accessible name. Show copy must come from that
+same state. See [NEXT_ACTION.md](NEXT_ACTION.md).
 
 Keep a real local calendar link in the static HTML as the no-JavaScript
 fallback. The controller may progressively replace it only with the configured

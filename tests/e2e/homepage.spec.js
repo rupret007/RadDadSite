@@ -370,6 +370,10 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
         'href',
         /music\.amazon\.com\/tracks\/B0FHPB9FN7/
     );
+    await expect(songDesk.getByRole('link', { name: 'Hear the Wildflower tapes' })).toHaveAttribute(
+        'href',
+        '#live-tapes'
+    );
     await expect(songDesk.getByRole('link', { name: 'Song story' })).toHaveAttribute('href', 'qr/#song');
     await expect(songDesk.getByRole('link', { name: 'Help shape the night' })).toHaveAttribute('href', '#join-show');
     await expect(songDesk.getByRole('link', { name: 'September 19 show' })).toHaveAttribute('href', '#show');
@@ -442,6 +446,10 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
     await featuredShow.getByRole('link', { name: 'Hear The Story Of Us' }).click();
     await expect(page).toHaveURL(/#our-song$/);
     await expect(songDesk).toBeInViewport();
+
+    await songDesk.getByRole('link', { name: 'Hear the Wildflower tapes' }).click();
+    await expect(page).toHaveURL(/#live-tapes$/);
+    await expect(page.locator('#live-tapes')).toBeInViewport();
 
     await songDesk.getByRole('link', { name: 'Help shape the night' }).click();
     await expect(page).toHaveURL(/#join-show$/);
