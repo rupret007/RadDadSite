@@ -835,38 +835,73 @@ html[data-show-phase="complete"] .show-moment {
     transform: rotate(14deg);
 }
 
-/* Event detail strip */
+/* Event detail strip — four hand-cut ticket chips pasted on the lime bar */
 .signal-strip {
-    border-top: 1px solid rgba(2, 8, 16, 0.5);
-    border-bottom: 1px solid rgba(2, 8, 16, 0.5);
-    background: var(--lime);
+    position: relative;
+    border-top: 3px solid var(--ink);
+    border-bottom: 3px solid var(--ink);
+    background:
+        repeating-linear-gradient(
+            -38deg,
+            rgba(2, 8, 16, 0.07) 0 2px,
+            transparent 2px 9px
+        ),
+        var(--lime);
     color: var(--ink);
+    overflow: hidden;
 }
 
 .signal-strip__inner {
-    min-height: 4.3rem;
+    min-height: 3.5rem;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: center;
+    gap: clamp(0.35rem, 1.4vw, 1rem);
+    padding-block: 0.8rem;
 }
 
 .signal-strip span {
-    min-height: 4.3rem;
+    min-height: 3.35rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.65rem 1rem;
-    border-left: 1px solid rgba(2, 8, 16, 0.28);
+    padding: 0.55rem 0.9rem;
+    background: var(--cream);
+    clip-path: polygon(1% 9%, 27% 0, 63% 6%, 99% 2%, 98% 85%, 70% 100%, 33% 93%, 2% 99%);
+    box-shadow: 3px 3px 0 rgba(2, 8, 16, 0.32);
     font-family: var(--display);
     font-size: clamp(0.9rem, 1.4vw, 1.1rem);
     font-weight: 700;
     letter-spacing: 0.055em;
     text-align: center;
     text-transform: uppercase;
+    transform: rotate(var(--chip-tilt, -1.4deg)) translateY(var(--chip-shift, 0));
 }
 
-.signal-strip span:last-child {
-    border-right: 1px solid rgba(2, 8, 16, 0.28);
+.signal-strip span:nth-child(1) {
+    --chip-tilt: -1.9deg;
+    --chip-shift: 2px;
+}
+
+.signal-strip span:nth-child(2) {
+    --chip-tilt: 1.5deg;
+    --chip-shift: -3px;
+    background: var(--ink);
+    color: var(--lime);
+    clip-path: polygon(2% 4%, 34% 0, 69% 7%, 98% 1%, 100% 83%, 63% 96%, 28% 100%, 1% 90%);
+}
+
+.signal-strip span:nth-child(3) {
+    --chip-tilt: -1deg;
+    --chip-shift: -1px;
+}
+
+.signal-strip span:nth-child(4) {
+    --chip-tilt: 2.2deg;
+    --chip-shift: 3px;
+    background: var(--ink);
+    color: var(--lime);
+    clip-path: polygon(1% 2%, 39% 6%, 73% 0, 99% 7%, 97% 93%, 65% 98%, 30% 92%, 3% 100%);
 }
 
 /* Fan participation */
@@ -2848,24 +2883,13 @@ html[data-show-phase="complete"] .show-moment {
 
     .signal-strip__inner {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem 0.85rem;
     }
 
     .signal-strip span {
-        min-height: 3.7rem;
-        border-bottom: 1px solid rgba(2, 8, 16, 0.28);
+        min-height: 3.1rem;
         font-size: 0.83rem;
-    }
-
-    .signal-strip span:nth-child(odd) {
-        border-left: 0;
-    }
-
-    .signal-strip span:nth-child(even) {
-        border-right: 0;
-    }
-
-    .signal-strip span:nth-child(n + 3) {
-        border-bottom: 0;
+        box-shadow: 2px 2px 0 rgba(2, 8, 16, 0.3);
     }
 
     .content-section {
