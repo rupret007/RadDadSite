@@ -177,4 +177,13 @@
         // already reopened this same dialog.
         if (!liveVideoDialog.open) resetLiveVideo();
     });
+
+    global.addEventListener('pagehide', () => {
+        // Retire the autoplay source and deadline before a history entry can
+        // preserve them. Returning requires a fresh tap, even from page cache.
+        // Skip the ordinary scripted focus return while leaving the document.
+        liveVideoTrigger = null;
+        resetLiveVideo();
+        if (liveVideoDialog?.open) liveVideoDialog.close();
+    });
 }(window));

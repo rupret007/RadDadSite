@@ -65,6 +65,34 @@ approved rollout. No real provider or outbound communication is exercised.
 
 ## Handoff
 
+### Page-exit leftover from main `b9240002`
+
+The homepage and QR player previously kept the dialog open, its autoplay
+iframe source attached, and the scroll-lock class set when a pagehide event
+could preserve the document in browser history. Both page baselines reproduce
+this for opening and loaded players.
+
+The shared player now retires its opening attempt, removes the iframe source,
+clears the selection/status/retry state and scroll lock, and closes the dialog
+on pagehide. It skips the ordinary scripted focus return while leaving. A
+pageshow event does not load anything; the fan chooses a recording again.
+Normal Close/Escape and YouTube fallback behavior keep their existing focus
+and link semantics. No visibilitychange/blur policy or provider API is added.
+
+Eight unit regressions cover both surfaces, opening/loaded states, persisted
+and nonpersisted exits, repeated events, late callbacks, and a fresh choice.
+Four offline browser journeys observe cleanup at an actual navigation event,
+go Back, verify no new embed request, then open a different recording. Browser
+cache eligibility remains browser-controlled; persisted events are also
+covered deterministically by the unit suite. This is not real-device Safari
+or real YouTube playback acceptance.
+
+Band-lab, its unlisted boundary, public navigation, event facts and package
+allowlists stay unchanged. PRE_KAREN only; no Pages/Che action.
+
+BOB_NEW_SESSION_FREELANE_20260906_2216
+OVERNIGHT_BOB_CONTINUE_20260907_0325
+
 Review the exact draft tip for Karen leftover + security. Che/Jeff retain any
 Pages, server or Sites deployment decision. A tested source artifact does not
 mean the live site changed. Travis books; never auto-pitch or post. No merge,

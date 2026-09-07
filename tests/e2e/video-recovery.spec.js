@@ -28,6 +28,63 @@ async function stopPending(attempts) {
 }
 
 for (const path of ['/', '/qr/']) {
+    for (const state of ['opening', 'loaded']) {
+        test(`${path} leaving the ${state} player retires it before history return`, async ({ page }) => {
+            const attempts = [];
+            await page.route(EMBED_PATTERN, async route => {
+                attempts.push(route);
+                if (state === 'loaded') {
+                    await route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>Offline player</title>' });
+                }
+            });
+            try {
+                await page.goto(path);
+                const controls = player(page);
+                await page.locator('[data-inline-video]').first().click();
+                await expect.poll(() => attempts.length).toBe(1);
+                if (state === 'loaded') await expect(controls.retry).toBeEnabled();
+
+                // Observe the real navigation event after the product listener,
+                // so this also checks cleanup when Chromium does not use bfcache.
+                await page.evaluate(() => {
+                    window.addEventListener('pagehide', () => {
+                        const dialog = document.querySelector('#live-video-dialog');
+                        sessionStorage.setItem('test-video-page-exit', JSON.stringify({
+                            open: dialog.open,
+                            src: dialog.querySelector('[data-video-frame]').getAttribute('src'),
+                            locked: document.documentElement.classList.contains('has-video-dialog'),
+                            status: dialog.querySelector('[data-video-status]').textContent,
+                            retryDisabled: dialog.querySelector('[data-video-retry]').disabled
+                        }));
+                    }, { once: true });
+                });
+                await page.goto(path === '/' ? '/qr/' : '/');
+                expect(await page.evaluate(() => JSON.parse(sessionStorage.getItem('test-video-page-exit')))).toEqual({
+                    open: false, src: null, locked: false, status: '', retryDisabled: true
+                });
+
+                await page.goBack();
+                await expect(controls.dialog).toBeHidden();
+                await expect(controls.frame).not.toHaveAttribute('src', /.+/);
+                await expect(controls.status).toHaveText('');
+                await expect(controls.dialog.locator('[data-video-retry]')).toBeDisabled();
+                await expect(page.locator('html')).not.toHaveClass(/has-video-dialog/);
+                expect(attempts).toHaveLength(1);
+
+                const nextCard = page.locator('[data-inline-video]').nth(1);
+                await nextCard.click();
+                await expect(controls.dialog).toBeVisible();
+                await expect(controls.frame).toHaveAttribute('src', /\/embed\/GCy4nHIqV5k\?/);
+                await expect.poll(() => attempts.length).toBe(2);
+                await controls.close.click();
+                await expect(nextCard).toBeFocused();
+                await expect(controls.frame).not.toHaveAttribute('src', /.+/);
+            } finally {
+                if (state === 'opening') await stopPending(attempts);
+            }
+        });
+    }
+
     test(`${path} stalled inline playback offers one manual retry, never an automatic loop`, async ({ page }) => {
         await page.clock.install({ time: new Date('2026-09-10T12:00:00-05:00') });
         const attempts = await stallEmbeds(page);

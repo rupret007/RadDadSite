@@ -290,6 +290,55 @@ describe('shared inline live-video player', () => {
         expect(page.dialog.close).not.toHaveBeenCalled();
     });
 
+    it.each(PAGES.flatMap(([label, html, url]) => [true, false].flatMap(persisted =>
+        ['opening', 'loaded'].map(state => ({ label, html, url, persisted, state }))
+    )))('retires $label video on page exit (persisted=$persisted, state=$state)', ({ html, url, persisted, state }) => {
+        const page = loadPage(html, url);
+        const cards = [...page.document.querySelectorAll('[data-inline-video]')];
+        click(page.window, cards[0]);
+        const retiredFrame = page.frame();
+        const retiredTimeout = [...page.timers.values()][0].callback;
+        if (state === 'loaded') retiredFrame.dispatchEvent(new page.window.Event('load'));
+        const focus = vi.spyOn(cards[0], 'focus');
+
+        page.window.dispatchEvent(new page.window.PageTransitionEvent('pagehide', { persisted }));
+
+        expect(page.dialog.open).toBe(false);
+        expect(retiredFrame.hasAttribute('src')).toBe(false);
+        expect(page.document.documentElement.classList.contains('has-video-dialog')).toBe(false);
+        expect(page.timers.size).toBe(0);
+        expect(page.status()).toBe('');
+        expect(page.retry().disabled).toBe(true);
+        expect(focus).not.toHaveBeenCalled();
+
+        // Returning, repeated lifecycle events, and retired provider callbacks
+        // must not reopen the old selection or make its retry active.
+        page.window.dispatchEvent(new page.window.PageTransitionEvent('pagehide', { persisted }));
+        page.window.dispatchEvent(new page.window.PageTransitionEvent('pageshow', { persisted }));
+        retiredFrame.dispatchEvent(new page.window.Event('load'));
+        retiredFrame.dispatchEvent(new page.window.Event('error'));
+        retiredTimeout();
+        click(page.window, page.retry());
+        expect(page.dialog.open).toBe(false);
+        expect(page.frame()).toBe(retiredFrame);
+        expect(page.frame().hasAttribute('src')).toBe(false);
+        expect(page.status()).toBe('');
+        expect(page.timers.size).toBe(0);
+
+        click(page.window, cards[1]);
+        expect(page.dialog.open).toBe(true);
+        expect(page.frame()).not.toBe(retiredFrame);
+        expect(page.frame().src).toContain('/embed/GCy4nHIqV5k?');
+        retiredTimeout();
+        page.dialog.dispatchEvent(new page.window.Event('close'));
+        expect(page.dialog.open).toBe(true);
+        expect(page.status()).toContain('Opening');
+        expect(page.timers.size).toBe(1);
+        page.dialog.querySelector('[data-video-close]').click();
+        expect(page.document.activeElement).toBe(cards[1]);
+        expect(page.timers.size).toBe(0);
+    });
+
     it('does not start an embed when native modal opening fails', () => {
         const page = loadPage('index.html', 'https://raddadband.com/');
         page.dialog.showModal = vi.fn(() => { throw new Error('Synthetic unavailable dialog'); });
