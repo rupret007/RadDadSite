@@ -1383,6 +1383,26 @@ html[data-show-phase="complete"] .show-moment {
     pointer-events: none;
 }
 
+/* Cut-paper backing for the wall's remaining bare clippings so every name
+   reads as its own pasted-up flyer scrap instead of floating text. No
+   clip-path here: the masking-tape ::before scraps must stay visible. */
+.artist-wall__item--jimmy,
+.artist-wall__item--nirvana,
+.artist-wall__item--blur,
+.artist-wall__item--pennywise,
+.artist-wall__item--me-first {
+    background:
+        linear-gradient(
+            168deg,
+            color-mix(in srgb, var(--artist-accent) 15%, transparent),
+            color-mix(in srgb, var(--artist-accent) 3%, transparent) 72%
+        ),
+        rgba(6, 12, 20, 0.5);
+    box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--artist-accent) 28%, transparent),
+        4px 5px 0 rgba(0, 0, 0, 0.42);
+}
+
 .artist-wall__item--green-day {
     --artist-accent: var(--lime);
     --artist-rotate: -2.6deg;
