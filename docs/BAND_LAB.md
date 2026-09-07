@@ -51,8 +51,8 @@ Karen review later. Leftovers and honesty:
   authenticate band mates. The HTML is in a public GitHub repo, so the path is
   visible to anyone who reads the tree, this PR, or CI logs.
 - **Do not treat this as private data storage.** No secrets belong here. Game
-  `localStorage` stays in the visitor’s browser. The next-play ticket never
-  writes those keys and never turns a storage string into HTML.
+  `localStorage` stays in the visitor’s browser. The next-play ticket
+  never writes those keys and never turns a storage string into HTML.
 - **Iframe sandbox** remains `allow-scripts allow-same-origin` so the vendored
   hub can run and keep continue-state. That is the same class of trust as
   hosting the game files. No `allow-popups` / top navigation.
