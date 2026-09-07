@@ -4,6 +4,14 @@ Base: `2df3e4e9aba9f52e2b137f2bcc726d0870b3d502`, after #32.
 
 ## Product change
 
+Backdrop dismissal now requires a primary pointer gesture that starts and ends
+outside the dialog. Dragging from its title/panel onto the backdrop, tapping an
+inside edge, or cancelling the pointer keeps the current player open. A normal
+backdrop tap still closes immediately, retires playback, and returns focus to
+the recording card. Close, Escape, and the YouTube exit keep their existing paths.
+This is a pointer-boundary fix, not a claim about provider playback or physical
+device behavior; the regression checks use offline fixtures on both fan pages.
+
 Homepage and QR fans can recover a blocked or stalled inline recording without
 closing the dialog and finding the card again. The existing shared player now
 shows an accessible status, **Try again**, and the selected tape's existing
