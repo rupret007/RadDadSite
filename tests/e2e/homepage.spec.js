@@ -469,7 +469,7 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
     await expect(contact.locator('.social-nav__kicker')).toHaveText('Just here for the band? Follow along.');
     await expect(contact.getByRole('link', { name: 'Email about a show' })).toHaveAttribute(
         'href',
-        'mailto:rad.dad.band@gmail.com?subject=Rad%20Dad%20booking'
+        'mailto:rad.dad.band@gmail.com?subject=Rad%20Dad%20booking&body=Venue%3A%0ACity%3A%0ADate%3A%0A%0ATell%20us%20about%20the%20show%3A%0A'
     );
     await expect(contact.getByRole('link', { name: 'Call (214) 697-0584' })).toHaveAttribute(
         'href',
@@ -650,7 +650,10 @@ test('keeps booking and follow as two usable contact lanes on phone and desktop'
 
         await expect(contact.getByRole('heading', { level: 2, name: 'Bring Rad Dad to your stage.' })).toBeVisible();
         await expect(contact).toContainText('This page does not book the night.');
-        await expect(email).toHaveAttribute('href', 'mailto:rad.dad.band@gmail.com?subject=Rad%20Dad%20booking');
+        await expect(email).toHaveAttribute(
+            'href',
+            'mailto:rad.dad.band@gmail.com?subject=Rad%20Dad%20booking&body=Venue%3A%0ACity%3A%0ADate%3A%0A%0ATell%20us%20about%20the%20show%3A%0A'
+        );
         await expect(phone).toHaveAttribute('href', 'tel:+12146970584');
         await expect(follow.getByRole('link', { name: 'Instagram' })).toBeVisible();
         await expect(contact.locator('form')).toHaveCount(0);
