@@ -66,6 +66,11 @@ YouTube fallback closes the inline player so the two do not keep running
 together. See [the player-recovery handoff](docs/VIDEO_RECOVERY.md) for behavior,
 offline tests and the remaining real-device/provider limits.
 
+Leaving either fan page also retires the selected inline frame, its opening
+deadline, and the modal's scroll lock. A history return starts with the player
+closed and requires a fresh card tap; old frame callbacks cannot revive it.
+Ordinary dialog closing still returns focus to the selected recording.
+
 ## Share Show Details
 
 The homepage show panel and `/qr/` offer one secondary sharing action without
