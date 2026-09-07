@@ -1,4 +1,4 @@
-# Unlisted band lab — September 6, 2026 leftover polish
+# Unlisted band lab — September 7, 2026 return-visit attractors
 
 ## Product behavior
 
@@ -6,23 +6,27 @@ The band-mates desk at `/private/garage-rehearsal-k7m2n9/` stays an unlisted
 rehearsal page. It is Pages-ready as a repo path and is **not** linked from the
 homepage, primary nav, footer, `/qr/`, `/tap/`, or `/nfc/`.
 
-This leftover slice keeps the playable Turdanoid six-game hub and the honest
-WebJam-shaped hole from [#36](https://github.com/rupret007/RadDadSite/pull/36),
-then polishes the desk so a band mate has a reason to return on the same
-device:
+This close-out slice keeps the playable Turdanoid six-game hub and the honest
+WebJam-shaped hole from [#36](https://github.com/rupret007/RadDadSite/pull/36)
+and the flyer desk from [#37](https://github.com/rupret007/RadDadSite/pull/37),
+then makes Turdanoid and the WebJam seat feel like reasons to come back on the
+same phone:
 
 - the same punk-flyer wheatpaste treatment as the public covers wall;
-- a six-game sewer roster that names the hub games without inventing extra
-  doors;
-- an honest return note: Continue / last-played lives on **this phone**,
-  arcade mid-run saves stay parked with Turdanoid PR #8, and the URL is not a
-  lock;
+- a six-game sewer set whose stickers are same-folder doors into the hub
+  games already on the desk — not extra titles, not Neon as a seventh sticker;
+- one next-play ticket: with no JavaScript it opens the sewer hub; after a
+  return visit it names a live table Continue or last-played on **this phone**;
+- an honest return note: arcade mid-run saves stay parked with Turdanoid
+  PR #8, and the URL is not a lock;
 - a same-folder **Open the sewer full-page** link for phone play;
-- a cardboard WebJam slot that still loads nothing and still pretends to
-  stream nothing;
+- a cardboard WebJam reserved seat that still loads nothing and still
+  pretends to stream nothing;
 - on-page PRE_KAREN leftovers instead of a share/auto-post widget.
 
-No JavaScript was added to the desk page. Native `details` is enough.
+Desk JavaScript only reads the same allowlisted Continue / last-played keys
+the vendored hub already writes. It does not write storage, share the URL, or
+invent a seventh game.
 
 ## Exact URL to share (Jeff / Che only)
 
@@ -47,7 +51,8 @@ Karen review later. Leftovers and honesty:
   authenticate band mates. The HTML is in a public GitHub repo, so the path is
   visible to anyone who reads the tree, this PR, or CI logs.
 - **Do not treat this as private data storage.** No secrets belong here. Game
-  `localStorage` stays in the visitor’s browser.
+  `localStorage` stays in the visitor’s browser. The next-play ticket
+  never writes those keys and never turns a storage string into HTML.
 - **Iframe sandbox** remains `allow-scripts allow-same-origin` so the vendored
   hub can run and keep continue-state. That is the same class of trust as
   hosting the game files. No `allow-popups` / top navigation.
@@ -68,6 +73,10 @@ Karen review later. Leftovers and honesty:
   the URL by hand.
 - **Future WebJam.** Wire a real attractor only when it exists. Do not turn
   the cardboard slot into a fake live embed.
+- **Ticket leftover.** Continue only names a table the vendored
+  `listLiveContinuePages` helper already accepts. Unknown last-played pages
+  fall back to the hub. Playing inside the iframe updates the ticket on the
+  next return, storage event, or visibility pass — not mid-frame.
 
 ## What was intentionally not changed
 
@@ -80,11 +89,12 @@ Karen review later. Leftovers and honesty:
 ## Verification
 
 `tests/unit/band-lab.test.js` covers noindex, no public doors, the honest
-WebJam hole, the six-game roster, PRE_KAREN leftover copy, Git blob-match
-against the documented Turdanoid pin, and the clean public allowlist.
-`tests/e2e/band-lab.spec.js` plays TurdAnoid from the hub, opens the same-folder
-full-page sewer, checks phone layout, and proves homepage / QR / tap / NFC
-do not link here.
+WebJam hole, same-folder sewer doors, next-play allowlisting, PRE_KAREN
+leftover copy, Git blob-match against the documented Turdanoid pin, and the
+clean public allowlist.
+`tests/e2e/band-lab.spec.js` plays TurdAnoid from a sticker and from the hub,
+checks the no-JavaScript hub ticket, last-played return copy, phone full-page
+sewer, and proves homepage / QR / tap / NFC do not link here.
 
 Run the full unit, deployment-harness and offline Chromium suites,
 ShellCheck, then both clean-commit package builds and production

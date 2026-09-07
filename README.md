@@ -246,7 +246,7 @@ If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead
 - Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention
 - Desktop flyer-and-event-copy presentation
 - Logo fallback behavior when the brand image cannot load
-- Unlisted band-lab desk: playable Turdanoid hub, honest WebJam hole, no public-surface links, and a clean production artifact that still excludes `/private/`
+- Unlisted band-lab desk: playable Turdanoid hub, same-folder sewer doors, this-phone next-play ticket, honest WebJam reserved seat, no public-surface links, and a clean production artifact that still excludes `/private/`
 
 Browser tests isolate external network access: known font, thumbnail, and
 media responses are synthetic, and unexpected external requests fail the test.
