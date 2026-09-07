@@ -138,6 +138,90 @@
     color: var(--lime);
 }
 
+.band-lab-next {
+    position: relative;
+    z-index: 2;
+    margin: 0 0 1.35rem;
+    padding: 0.95rem 1rem 1.05rem;
+    border: 2px solid rgba(201, 138, 36, 0.7);
+    background:
+        linear-gradient(135deg, rgba(201, 138, 36, 0.16), transparent 42%),
+        #1a1208;
+    box-shadow: 8px 8px 0 rgba(181, 220, 8, 0.22);
+    transform: rotate(-0.5deg);
+}
+
+.band-lab-next::before,
+.band-lab-next::after {
+    content: "";
+    position: absolute;
+    width: 2.7rem;
+    height: 0.85rem;
+    background: linear-gradient(rgba(243, 242, 238, 0.42), rgba(243, 242, 238, 0.2));
+    clip-path: polygon(3% 0, 97% 10%, 100% 88%, 94% 100%, 4% 90%, 0 14%);
+    pointer-events: none;
+}
+
+.band-lab-next::before {
+    top: -0.32rem;
+    left: 1.1rem;
+    transform: rotate(-8deg);
+}
+
+.band-lab-next::after {
+    top: -0.26rem;
+    right: 1.4rem;
+    transform: rotate(7deg);
+}
+
+.band-lab-next h2 {
+    margin: 0 0 0.45rem;
+    font-family: var(--display);
+    font-size: 1.5rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.band-lab-next > p {
+    max-width: 46rem;
+    margin: 0 0 0.85rem;
+    color: var(--muted);
+}
+
+.band-lab-next-ticket {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.7rem 1rem;
+    margin: 0 !important;
+}
+
+.band-lab-next-play {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.45rem 0.95rem;
+    background: var(--amber);
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.band-lab-next-play:hover,
+.band-lab-next-play:focus-visible {
+    background: var(--lime);
+}
+
+.band-lab-next-ticket span {
+    color: var(--poster-cream);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
 .band-lab-set {
     position: relative;
     z-index: 2;
@@ -184,7 +268,14 @@
     letter-spacing: 0.04em;
     line-height: 1.05;
     text-align: center;
+    text-decoration: none;
     text-transform: uppercase;
+}
+
+.band-lab-sticker:hover,
+.band-lab-sticker:focus-visible {
+    outline: 3px solid var(--lime);
+    outline-offset: 3px;
 }
 
 .band-lab-sticker--anoid {
@@ -391,6 +482,24 @@
     transform: rotate(2deg);
 }
 
+.band-lab-webjam-stub {
+    margin: 0.85rem 0 0 !important;
+    padding: 0.7rem 0.75rem 0.75rem;
+    border: 2px dashed rgba(201, 138, 36, 0.7);
+    background: repeating-linear-gradient(
+        -12deg,
+        rgba(201, 138, 36, 0.08),
+        rgba(201, 138, 36, 0.08) 8px,
+        transparent 8px,
+        transparent 16px
+    );
+    color: var(--poster-cream) !important;
+    font-family: "Permanent Marker", var(--display), sans-serif;
+    font-size: 0.86rem;
+    letter-spacing: 0.04em;
+    transform: rotate(1.1deg);
+}
+
 .band-lab-leftovers {
     position: relative;
     z-index: 2;
@@ -473,9 +582,11 @@
 @media (prefers-reduced-motion: reduce) {
     .band-lab-stamp,
     .band-lab-return,
+    .band-lab-next,
     .band-lab-card--soon,
     .band-lab-sticker,
     .band-lab-jack__label,
+    .band-lab-webjam-stub,
     .band-lab-poster::after {
         transform: none;
     }

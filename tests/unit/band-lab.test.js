@@ -10,17 +10,18 @@ import { CLIENT_SOURCE_PATHS } from '../../scripts/lib/production-artifact.mjs';
 const repoRoot = join(fileURLToPath(new URL('../..', import.meta.url)));
 const BAND_LAB_DIR = 'private/garage-rehearsal-k7m2n9';
 const BAND_LAB_PAGE = `${BAND_LAB_DIR}/index.html`;
+const BAND_LAB_NEXT_PLAY = `${BAND_LAB_DIR}/next-play.js`;
 const TURDANOID_DIR = `${BAND_LAB_DIR}/turdanoid`;
 const TURDANOID_HUB = `${TURDANOID_DIR}/index.html`;
 const BAND_LAB_DOC = 'docs/BAND_LAB.md';
 const TURDANOID_PIN = '600b96caa3064368f44cc8b79eb8c97950211fee';
 const SEWER_SET = [
-    'TurdAnoid Turbo',
-    'Turdtris',
-    'Crapjack 21',
-    'Crappy Eights',
-    'TurdRummy',
-    'TurdSpades'
+    { label: 'TurdAnoid Turbo', href: 'turdanoid/TurdAnoid.html', page: 'TurdAnoid.html' },
+    { label: 'Turdtris', href: 'turdanoid/turdtris.html', page: 'turdtris.html' },
+    { label: 'Crapjack 21', href: 'turdanoid/turdjack.html', page: 'turdjack.html' },
+    { label: 'Crappy Eights', href: 'turdanoid/crapeights.html', page: 'crapeights.html' },
+    { label: 'TurdRummy', href: 'turdanoid/turdrummy.html', page: 'turdrummy.html' },
+    { label: 'TurdSpades', href: 'turdanoid/turdspades.html', page: 'turdspades.html' }
 ];
 
 // Git blob SHAs from rupret007/Turdanoid @ TURDANOID_PIN. Update SOURCE.txt
@@ -85,18 +86,27 @@ describe('unlisted band lab', () => {
         expect(html).not.toMatch(/navigator\.share|clipboard|shareDetails/i);
         expect(html).toContain('href="turdanoid/index.html"');
         expect(html).toContain('Open the sewer full-page');
+        expect(html).toContain('src="turdanoid/games/table-continue-core.js"');
+        expect(html).toContain('src="next-play.js"');
+        expect(html).toContain('Reserved seat. Not a stream. Not a date.');
     });
 
-    it('names the six-game sewer set and keeps return-visit leftovers honest', async () => {
+    it('names the six-game sewer set as same-folder doors and keeps return-visit leftovers honest', async () => {
         const html = await readFile(join(repoRoot, BAND_LAB_PAGE), 'utf8');
         const leftovers = await readFile(join(repoRoot, BAND_LAB_DOC), 'utf8');
         const setlist = html.match(/<ol class="band-lab-setlist">[^]*?<\/ol>/)?.[0] ?? '';
+        const stickerHrefs = [...setlist.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
 
         expect(setlist).toBeTruthy();
         for (const game of SEWER_SET) {
-            expect(setlist).toContain(game);
+            expect(setlist).toContain(game.label);
+            expect(setlist).toContain(`href="${game.href}"`);
         }
-        expect(setlist).not.toMatch(/<a\b/i);
+        expect(stickerHrefs).toEqual(SEWER_SET.map((game) => game.href));
+        expect(setlist).not.toMatch(/https?:/i);
+        expect(setlist).not.toContain('neon-arkanoid');
+        expect(html).toContain('data-band-lab-next-play');
+        expect(html).toContain('Open the sewer hub');
         expect(html).toContain('This URL is not a lock.');
         expect(html).toContain('Arcade mid-run saves stay parked with Turdanoid #8.');
         expect(html).toContain('Obscurity is not access control.');
@@ -106,6 +116,98 @@ describe('unlisted band lab', () => {
         expect(leftovers).toContain(TURDANOID_PIN);
         expect(leftovers).toContain('does **not** add `/private/` to that allowlist');
         expect(leftovers).toContain('2b1864fa118962abf98c5cf34acdbf58f4f1d699');
+        expect(leftovers).toContain('never writes those keys');
+    });
+
+    it('resolves one next-play ticket from allowlisted continue or last-played only', async () => {
+        const { JSDOM } = await import('jsdom');
+        const source = await readFile(join(repoRoot, BAND_LAB_NEXT_PLAY), 'utf8');
+        const html = `<!DOCTYPE html><html><body>
+            <div data-band-lab-next>
+                <a data-band-lab-next-play href="turdanoid/index.html">Open the sewer hub</a>
+                <span data-band-lab-next-note>fallback</span>
+            </div>
+        </body></html>`;
+        const { window } = new JSDOM(html, { runScripts: 'outside-only', url: 'https://example.test/private/lab/' });
+        window.eval(source);
+        const api = window.BandLabNextPlay;
+        const storage = {
+            values: Object.create(null),
+            getItem(key) {
+                return Object.prototype.hasOwnProperty.call(this.values, key) ? this.values[key] : null;
+            },
+            setItem(key, value) {
+                this.values[key] = String(value);
+            }
+        };
+
+        expect(api.SEWER_GAMES.map((game) => game.page)).toEqual(SEWER_SET.map((game) => game.page));
+        expect(api.resolveNextPlay(storage, null)).toMatchObject({
+            kind: 'hub',
+            href: 'turdanoid/index.html',
+            action: 'Open the sewer hub'
+        });
+
+        storage.setItem(api.LAST_GAME_KEY, 'turdtris.html');
+        expect(api.resolveNextPlay(storage, null)).toMatchObject({
+            kind: 'again',
+            page: 'turdtris.html',
+            href: 'turdanoid/turdtris.html',
+            action: 'Play Turdtris again'
+        });
+
+        storage.setItem(api.LAST_GAME_KEY, 'neon-arkanoid.html');
+        expect(api.resolveNextPlay(storage, null).kind).toBe('hub');
+
+        storage.setItem(api.LAST_GAME_KEY, '<img src=x onerror=alert(1)>');
+        expect(api.resolveNextPlay(storage, null).kind).toBe('hub');
+
+        storage.setItem(api.LAST_GAME_KEY, 'TurdAnoid.html');
+        const continueFirst = api.resolveNextPlay(storage, {
+            listLiveContinuePages() {
+                return ['turdspades.html', 'javascript:alert(1)', 'neon-arkanoid.html'];
+            }
+        });
+        expect(continueFirst).toMatchObject({
+            kind: 'continue',
+            page: 'turdspades.html',
+            href: 'turdanoid/turdspades.html',
+            action: 'Continue TurdSpades'
+        });
+
+        const ignoredUnknown = api.resolveNextPlay(storage, {
+            listLiveContinuePages() {
+                return ['evil.html', 'neon-arkanoid.html'];
+            }
+        });
+        expect(ignoredUnknown.kind).toBe('again');
+        expect(ignoredUnknown.page).toBe('TurdAnoid.html');
+
+        const thrown = api.resolveNextPlay({
+            getItem() {
+                throw new Error('blocked');
+            }
+        }, {
+            listLiveContinuePages() {
+                throw new Error('bad store');
+            }
+        });
+        expect(thrown.kind).toBe('hub');
+
+        api.applyNextPlay(window.document, {
+            href: 'turdanoid/turdjack.html',
+            action: '<img src=x>Crapjack',
+            note: '<script>alert(1)</script>'
+        });
+        const link = window.document.querySelector('[data-band-lab-next-play]');
+        const note = window.document.querySelector('[data-band-lab-next-note]');
+        expect(link.getAttribute('href')).toBe('turdanoid/turdjack.html');
+        expect(link.textContent).toBe('<img src=x>Crapjack');
+        expect(note.textContent).toBe('<script>alert(1)</script>');
+        expect(link.querySelector('img')).toBeNull();
+        expect(note.querySelector('script')).toBeNull();
+        expect(source).not.toMatch(/innerHTML/);
+        expect(source).not.toMatch(/navigator\.share|clipboard/i);
     });
 
     it('keeps the vendored six-game hub playable without rewriting Neon', async () => {
@@ -161,7 +263,9 @@ describe('unlisted band lab', () => {
     it('stays out of the production public-site artifact allowlist', () => {
         expect(CLIENT_SOURCE_PATHS.some((path) => path.startsWith('private/'))).toBe(false);
         expect(CLIENT_SOURCE_PATHS).not.toContain(BAND_LAB_PAGE);
+        expect(CLIENT_SOURCE_PATHS).not.toContain(BAND_LAB_NEXT_PLAY);
         expect(CLIENT_SOURCE_PATHS).not.toContain(BAND_LAB_DOC);
         expect(CLIENT_SOURCE_PATHS.some((path) => path.includes('turdanoid'))).toBe(false);
+        expect(CLIENT_SOURCE_PATHS.some((path) => path.includes('next-play'))).toBe(false);
     });
 });
