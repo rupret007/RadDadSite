@@ -28,6 +28,29 @@ async function stopPending(attempts) {
 }
 
 for (const path of ['/', '/qr/']) {
+    test(`${path} dragging from the dialog to its backdrop keeps playback open`, async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 720 });
+        await page.goto(path);
+        const controls = player(page);
+        const card = page.locator('[data-inline-video]').first();
+        await card.click();
+        await expect(controls.retry).toBeEnabled();
+        const before = await controls.frame.getAttribute('src');
+        const bounds = await controls.dialog.boundingBox();
+        const title = await controls.dialog.locator('#live-video-title').boundingBox();
+        const inside = { x: title.x + 8, y: title.y + title.height / 2 };
+        await page.mouse.move(inside.x, inside.y);
+        await page.mouse.down();
+        await page.mouse.move(bounds.x / 2, inside.y);
+        await page.mouse.up();
+        await expect(controls.dialog).toBeVisible();
+        await expect(controls.frame).toHaveAttribute('src', before);
+        await page.mouse.click(bounds.x / 2, inside.y);
+        await expect(controls.dialog).toBeHidden();
+        await expect(controls.frame).not.toHaveAttribute('src', /.+/);
+        await expect(card).toBeFocused();
+    });
+
     for (const state of ['opening', 'loaded']) {
         test(`${path} leaving the ${state} player retires it before history return`, async ({ page }) => {
             const attempts = [];

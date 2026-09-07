@@ -63,6 +63,40 @@ const PAGES = [
 ];
 
 describe('shared inline live-video player', () => {
+    it.each(PAGES)('keeps %s dialog interior/edges open but closes for each outside edge', (_label, html, url) => {
+        const page = loadPage(html, url);
+        const card = page.document.querySelector('[data-inline-video]');
+        vi.spyOn(page.dialog, 'getBoundingClientRect').mockReturnValue({ left: 20, top: 30, right: 320, bottom: 430 });
+        click(page.window, card);
+        const frame = page.frame();
+        const press = (clientX, clientY) => page.dialog.dispatchEvent(new page.window.MouseEvent('pointerdown', { bubbles: true, button: 0, clientX, clientY }));
+        for (const [clientX, clientY] of [[100, 100], [20, 30], [320, 430]]) {
+            press(clientX, clientY);
+            click(page.window, page.dialog, { clientX, clientY });
+            expect(page.dialog.open).toBe(true);
+            expect(page.frame()).toBe(frame);
+            expect(frame.hasAttribute('src')).toBe(true);
+            expect(page.dialog.close).not.toHaveBeenCalled();
+        }
+        press(100, 100);
+        click(page.window, page.dialog, { clientX: 19, clientY: 100 });
+        expect(page.dialog.open).toBe(true);
+        press(19, 100);
+        page.dialog.dispatchEvent(new page.window.Event('pointercancel'));
+        click(page.window, page.dialog, { clientX: 19, clientY: 100 });
+        expect(page.dialog.open).toBe(true);
+        for (const [clientX, clientY] of [[19, 100], [321, 100], [100, 29], [100, 431]]) {
+            press(clientX, clientY);
+            click(page.window, page.dialog, { clientX, clientY });
+            expect(page.dialog.open).toBe(false);
+            expect(page.frame().hasAttribute('src')).toBe(false);
+            expect(page.timers.size).toBe(0);
+            expect(page.document.activeElement).toBe(card);
+            click(page.window, card);
+        }
+        page.window.close();
+    });
+
     it.each([
         ['homepage', 'index.html', 'https://raddadband.com/', 'All the Small Things — blink-182 cover', 'Wildflower 2026 · Live performance'],
         ['QR', 'qr/index.html', 'https://raddadband.com/qr/', 'All the Small Things', 'blink-182 cover']

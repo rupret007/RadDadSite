@@ -15,6 +15,7 @@
     let liveVideoTrigger = null;
     let selectedVideo = null;
     let openingAttempt = null;
+    let backdropPress = false;
 
     function isPlainPrimaryClick(event) {
         return event.button === 0
@@ -101,6 +102,7 @@
     }
 
     function resetLiveVideo() {
+        backdropPress = false;
         retireOpeningAttempt();
         selectedVideo = null;
         liveVideoFrame?.removeAttribute('src');
@@ -168,8 +170,23 @@
         // Preserve the anchor's native destination, target and modifier keys.
     });
 
+    function isBackdropPoint(event) {
+        if (event.target !== liveVideoDialog) return false;
+        const bounds = liveVideoDialog.getBoundingClientRect();
+        return event.clientX < bounds.left || event.clientX > bounds.right
+            || event.clientY < bounds.top || event.clientY > bounds.bottom;
+    }
+
+    liveVideoDialog?.addEventListener('pointerdown', (event) => {
+        backdropPress = isPlainPrimaryClick(event) && isBackdropPoint(event);
+    });
+    liveVideoDialog?.addEventListener('pointercancel', () => { backdropPress = false; });
     liveVideoDialog?.addEventListener('click', (event) => {
-        if (event.target === liveVideoDialog) closeLiveVideo();
+        // A drag from the panel can finish with dialog as the click target.
+        // Require both ends outside; interior/border interactions keep playing.
+        const dismiss = backdropPress && isBackdropPoint(event);
+        backdropPress = false;
+        if (dismiss) closeLiveVideo();
     });
 
     liveVideoDialog?.addEventListener('close', () => {
