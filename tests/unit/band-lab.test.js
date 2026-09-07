@@ -116,7 +116,7 @@ describe('unlisted band lab', () => {
         expect(leftovers).toContain(TURDANOID_PIN);
         expect(leftovers).toContain('does **not** add `/private/` to that allowlist');
         expect(leftovers).toContain('2b1864fa118962abf98c5cf34acdbf58f4f1d699');
-        expect(leftovers).toContain('never writes those keys');
+        expect(leftovers.replace(/\s+/g, ' ')).toContain('never writes those keys');
     });
 
     it('resolves one next-play ticket from allowlisted continue or last-played only', async () => {
