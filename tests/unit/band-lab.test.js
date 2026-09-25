@@ -183,6 +183,77 @@ describe('unlisted band lab', () => {
         expect(ignoredUnknown.kind).toBe('again');
         expect(ignoredUnknown.page).toBe('TurdAnoid.html');
 
+        // Regression: when two tables are both live, the ticket must follow the
+        // most recently touched one (by the store's updatedAt), not whichever
+        // page happens to sort first in the hub's fixed game order. Before this
+        // fix, resolveNextPlay always took continuing[0] as returned by
+        // listLiveContinuePages, so a fresher turdspades game lost out to a
+        // stale turdjack game listed earlier.
+        const CONTINUE_KEY = 'turdsuite_continue_v1';
+        storage.setItem(CONTINUE_KEY, JSON.stringify({
+            v: 1,
+            games: {
+                'turdjack.html': { updatedAt: 1000, snapshot: {} },
+                'turdspades.html': { updatedAt: 5000, snapshot: {} }
+            }
+        }));
+        const recencyPick = api.resolveNextPlay(storage, {
+            CONTINUE_KEY,
+            listLiveContinuePages() {
+                // Fixed hub order lists turdjack before turdspades even though
+                // turdspades was updated later.
+                return ['turdjack.html', 'turdspades.html'];
+            },
+            parseContinueStore(raw) {
+                return JSON.parse(raw);
+            }
+        });
+        expect(recencyPick).toMatchObject({
+            kind: 'continue',
+            page: 'turdspades.html',
+            href: 'turdanoid/turdspades.html',
+            action: 'Continue TurdSpades'
+        });
+
+        // Same scenario reversed: whichever page has the larger updatedAt wins,
+        // proving the order isn't just being flipped.
+        storage.setItem(CONTINUE_KEY, JSON.stringify({
+            v: 1,
+            games: {
+                'turdjack.html': { updatedAt: 9000, snapshot: {} },
+                'turdspades.html': { updatedAt: 4000, snapshot: {} }
+            }
+        }));
+        const recencyPickReversed = api.resolveNextPlay(storage, {
+            CONTINUE_KEY,
+            listLiveContinuePages() {
+                return ['turdjack.html', 'turdspades.html'];
+            },
+            parseContinueStore(raw) {
+                return JSON.parse(raw);
+            }
+        });
+        expect(recencyPickReversed).toMatchObject({
+            kind: 'continue',
+            page: 'turdjack.html',
+            action: 'Continue Crapjack 21'
+        });
+
+        // Missing/unavailable timestamp metadata (e.g. a lighter-weight
+        // tableContinue mock, or a corrupt store) must not crash and must fall
+        // back to the hub's own array order rather than reordering randomly.
+        storage.setItem(CONTINUE_KEY, 'not json');
+        const fallbackOrder = api.resolveNextPlay(storage, {
+            CONTINUE_KEY,
+            listLiveContinuePages() {
+                return ['crapeights.html', 'turdrummy.html'];
+            },
+            parseContinueStore() {
+                throw new Error('bad store');
+            }
+        });
+        expect(fallbackOrder.page).toBe('crapeights.html');
+
         const thrown = api.resolveNextPlay({
             getItem() {
                 throw new Error('blocked');

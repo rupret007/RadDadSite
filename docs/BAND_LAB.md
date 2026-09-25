@@ -78,6 +78,26 @@ Karen review later. Leftovers and honesty:
   fall back to the hub. Playing inside the iframe updates the ticket on the
   next return, storage event, or visibility pass — not mid-frame.
 
+## Next-play recency fix — September 25, 2026
+
+`listLiveContinuePages` returns live tables in the hub's fixed game order
+(Crapjack, Crappy Eights, TurdRummy, TurdSpades), not by which one a band
+mate actually touched last. Before this fix, `resolveNextPlay` always took
+that array's first entry, so an old still-open Crapjack hand could keep
+naming itself on the ticket even after someone started and left a fresher
+TurdSpades round — the return-visit ticket pointed at a stale table instead
+of the one worth resuming.
+
+`next-play.js` now re-sorts the allowlisted live pages by each table's
+`updatedAt` (read via the vendored `parseContinueStore(raw)` against the same
+`CONTINUE_KEY`, both already public on `TurdSuiteTableContinue`) before
+picking the ticket's target, falling back to the hub's original order when
+timestamps are missing or unavailable — e.g. a lighter test double that only
+implements `listLiveContinuePages`. This is still a read-only lookup against
+the same allowlisted key; it does not write storage, add a new key, or touch
+the vendored `table-continue-core.js` file, so the documented Turdanoid pin
+and its blob-match tests stay untouched.
+
 ## What was intentionally not changed
 
 - Public HTML/CSS/nav/footer/homepage/QR/tap/NFC
@@ -89,12 +109,16 @@ Karen review later. Leftovers and honesty:
 ## Verification
 
 `tests/unit/band-lab.test.js` covers noindex, no public doors, the honest
-WebJam hole, same-folder sewer doors, next-play allowlisting, PRE_KAREN
-leftover copy, Git blob-match against the documented Turdanoid pin, and the
-clean public allowlist.
+WebJam hole, same-folder sewer doors, next-play allowlisting, the next-play
+recency fix (picking the most recently updated live table over the hub's
+fixed array order, in both directions, plus a safe fallback when timestamp
+metadata is unavailable), PRE_KAREN leftover copy, Git blob-match against the
+documented Turdanoid pin, and the clean public allowlist.
 `tests/e2e/band-lab.spec.js` plays TurdAnoid from a sticker and from the hub,
 checks the no-JavaScript hub ticket, last-played return copy, phone full-page
-sewer, and proves homepage / QR / tap / NFC do not link here.
+sewer, the next-play recency fix with real Continue snapshots (validating that
+two live tables are sorted by `updatedAt` not by the hub's fixed game order),
+and proves homepage / QR / tap / NFC do not link here.
 
 Run the full unit, deployment-harness and offline Chromium suites,
 ShellCheck, then both clean-commit package builds and production
