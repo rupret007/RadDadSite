@@ -1,4 +1,4 @@
-const { test, expect } = require('./fixtures');
+const { test, expect, isShowComplete } = require('./fixtures');
 
 const EXPECTED_TITLE = 'Rad Dad + Friends with The Fault Lines at Guitars & Growlers | September 19, 2026';
 const CALENDAR_PATH = 'assets/rad-dad-friends-guitars-growlers-2026.ics';
@@ -154,12 +154,18 @@ test('presents the September event, flyer, and one useful lifecycle action', asy
     );
 
     const showMoment = hero.locator('.show-moment');
-    await expect(showMoment.getByRole('status')).toContainText('Next show');
-    const calendarLink = showMoment.getByRole('link', { name: 'Add to Calendar' });
     const fullFlyerLink = hero.getByRole('link', { name: 'View Full Flyer' });
 
-    await expect(calendarLink).toHaveAttribute('href', CALENDAR_PATH);
-    await expect(calendarLink).toHaveAttribute('download', '');
+    if (isShowComplete()) {
+        await expect(showMoment.getByRole('status')).toContainText('Show complete');
+        const watchLink = showMoment.getByRole('link', { name: 'Watch Rad Dad live' });
+        await expect(watchLink).toHaveAttribute('href', '#watch');
+    } else {
+        await expect(showMoment.getByRole('status')).toContainText('Next show');
+        const calendarLink = showMoment.getByRole('link', { name: 'Add to Calendar' });
+        await expect(calendarLink).toHaveAttribute('href', CALENDAR_PATH);
+        await expect(calendarLink).toHaveAttribute('download', '');
+    }
     await expect(fullFlyerLink).toHaveAttribute('href', FLYER_PATH);
     await expect(fullFlyerLink).toHaveAttribute('target', '_blank');
     await expect(hero.locator('.flyer-link')).toHaveAttribute('href', FLYER_PATH);
@@ -306,37 +312,48 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
         'Downtown Dallas Arts and Music Festival'
     ]);
 
-    const featuredShow = showCards.nth(0);
-    await expect(featuredShow).toHaveClass(/show-card--featured/);
-    await expect(featuredShow.locator('.show-status')).toHaveText('Next show');
-    await expect(featuredShow.locator('time.show-date')).toHaveAttribute('datetime', '2026-09-19');
-    await expect(featuredShow.locator('.show-date .sr-only')).toHaveText('September 19, 2026');
-    await expect(featuredShow).toContainText('SEP');
-    await expect(featuredShow).toContainText('19');
-    await expect(featuredShow).toContainText('2026');
-    await expect(featuredShow).toContainText('7:00–10:00 PM · Free show');
-    await expect(featuredShow.getByRole('link', { name: 'Hear The Story Of Us' })).toHaveAttribute(
+    const septemberShow = showCards.nth(0);
+    await expect(septemberShow.locator('time.show-date')).toHaveAttribute('datetime', '2026-09-19');
+    await expect(septemberShow.locator('.show-date .sr-only')).toHaveText('September 19, 2026');
+    await expect(septemberShow).toContainText('SEP');
+    await expect(septemberShow).toContainText('19');
+    await expect(septemberShow).toContainText('2026');
+    await expect(septemberShow).toContainText('7:00–10:00 PM · Free show');
+    await expect(septemberShow.getByRole('link', { name: 'Hear The Story Of Us' })).toHaveAttribute(
         'href',
         '#our-song'
     );
-    await expect(featuredShow.getByRole('link', { name: 'Add to Calendar' })).toHaveAttribute(
-        'href',
-        CALENDAR_PATH
-    );
-    await expect(featuredShow.getByRole('link', { name: 'Get Directions' })).toHaveAttribute(
-        'href',
-        'https://maps.app.goo.gl/Gr79GmmXAxMH5SkP6'
-    );
-    await expect(featuredShow.getByRole('link', { name: 'Show details' })).toHaveAttribute('href', '#show');
-    await expect(featuredShow).not.toContainText(/save the date/i);
+    await expect(septemberShow.getByRole('link', { name: 'Show details' })).toHaveAttribute('href', '#show');
+    await expect(septemberShow).not.toContainText(/save the date/i);
+
+    if (isShowComplete()) {
+        await expect(septemberShow).toHaveClass(/show-card--past/);
+        await expect(septemberShow).not.toHaveClass(/show-card--featured/);
+        await expect(septemberShow.locator('.show-status')).toHaveText('Show complete');
+        await expect(septemberShow.getByRole('link', { name: 'Add to Calendar' })).toBeHidden();
+        await expect(septemberShow.getByRole('link', { name: 'Get Directions' })).toBeHidden();
+    } else {
+        await expect(septemberShow).toHaveClass(/show-card--featured/);
+        await expect(septemberShow.locator('.show-status')).toHaveText('Next show');
+        await expect(septemberShow.getByRole('link', { name: 'Add to Calendar' })).toHaveAttribute(
+            'href',
+            CALENDAR_PATH
+        );
+        await expect(septemberShow.getByRole('link', { name: 'Get Directions' })).toHaveAttribute(
+            'href',
+            'https://maps.app.goo.gl/Gr79GmmXAxMH5SkP6'
+        );
+    }
 
     const pastShows = page.locator('#shows .show-card--past');
-    await expect(pastShows).toHaveCount(2);
-    await expect(pastShows.nth(0).getByRole('link', { name: 'Hear the Wildflower tapes' })).toHaveAttribute(
+    const wildflowerIndex = isShowComplete() ? 1 : 0;
+    const dallasIndex = isShowComplete() ? 2 : 1;
+    await expect(pastShows).toHaveCount(isShowComplete() ? 3 : 2);
+    await expect(pastShows.nth(wildflowerIndex).getByRole('link', { name: 'Hear the Wildflower tapes' })).toHaveAttribute(
         'href',
         '#live-tapes'
     );
-    await expect(pastShows.nth(0).getByRole('link', { name: 'Festival website' })).toHaveAttribute(
+    await expect(pastShows.nth(wildflowerIndex).getByRole('link', { name: 'Festival website' })).toHaveAttribute(
         'href',
         'https://wildflowerfestival.com/'
     );
@@ -344,16 +361,16 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
         'href',
         '#live-tapes'
     );
-    await expect(pastShows.nth(0).locator('.show-status')).toHaveText('Earlier this year');
-    await expect(pastShows.nth(0).locator('time.show-date')).toHaveAttribute('datetime', '2026-05-16');
-    await expect(pastShows.nth(0).locator('.show-date .sr-only')).toHaveText('May 16, 2026');
-    await expect(pastShows.nth(0)).toContainText('MAY');
-    await expect(pastShows.nth(0)).toContainText('16');
-    await expect(pastShows.nth(1).locator('.show-status')).toHaveText('Earlier this year');
-    await expect(pastShows.nth(1).locator('time.show-date')).toHaveAttribute('datetime', '2026-04-11');
-    await expect(pastShows.nth(1).locator('.show-date .sr-only')).toHaveText('April 11, 2026');
-    await expect(pastShows.nth(1)).toContainText('APR');
-    await expect(pastShows.nth(1)).toContainText('11');
+    await expect(pastShows.nth(wildflowerIndex).locator('.show-status')).toHaveText('Earlier this year');
+    await expect(pastShows.nth(wildflowerIndex).locator('time.show-date')).toHaveAttribute('datetime', '2026-05-16');
+    await expect(pastShows.nth(wildflowerIndex).locator('.show-date .sr-only')).toHaveText('May 16, 2026');
+    await expect(pastShows.nth(wildflowerIndex)).toContainText('MAY');
+    await expect(pastShows.nth(wildflowerIndex)).toContainText('16');
+    await expect(pastShows.nth(dallasIndex).locator('.show-status')).toHaveText('Earlier this year');
+    await expect(pastShows.nth(dallasIndex).locator('time.show-date')).toHaveAttribute('datetime', '2026-04-11');
+    await expect(pastShows.nth(dallasIndex).locator('.show-date .sr-only')).toHaveText('April 11, 2026');
+    await expect(pastShows.nth(dallasIndex)).toContainText('APR');
+    await expect(pastShows.nth(dallasIndex)).toContainText('11');
 
     const songDesk = page.locator('#our-song');
     await expect(songDesk.getByRole('heading', { level: 3, name: 'The Story Of Us' })).toBeVisible();
@@ -443,7 +460,7 @@ test('keeps the 2026 show history, all five videos, and stable contact links', a
         'https://www.youtube.com/@RadDadBand'
     );
 
-    await featuredShow.getByRole('link', { name: 'Hear The Story Of Us' }).click();
+    await septemberShow.getByRole('link', { name: 'Hear The Story Of Us' }).click();
     await expect(page).toHaveURL(/#our-song$/);
     await expect(songDesk).toBeInViewport();
 
