@@ -116,7 +116,9 @@ metadata is unavailable), PRE_KAREN leftover copy, Git blob-match against the
 documented Turdanoid pin, and the clean public allowlist.
 `tests/e2e/band-lab.spec.js` plays TurdAnoid from a sticker and from the hub,
 checks the no-JavaScript hub ticket, last-played return copy, phone full-page
-sewer, and proves homepage / QR / tap / NFC do not link here.
+sewer, the next-play recency fix with real Continue snapshots (validating that
+two live tables are sorted by `updatedAt` not by the hub's fixed game order),
+and proves homepage / QR / tap / NFC do not link here.
 
 Run the full unit, deployment-harness and offline Chromium suites,
 ShellCheck, then both clean-commit package builds and production
