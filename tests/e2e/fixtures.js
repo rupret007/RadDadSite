@@ -1,5 +1,11 @@
 const { test: base, expect } = require('@playwright/test');
 
+const SHOW_ENDS_AT = Date.parse('2026-09-19T22:00:00-05:00');
+
+function isShowComplete(now = Date.now()) {
+    return now >= SHOW_ENDS_AT;
+}
+
 // These are browser fixtures, not assertions about any live provider. Every
 // external response is synthetic; only this test server can receive traffic.
 const test = base.extend({
@@ -77,4 +83,4 @@ const test = base.extend({
     }, { auto: true }]
 });
 
-module.exports = { test, expect };
+module.exports = { test, expect, isShowComplete };
