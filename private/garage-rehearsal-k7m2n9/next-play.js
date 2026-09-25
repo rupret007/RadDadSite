@@ -33,6 +33,37 @@
             : null;
     }
 
+    function continueUpdatedAt(storage, tableContinue, page) {
+        if (typeof tableContinue.CONTINUE_KEY !== 'string' || typeof tableContinue.parseContinueStore !== 'function') {
+            return 0;
+        }
+        if (!storage || typeof storage.getItem !== 'function') {
+            return 0;
+        }
+
+        let raw = null;
+        try {
+            raw = storage.getItem(tableContinue.CONTINUE_KEY);
+        } catch {
+            return 0;
+        }
+
+        let store;
+        try {
+            store = tableContinue.parseContinueStore(raw);
+        } catch {
+            return 0;
+        }
+
+        const entry = store && store.games ? store.games[page] : null;
+        const updatedAt = entry ? entry.updatedAt : null;
+        return typeof updatedAt === 'number' && Number.isFinite(updatedAt) ? updatedAt : 0;
+    }
+
+    // The hub's own continue list is ordered by a fixed game order, not by which
+    // table a band mate actually touched last. Re-sort by updatedAt (falling
+    // back to that fixed order on ties, or when timestamps are unavailable) so
+    // the return-visit ticket always names the freshest unfinished table.
     function liveContinuePages(storage, tableContinue) {
         if (!tableContinue || typeof tableContinue.listLiveContinuePages !== 'function') {
             return [];
@@ -49,7 +80,11 @@
             return [];
         }
 
-        return listed.filter((page) => allowlistedGame(page));
+        return listed
+            .filter((page) => allowlistedGame(page))
+            .map((page, index) => ({ page, index, updatedAt: continueUpdatedAt(storage, tableContinue, page) }))
+            .sort((a, b) => b.updatedAt - a.updatedAt || a.index - b.index)
+            .map((entry) => entry.page);
     }
 
     function lastPlayedPage(storage) {
