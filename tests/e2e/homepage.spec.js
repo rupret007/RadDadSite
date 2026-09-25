@@ -5,6 +5,12 @@ const CALENDAR_PATH = 'assets/rad-dad-friends-guitars-growlers-2026.ics';
 const FLYER_PATH = 'assets/rad-dad-friends-guitars-growlers-2026-v2-full.png';
 const FLYER_ASPECT_RATIO = 1024 / 1536;
 
+async function applyAt(page, isoTime) {
+    return page.evaluate((timestamp) => (
+        window.RadDadShowState.apply(document, Date.parse(timestamp))
+    ), isoTime);
+}
+
 async function getFlyerLayout(page) {
     const flyer = page.locator('.event-flyer');
 
@@ -126,6 +132,7 @@ test('invites fans into the review-only show board without exposing owner contro
 
 test('presents the September event, flyer, and one useful lifecycle action', async ({ page }) => {
     await page.goto('/');
+    await applyAt(page, '2026-09-10T12:00:00-05:00');
 
     const hero = page.locator('#show');
     const eventTitle = hero.getByRole('heading', { level: 1, name: 'Rad Dad + Friends' });
@@ -293,6 +300,7 @@ test('shows an accessible graphic artist wall without song titles', async ({ pag
 
 test('keeps the 2026 show history, all five videos, and stable contact links', async ({ page }) => {
     await page.goto('/');
+    await applyAt(page, '2026-09-10T12:00:00-05:00');
 
     const showCards = page.locator('#shows .show-card');
     await expect(showCards).toHaveCount(3);
