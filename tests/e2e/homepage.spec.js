@@ -71,9 +71,14 @@ for (const width of [320, 390, 768, 980, 981, 1440]) {
         }
         await nav.getByRole('link', { name: 'Watch', exact: true }).click();
         await expect.poll(async () => {
-            const top = await page.locator('#watch-title').boundingBox();
+            const section = await page.locator('#watch').boundingBox();
+            const heading = await page.locator('#watch-title').boundingBox();
             const header = await page.locator('.site-header').boundingBox();
-            return top.y >= header.height - 1 && top.y < header.height + 100;
+            const headerBottom = header.y + header.height;
+            // The fragment targets the section, not the heading below its padding.
+            // Verify the target clears the sticky header and its heading is in view.
+            return section.y >= headerBottom - 1 && section.y < headerBottom + 20
+                && heading.y >= section.y && heading.y + heading.height <= 900;
         }).toBe(true);
     });
 }
