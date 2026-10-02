@@ -1,0 +1,94 @@
+name: Apply reviewed evergreen edits on isolated branch
+on:
+  push:
+    branches: [update/evergreen-band-homepage]
+    paths: [.github/workflows/evergreen-apply-reviewed-edits.yml]
+permissions:
+  contents: write
+concurrency:
+  group: evergreen-reviewed-edits
+  cancel-in-progress: false
+jobs:
+  apply:
+    if: github.repository == 'rupret007/RadDadSite' && github.ref == 'refs/heads/update/evergreen-band-homepage'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+      - name: Validate every old and new blob before applying the reviewed source edits
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import base64, gzip, hashlib, json, os, pathlib, subprocess
+          def blob(data):
+              return hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+          one = pathlib.Path('.evergreen-upload-1.b64').read_bytes()
+          two = pathlib.Path('.evergreen-upload-2.b64').read_bytes()
+          # Repair the explicitly identified transfer transcription errors only.
+          # Both received and corrected bytes must match independently checked hashes.
+          assert blob(one) == '13b0f904da6449fdef788db0c5c6478f9f18baad'
+          assert blob(two) == '0a08a743abe79f8539da8621261adfd3b416c392'
+          one = one.replace(b'niWPuqs/jYgbv', b'niWPuqs/jqYgbv')
+          two = two.replace(b'WLg07tgHBBIKde64iR5hn', b'WLg07tgXwBBIKde64iR3hn').replace(b'N9Xt+/ef3QjRx', b'N9Xt+/ef3TwjRx')
+          assert blob(one) == '2c28169822b8c85148a0d6f8d877d7016b391897'
+          assert blob(two) == 'd6bb242dbf50be699c23fffda8b53f8780855d3c'
+          payload = gzip.decompress(base64.b64decode(one + two, validate=True))
+          assert len(payload) == 103678
+          assert hashlib.sha256(payload).hexdigest() == 'b51067e5a0951b15e44496d36161d002770445edc4bccd80186b9ee285f8aa21'
+          allowed = {
+              'GPT/README.txt', 'GPT/index.html', 'README.md',
+              'docs/EVERGREEN_AUDIT.md', 'docs/HOME_WATCH.md', 'docs/NEXT_ACTION.md',
+              'docs/QR_LANDING_PAGE.md', 'docs/SHOW_SHARING.md', 'docs/SHOW_VISIT.md',
+              'index.html', 'nfc/index.html', 'qr/index.html', 'qr/script.js',
+              'qr/styles.css', 'script.js', 'tap/index.html',
+              'tests/e2e/chatgpt-sites.spec.js', 'tests/e2e/header-socials.spec.js',
+              'tests/e2e/homepage.spec.js', 'tests/e2e/qr.spec.js',
+              'tests/e2e/show-lifecycle.spec.js', 'tests/e2e/show-share.spec.js',
+              'tests/e2e/show-visit.spec.js', 'tests/e2e/worker-recovery.spec.js',
+              'tests/fixtures/legacy-show.html', 'tests/unit/chatgpt-sites.test.js',
+              'tests/unit/live-video.test.js', 'tests/unit/public-live-surface.test.js',
+              'tests/unit/public-surface-security.test.js', 'tests/unit/sept19-lineup.test.js',
+              'tests/unit/show-share.test.js', 'tests/unit/show-visit.test.js'
+          }
+          entries = json.loads(payload)
+          assert len(entries) == 32 and {e['path'] for e in entries} == allowed
+          validated = []
+          for entry in entries:
+              path = pathlib.Path(entry['path'])
+              assert not path.is_absolute() and '..' not in path.parts
+              assert all(not p.is_symlink() for p in (path, *path.parents))
+              if entry['baseSha'] is None:
+                  assert not path.exists(), f'New path already exists: {path}'
+                  old = b''
+              else:
+                  assert path.is_file(), f'Missing source file: {path}'
+                  old = path.read_bytes()
+                  assert blob(old) == entry['baseSha'], f'Source changed: {path}'
+              lines = old.decode('utf-8').splitlines(keepends=True)
+              previous_end = 0
+              for start, end, replacement in entry['edits']:
+                  assert isinstance(start, int) and isinstance(end, int) and isinstance(replacement, str)
+                  assert previous_end <= start <= end <= len(lines)
+                  previous_end = end
+              for start, end, replacement in reversed(entry['edits']):
+                  lines[start:end] = [replacement]
+              new = ''.join(lines).encode('utf-8')
+              assert blob(new) == entry['resultSha'], f'Result checksum mismatch: {path}'
+              validated.append((path, new))
+          for path, new in validated:
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(new)
+          uploads = ['.evergreen-upload-1.b64', '.evergreen-upload-2.b64']
+          for upload in uploads:
+              pathlib.Path(upload).unlink()
+          subprocess.run(['git', 'add', '--', *sorted(allowed), *uploads], check=True)
+          subprocess.run(['git', '-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com', 'commit', '-m', 'feat: refresh public pages for Rad Dad cover band and retire expired promotion'], check=True)
+          branch = 'refs/heads/update/evergreen-band-homepage'
+          remote = subprocess.check_output(['git', 'ls-remote', 'origin', branch], text=True).split()[0]
+          assert remote == os.environ['GITHUB_SHA'], 'Branch changed during verification; refusing push'
+          subprocess.run(['git', 'push', 'origin', 'HEAD:' + branch], check=True)
+          print('Applied 32 independently checksum-verified source files to the update branch only.')
+          PY
