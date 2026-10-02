@@ -68,7 +68,10 @@ test('social icons support keyboard focus and reduced motion', async ({ page }) 
     for (let index = 0; index < SOCIALS.length; index += 1) {
         await expect(links.nth(index)).toBeFocused();
         await expect(links.nth(index)).toHaveCSS('outline-style', 'solid');
-        await expect(links.nth(index)).toHaveCSS('transition-duration', '0s');
+        // The site-wide reduced-motion rule keeps a 0.01ms !important duration.
+        // transition-property: none proves these icons cannot animate regardless
+        // of that harmless computed duration or its browser serialization.
+        await expect(links.nth(index)).toHaveCSS('transition-property', 'none');
         if (index < SOCIALS.length - 1) await page.keyboard.press('Tab');
     }
 });
