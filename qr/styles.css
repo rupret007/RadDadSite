@@ -45,11 +45,12 @@
 .band-proof { max-width: 58rem; margin: 1.8rem 0 0; color: var(--muted); font-size: .88rem; }
 .recording-section { background: var(--ink); }
 .evergreen .song-desk { margin-bottom: 0; }
+.evergreen .song-desk__copy h2 { margin: 0; font-family: var(--display); font-size: clamp(1.8rem, 3vw, 2.7rem); line-height: 1.05; text-transform: uppercase; }
+.evergreen .song-desk__credit { font-size: .84rem; line-height: 1.6; }
 .evergreen .song-desk__actions { gap: .5rem 1rem; }
 .evergreen .song-desk__actions a { min-height: 44px; display: inline-flex; align-items: center; }
-.evergreen .song-desk__player { min-height: 0; }
+.evergreen .song-desk__player { min-height: 0; border: 0; background: transparent; }
 .evergreen .song-desk__player iframe { width: 100%; min-height: 175px; border: 0; }
-.preview-help { color: var(--muted); font-size: .77rem; }
 .upcoming-shows { padding: clamp(1.25rem, 3vw, 2rem); margin-bottom: 2.5rem; border: 1px solid var(--line); border-left: 4px solid var(--lime); background: var(--surface); }
 .upcoming-shows h3 { margin: 0; font-family: var(--display); font-size: 1.8rem; text-transform: uppercase; }
 .upcoming-shows p { color: var(--muted); }
