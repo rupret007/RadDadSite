@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const source = fs.readFileSync(path.join(root, 'show-state.js'), 'utf8');
+// Historical contexts still exercise the controller contract; public pages no longer load it.
 const pages = ['index.html', 'qr/index.html'];
 const windows = [];
 const TITLE = 'Rad Dad + Friends with The Fault Lines';
@@ -28,7 +29,7 @@ async function settle() {
 }
 
 function loadPage({ page = pages[0], now = BEFORE, share, canShare, writeText, url = 'https://raddadband.com/' } = {}) {
-    const html = fs.readFileSync(path.join(root, page), 'utf8');
+    const html = fs.readFileSync(path.join(root, 'tests/fixtures/legacy-show.html'), 'utf8');
     // Outside-only deliberately does not run inline scripts or request external
     // scripts, images, or provider frames. Only the real local controller runs.
     const dom = new JSDOM(html, { runScripts: 'outside-only', pretendToBeVisual: true, url });
@@ -96,7 +97,7 @@ describe('one canonical shareable September 19 show', () => {
         expect(() => api.shareDetails(Number.NaN)).toThrow();
     });
 
-    it('keeps sharing facts aligned with calendar and homepage structured event data', () => {
+    it('keeps sharing facts aligned with calendar and historical structured event fixture', () => {
         const { api, document } = loadPage();
         const details = api.shareDetails(BEFORE);
         const calendar = fs.readFileSync(path.join(root, 'assets/rad-dad-friends-guitars-growlers-2026.ics'), 'utf8')
