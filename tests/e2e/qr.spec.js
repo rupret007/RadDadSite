@@ -1,5 +1,11 @@
 const { test, expect } = require('./fixtures');
 
+async function applyAt(page, isoTime) {
+    return page.evaluate((timestamp) => (
+        window.RadDadShowState.apply(document, Date.parse(timestamp))
+    ), isoTime);
+}
+
 test.describe('tap, NFC, and QR landing pages', () => {
     test('/tap/ redirects to /qr/ via client-side JavaScript', async ({ page }) => {
         await page.goto('/tap/');
@@ -272,6 +278,7 @@ test.describe('tap, NFC, and QR landing pages', () => {
 
     test('/qr/ promotes the next show with v2 flyer and one lifecycle action', async ({ page }) => {
         await page.goto('/qr/');
+        await applyAt(page, '2026-09-10T12:00:00-05:00');
 
         const nextShowSection = page.locator('#next-show');
         await expect(nextShowSection.getByRole('heading', { level: 2 })).toContainText('Rad Dad');
@@ -431,6 +438,7 @@ test.describe('tap, NFC, and QR landing pages', () => {
     test('/qr/ is responsive and overflow-free on mobile', async ({ page }) => {
         await page.setViewportSize({ width: 390, height: 844 });
         await page.goto('/qr/');
+        await applyAt(page, '2026-09-10T12:00:00-05:00');
 
         const layout = await page.evaluate(() => ({
             bodyScrollWidth: document.body.scrollWidth,

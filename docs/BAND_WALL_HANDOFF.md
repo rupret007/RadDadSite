@@ -36,3 +36,28 @@ No merge, Pages, deployment, signing, release, sending, or spending.
 
 Markers: `BOB_NEW_SESSION_FREELANE_20260907_2307` /
 `OVERNIGHT_FREELANE_RADDAD_20260907_2307`.
+
+## Wide-wall overlap recovery
+
+Base: `66fc392708c9a8b34a88680de715adccd4e28795` after #44. Marker:
+`BOB_CODEX_CLOSEOUT_20260908`.
+
+Recovered the interrupted follow-up CSS patch without changing its original
+worktree. Tighter gaps and individual horizontal offsets bring the wide-screen
+scraps together. At the 1080px reflow, horizontal offsets reset; the existing
+phone transforms remain. The fourteen names, order, navigation, JavaScript,
+fonts, dependencies and band-lab are unchanged.
+
+The recovery passes 166 unit tests, 85 deployment-helper fixture checks and
+78 Chromium journeys, plus deployment-shell lint and clean production packaging.
+Additional character-center hit checks cover 320, 390, 700, 768, 1080, 1081,
+1440 and 2048px, with web fonts loaded and external font requests blocked:
+all fourteen names stay unobscured and the page has no horizontal overflow.
+Desktop and phone screenshots were inspected; physical devices and other
+browser engines remain unverified. OPEN DRAFT PRE_KAREN only.
+
+Publication correction: GitHub's legacy Pages source is `main:/`, separate
+from the custom production job. #44's main was automatically published by
+Pages run `34189663719` even though that custom deployment job was skipped.
+This recovery does not change or trigger publication. Any later main merge
+remains held for Jeff to reconcile the Pages source setting first.
