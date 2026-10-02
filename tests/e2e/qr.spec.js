@@ -1,4 +1,4 @@
-const { test, expect } = require('./fixtures');
+const { test, expect, isShowComplete } = require('./fixtures');
 
 test.describe('tap, NFC, and QR landing pages', () => {
     test('/tap/ redirects to /qr/ via client-side JavaScript', async ({ page }) => {
@@ -289,10 +289,17 @@ test.describe('tap, NFC, and QR landing pages', () => {
         await expect(facts).toContainText('Free show');
 
         const showMoment = nextShowSection.locator('.show-moment');
-        await expect(showMoment.getByRole('status')).toContainText('Next show');
-        const calendarLink = showMoment.getByRole('link', { name: 'Add to Calendar' });
-        await expect(calendarLink).toHaveAttribute('href', '../assets/rad-dad-friends-guitars-growlers-2026.ics');
-        await expect(calendarLink).toHaveAttribute('download', '');
+
+        if (isShowComplete()) {
+            await expect(showMoment.getByRole('status')).toContainText('Show complete');
+            const watchLink = showMoment.getByRole('link', { name: 'Watch Rad Dad live' });
+            await expect(watchLink).toHaveAttribute('href', '#wildflower');
+        } else {
+            await expect(showMoment.getByRole('status')).toContainText('Next show');
+            const calendarLink = showMoment.getByRole('link', { name: 'Add to Calendar' });
+            await expect(calendarLink).toHaveAttribute('href', '../assets/rad-dad-friends-guitars-growlers-2026.ics');
+            await expect(calendarLink).toHaveAttribute('download', '');
+        }
 
         const flyerLink = nextShowSection.locator('.next-show-flyer');
         await expect(flyerLink).toHaveAttribute(
@@ -314,17 +321,20 @@ test.describe('tap, NFC, and QR landing pages', () => {
             'href',
             '#song'
         );
-        await expect(nextShowPaths.getByRole('link', { name: /full show details/i })).toHaveAttribute(
+        const detailsLinkName = isShowComplete() ? /September 19 show archive/i : /full show details/i;
+        await expect(nextShowPaths.getByRole('link', { name: detailsLinkName })).toHaveAttribute(
             'href',
             '../#show'
         );
 
         const strip = page.locator('.next-show-strip');
         await expect(strip).toBeVisible();
-        await expect(strip).toHaveAttribute('href', '#next-show');
+        await expect(strip).toHaveAttribute('href', isShowComplete() ? '#wildflower' : '#next-show');
         await expect(strip).toContainText('Sep 19');
         await expect(strip).toContainText('Guitars & Growlers');
-        await expect(strip).toContainText('7–10 PM');
+        if (!isShowComplete()) {
+            await expect(strip).toContainText('7–10 PM');
+        }
 
         await nextShowPaths.getByRole('link', { name: 'Hear The Story Of Us' }).click();
         await expect(page).toHaveURL(/#song$/);
@@ -461,7 +471,7 @@ test.describe('tap, NFC, and QR landing pages', () => {
 
         const strip = page.locator('.next-show-strip');
         await expect(strip).toBeVisible();
-        await expect(strip).toHaveAttribute('href', '#next-show');
+        await expect(strip).toHaveAttribute('href', isShowComplete() ? '#wildflower' : '#next-show');
         await expect(strip).toContainText('Sep 19');
         await expect(strip).toContainText('Guitars & Growlers');
         await expect(page.locator('a[href*="show-control"]')).toHaveCount(0);
