@@ -20,69 +20,32 @@ const restoredFlyerHashes = {
     'assets/rad-dad-social-2026.png': 'cd8ff5869a6b9376697046337a31af414554165714e9d089fa6de77791dcc314'
 };
 
-function section(html, id) {
-    const match = html.match(new RegExp(`<section[^>]*id="${id}"[\\s\\S]*?<\\/section>`, 'i'));
-    expect(match, `page must keep the ${id} section`).not.toBeNull();
-    return match[0];
-}
-
-describe('September 19 public lineup', () => {
-    it('adds The Fault Lines while keeping Friends as the show identity', async () => {
+describe('September 19 archive integrity', () => {
+    it('keeps the event in past shows without promoting it in either hero', async () => {
         const homepage = await readFile(join(repoRoot, 'index.html'), 'utf8');
         const qr = await readFile(join(repoRoot, 'qr', 'index.html'), 'utf8');
-        const calendar = await readFile(
-            join(repoRoot, 'assets', 'rad-dad-friends-guitars-growlers-2026.ics'),
-            'utf8'
-        );
-        const hero = section(homepage, 'show');
-        const qrShow = section(qr, 'next-show');
-
-        for (const surface of [hero, qrShow, calendar]) {
-            expect(surface).toContain('Friends');
-            expect(surface).toContain('The Fault Lines');
-        }
-
-        expect(hero).toContain('event-title__friends-row');
-        expect(hero).toContain('event-title__friends');
-        expect(qrShow).toContain('Rad Dad <span>+ Friends</span>');
-        expect(hero).toContain(faultLinesUrl);
-        expect(qrShow).toContain(faultLinesUrl);
+        const archive = homepage.match(/<article[^>]*id="show"[\s\S]*?<\/article>/)[0];
+        expect(archive).toContain('Past show');
+        expect(archive).toContain('Rad Dad + Friends');
+        expect(archive).toContain('The Fault Lines');
+        expect(archive).toContain(faultLinesUrl);
+        expect(qr).not.toContain('September 19');
+        expect(homepage).not.toContain('EventScheduled');
+        expect(qr).not.toContain('EventScheduled');
     });
-
-    it('preserves the full approved 7–10 PM schedule and flyer artwork', async () => {
-        const homepage = await readFile(join(repoRoot, 'index.html'), 'utf8');
-        const qr = await readFile(join(repoRoot, 'qr', 'index.html'), 'utf8');
-        const calendar = await readFile(
-            join(repoRoot, 'assets', 'rad-dad-friends-guitars-growlers-2026.ics'),
-            'utf8'
-        );
-
-        expect(homepage).toContain('2026-09-19T19:00:00-05:00');
-        expect(homepage).toContain('2026-09-19T22:00:00-05:00');
-        expect(homepage).toContain('7–10 PM');
-        expect(qr).toContain('7&ndash;10 PM');
+    it('retains approved historical calendar and flyer bytes for existing links', async () => {
+        const calendar = await readFile(join(repoRoot, 'assets/rad-dad-friends-guitars-growlers-2026.ics'), 'utf8');
         expect(calendar).toContain('DTSTART:20260920T000000Z');
         expect(calendar).toContain('DTEND:20260920T030000Z');
         expect(calendar).toContain('SUMMARY:Rad Dad + Friends with The Fault Lines');
-
         for (const [relativePath, expectedHash] of Object.entries(restoredFlyerHashes)) {
-            const data = await readFile(join(repoRoot, relativePath));
-            const actualHash = createHash('sha256').update(data).digest('hex');
-            expect(actualHash, relativePath).toBe(expectedHash);
+            expect(createHash('sha256').update(await readFile(join(repoRoot, relativePath))).digest('hex'), relativePath).toBe(expectedHash);
         }
     });
-
-    it('does not invent bill order, set times, or sponsorship', async () => {
-        const homepage = await readFile(join(repoRoot, 'index.html'), 'utf8');
-        const qr = await readFile(join(repoRoot, 'qr', 'index.html'), 'utf8');
-        const calendar = await readFile(
-            join(repoRoot, 'assets', 'rad-dad-friends-guitars-growlers-2026.ics'),
-            'utf8'
-        );
-        const liveSurfaces = [section(homepage, 'show'), section(qr, 'next-show'), calendar];
-
-        for (const surface of liveSurfaces) {
-            expect(surface).not.toMatch(/\b(opener|opening|headliner|headline|supporting|set times?|sponsor)\b/i);
-        }
+    it('does not invent lineup order, set times or sponsorship in the archive', async () => {
+        const html = await readFile(join(repoRoot, 'index.html'), 'utf8');
+        const archive = html.match(/<article[^>]*id="show"[\s\S]*?<\/article>/)[0];
+        expect(archive).not.toMatch(/\b(opener|opening|headliner|headline|supporting|set times?|sponsor)\b/i);
+        expect(archive).not.toMatch(/download|Get Directions|Add to Calendar/);
     });
 });

@@ -99,7 +99,7 @@ describe('shared inline live-video player', () => {
 
     it.each([
         ['homepage', 'index.html', 'https://raddadband.com/', 'All the Small Things — blink-182 cover', 'Wildflower 2026 · Live performance'],
-        ['QR', 'qr/index.html', 'https://raddadband.com/qr/', 'All the Small Things', 'blink-182 cover']
+        ['QR', 'qr/index.html', 'https://raddadband.com/qr/', 'All the Small Things — blink-182 cover', 'Wildflower 2026 · Live performance']
     ])('loads a validated YouTube video after an explicit plain click on %s', (label, html, url, title, context) => {
         const { dialog, document, window } = loadPage(html, url);
         const card = document.querySelector('[data-inline-video]');

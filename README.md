@@ -1,354 +1,63 @@
-# Rad Dad Band Website
+# Rad Dad band website
 
-Static website for Rad Dad, a pop punk cover band. The site includes the main
-band page and a music-first `/qr/` landing page reached through the permanent
-printed-QR URL `/tap/`.
+Rad Dad is a Dallas–Fort Worth **cover band**, playing pop-punk, punk and alternative favorites.
+The public site is evergreen as of October 2, 2026. The September 19 show is a dated past-show entry, not the site's identity or an upcoming invitation.
 
-The current September 19, 2026 show remains branded **Rad Dad + Friends** and
-runs from **7–10 PM** at Guitars & Growlers in Richardson. **The Fault Lines**
-are named as a participating band on the homepage, QR landing page, calendar
-download, and structured event metadata. The restored Friends flyer and visual
-treatment remain the source of truth; do not infer billing order or set times.
+## Current public surfaces
 
-## Public Show-Night Board
+- `/`: band introduction, live covers, covered artists, band members, a Taylor Swift cover recording, upcoming-show placeholder, dated history, and direct booking.
+- `/qr/`: music-first landing page with accurate cover credits, the same five live-video destinations, follow links and a path back to the main booking section.
+- `/tap/`: permanent printed-QR URL, still redirects to `/qr/`. Never remove or repurpose it.
+- `/nfc/`: legacy compatibility alias for `/qr/`; the current physical items use printed QR codes rather than NFC hardware.
+- `GPT/index.html`: old standalone source page now redirects to the homepage, rather than maintaining a second stale band site. It is still excluded from the clean deployment artifact.
 
-The homepage and `/qr/` landing page both connect fans to the same public
-[Rad Dad show-night board](https://rad-dad-show-night.jeffstory007.chatgpt.site/).
-The two focused actions deep-link to the current running order and public song
-suggestions without adding either destination to the already-compact site
-navigation.
+`#show` on the homepage identifies the dated September 19 past-show card. Old `#join-show` fragments lead to the show-updates area. Existing song, watch, follow and QR fragments remain valid.
 
-Suggestions are review-only: submitting an idea never changes the official
-show automatically. The public site links only to `#official-sets` and
-`#suggestions`; it must never expose the owner-only `/show-control` route. The
-show-night app remains the canonical source for running-order and suggestion
-data, so this static repository must not copy those records.
+## Cover credits and factual boundaries
 
-## Show Lifecycle
+**The Story Of Us is a Taylor Swift song.** The streaming recording linked on the site is released under Jeff Story. Do not call it a Rad Dad original, "our only original," or a song written inside the band. Do not conflate Rad Dad with Jeff's original-music projects.
 
-The homepage and canonical `/qr/` page share one event-state controller in
-`show-state.js`. It uses the fixed September 19 Central-time boundaries to show
-one useful fan action at a time:
+No upcoming dates have been provided for this update. The site says **No upcoming dates posted yet**, rather than inventing a booking or claiming the band has none. Previously supplied show facts remain in dated history. No new fees, set lengths, reviews, awards, sponsors or venue endorsements are asserted.
 
-- before show day: add the verified local calendar file;
-- on show day before 7 PM: get directions;
-- from 7–10 PM: open the public running order;
-- after 10 PM: watch the current Rad Dad live-video section.
+## Shared behavior and styling
 
-The status copy, show-history language, featured-show treatment, and homepage
-watch heading change with the same state, so the two surfaces cannot drift into
-conflicting “next show” or “before the show” claims. The `/qr/` status strip
-uses that same useful action: the show panel before and on show day, the public
-running order while live, and the Wildflower tapes after the show. The HTML
-fallback remains the pre-show calendar action and a show-panel strip. Missing
-action configuration hides a panel action instead of guessing a destination; a
-misconfigured strip keeps its static show-panel link. Live state may use only
-the review-safe `#official-sets` board anchor; owner controls remain forbidden.
-See [the useful-action handoff](docs/NEXT_ACTION.md).
+Both current pages load `styles.css` followed by **`qr/styles.css`**, which now contains shared evergreen overrides. Keeping that existing supplemental URL avoids changing the exact production artifact inventory or requiring a new server deployment helper for one new CSS filename.
 
-On the homepage and `/qr/`, a normal tap on a verified-embeddable Wildflower
-performance opens a focused inline player so a fan can watch without leaving
-the page. Both surfaces share `live-video.js`. The privacy-enhanced YouTube
-frame is created only after that explicit tap. Videos that YouTube does not
-permit to embed—including the current featured upload—stay clearly labeled
-direct YouTube links instead of opening a broken player. Every card remains a
-real `youtube.com` link, so modified clicks, browsers without the dialog API,
-and visits without JavaScript keep the direct YouTube fallback. The covers
-wall stay unlinkable; its footer, the homepage listen desk, and the QR song
-paths now point at the Wildflower tapes as well as The Story Of Us. See
-[the homepage watch handoff](docs/HOME_WATCH.md).
+`script.js` is shared by both pages. It handles logo fallback, sticky-header measurements, optional Apple Music previews and sharing a fixed canonical band URL. Navigation, booking and streaming destinations work without JavaScript. Apple Music loads only after an explicit preview click; YouTube inline frames load only after a card click. Images and Google Fonts remain external where already configured; this is not a claim of zero third-party requests.
 
-Both inline players also offer an explicit **Try again** and keep the selected
-video's **Watch on YouTube** link visible. An opening attempt is bounded to ten
-seconds; a stalled or failed frame is stopped before offering a manual retry.
-A frame load is not described as successful playback. Taking the normal
-YouTube fallback closes the inline player so the two do not keep running
-together. See [the player-recovery handoff](docs/VIDEO_RECOVERY.md) for behavior,
-offline tests and the remaining real-device/provider limits.
+`live-video.js` retains direct YouTube fallback, narrow sandboxing, explicit retry, a ten-second opening deadline, focus return and page-exit cleanup. The same five recorded performance destinations are retained. Existing direct-only cards are not changed to unverified embeds. Offline tests do not prove current third-party playback availability.
 
-Leaving either fan page also retires the selected inline frame, its opening
-deadline, and the modal's scroll lock. A history return starts with the player
-closed and requires a fresh card tap; old frame callbacks cannot revive it.
-Ordinary dialog closing still returns focus to the selected recording.
+`show-state.js` is a retained legacy controller and is **not loaded by either current public page**. Its unit regression contracts use `tests/fixtures/legacy-show.html`, outside the production artifact. Current browser tests prove that neither a clock change nor a history return can revive the retired event UI.
 
-## Share Show Details
+## Validation
 
-The homepage show panel and `/qr/` offer one secondary sharing action without
-replacing the primary calendar → directions → running order → video path.
-Both use the same verified event facts and public `https://raddadband.com/#show`
-link. Preview addresses, query strings, and private page fragments are never
-included in the shared note.
-
-An explicit tap opens the browser's share options when supported, or copies
-the details when only the clipboard is available. Cancellation or a failed
-share never automatically copies or sends anything: the fan can explicitly
-copy or select the full note instead. The wording updates for tonight, during
-the show, and after it ends. No JavaScript leaves a normal public show link.
-
-See [the sharing handoff](docs/SHOW_SHARING.md) for behavior, offline evidence,
-device checks still needed, and the source-only deployment boundary.
-
-## Plan a Visit
-
-Both show panels include a compact **Plan your visit** disclosure with the
-September 19 date and Central time, the full Richardson street address,
-directions, and venue information. Fans can check the address or open the map
-before show day and while the primary action shows the running order.
-Expanding the panel does not load a map or contact a provider.
-
-The native disclosure also works without JavaScript. With JavaScript, the
-shared show lifecycle changes its label to **Venue details** at show end and
-hides directions, retaining the dated venue information. Returning from a map
-or background tab refreshes the entire show state immediately. See
-[the visit-planning handoff](docs/SHOW_VISIT.md) for behavior and verification.
-
-## Booking and Follow
-
-The homepage Connect panel is the booking surface. Email and phone stay the
-only booking actions, with a booking-subject mailto so the note is labeled
-before anyone reads it. Copy asks for venue, city, and date, and says a person
-reads the note — the page does not book the night. Social links stay
-follow-only. Travis continues to own booking and connections; there is no
-form, inbox automation, or auto-pitch. `/qr/` stays music-first and does not
-grow a second booking path.
-
-## QR Landing Page
-
-The current physical promotion workflow uses a **1-inch round matte-white
-sticker with a solid-black QR code**. The sticker is installed on the protected
-rear or underside landing of each printed item and uses the permanent URL:
-
-`https://raddadband.com/tap/`
-
-`/tap/` redirects to the canonical `/qr/` landing page. It is printed on
-physical QR codes and must never be removed or repurposed. A static redirect
-page is retained alongside the Worker redirect so the URL works on either
-deployment path.
-
-The current products do not contain NFC hardware. The landing page should focus
-on the band and its music rather than explaining how the visitor arrived. The
-legacy `/nfc` and `/nfc/` routes continue to redirect to `/qr/` only so old
-links do not break. `/qr/` is the single content source for `/tap/` and those
-legacy NFC aliases; the alias pages contain redirects, not duplicate music
-content.
-
-See [docs/QR_LANDING_PAGE.md](./docs/QR_LANDING_PAGE.md) for the physical QR
-specification, copy guardrails, and routing notes.
-
-## Old Public Links on Worker-Backed Hosting
-
-When an old public page URL is missing, the Sites Worker now redirects an HTML
-navigation to the same site's real homepage. It no longer serves homepage HTML
-under a nested missing address where styles, scripts, flyer links, and calendar
-downloads resolve incorrectly. Recovery works without JavaScript.
-
-The temporary redirect drops the stale query and fragment and suppresses the
-redirect-hop referrer; it does not erase the original request from history or
-server logs. Missing files, reserved/API paths, owner routes, non-HTML requests,
-and missing canonical pages keep their errors instead of becoming homepages.
-Permanent QR aliases keep their existing behavior. See
-[the broken-link recovery handoff](docs/PUBLIC_LINK_RECOVERY.md).
-
-This applies to Worker-backed Sites hosting only. It does not change the
-separate legacy server, publish a new build, or authorize a Pages/server cutover.
-
-## Local Preview
-
-1. Open [index.html](./index.html) directly in a browser for a quick preview.
-2. Use the automated test server when you want to exercise the site through Playwright.
-
-## Automated Testing
-
-The repo now includes a hybrid automated test suite:
-
-- `Vitest + JSDOM` for `script.js` behavior
-- artifact and deployment-helper safety tests for clean releases and rollback
-- `Playwright` for real-browser homepage smoke coverage in Chromium
-
-### Install
-
-1. Install dependencies:
-
-   ```bash
-   npm ci
-   ```
-
-2. Install the Playwright Chromium browser once:
-
-   ```bash
-   npm run test:install-browsers
-   ```
-
-If Windows PowerShell blocks `npm` or `npx`, use `npm.cmd` and `npx.cmd` instead.
-
-### Test Commands
-
-- Build the deployable Sites package:
-
-  ```bash
-  npm run build:sites
-  ```
-
-- Build and verify the clean production-only package:
-
-  ```bash
-  npm run build:production
-  npm run verify:production -- --expected-sha YOUR_40_CHARACTER_GIT_SHA
-  ```
-
-- Run the full suite:
-
-  ```bash
-  npm test
-  ```
-
-- Run unit tests only:
-
-  ```bash
-  npm run test:unit
-  ```
-
-- Run browser smoke tests only:
-
-  ```bash
-  npm run test:e2e
-  ```
-
-  When another local project already uses port `4173`, choose an isolated port
-  without stopping that process:
-
-  ```bash
-  RAD_DAD_TEST_PORT=4273 npm run test:e2e
-  ```
-
-- Run the server deployment-helper tests only:
-
-  ```bash
-  npm run test:deploy
-  ```
-
-- Lint the deployment helper and its shell test harness (requires ShellCheck):
-
-  ```bash
-  npm run lint:deploy
-  ```
-
-### What The Suite Covers
-
-- Event-first section and focus order, page metadata, and structured event data
-- September 19 event facts, named participating bands, flyer assets, and the calendar → directions → live order → video lifecycle
-- Flyer-style recent-set artist wall with show and listen paths, including covers-footer, listen-desk, and QR song paths to the Wildflower tapes, leftover show-tape and QR listen loops, a QR status strip that follows the useful show action, 2026 show history, videos, and a homepage contact panel that separates show booking from follow-only social links
-- Review-only fan participation links shared by the homepage and canonical QR landing page
-- Homepage Connect booking vs follow lanes, booking-subject mailto, and no-form contact honesty
-- Canonical show sharing, explicit fallback choices, clipboard denial, cancellation, stale completion, and no-JavaScript access on both pages
-- Visit planning on both show panels: full address, directions before/during the show, archive wording, keyboard disclosure, page-return refresh, and no-JavaScript access
-- Public HTML never exposing `/show-control`, board links limited to `#official-sets` and `#suggestions`, and the Worker failing closed on owner-only `/show-control` paths
-- The latest featured YouTube performance on both the homepage and canonical QR landing page
-- Progressive inline playback for verified-embeddable homepage and `/qr/` videos, including privacy-delayed loading, honest direct-only cards, close cleanup, and focus return
-- Inline-player stall/error recovery, explicit retry without loops, retired frame events, native YouTube handoff cleanup, and phone/keyboard access
-- Permanent `/tap/` and legacy `/nfc/` fallbacks converging on the canonical `/qr/` content
-- Actual Worker-backed nested-link recovery, real local CSS/scripts/flyer/calendar downloads, no-JavaScript use, and preservation of error/owner boundaries
-- Mobile flyer prominence, uncropped aspect ratio, and horizontal-overflow prevention
-- Desktop flyer-and-event-copy presentation
-- Logo fallback behavior when the brand image cannot load
-- Unlisted band-lab desk: playable Turdanoid hub, same-folder sewer doors, this-phone next-play ticket, honest WebJam reserved seat, no public-surface links, and a clean production artifact that still excludes `/private/`
-
-Browser tests isolate external network access: known font, thumbnail, and
-media responses are synthetic, and unexpected external requests fail the test.
-Share and clipboard APIs are controlled test doubles. These tests verify our
-UI and payload logic, not real provider playback, OS share delivery, or device
-clipboard permissions.
-
-## Continuous Integration
-
-GitHub Actions runs the same test suite on every push and pull request:
-
-- installs Node 24 dependencies with `npm ci`
-- installs Chromium for Playwright
-- runs `npm test`
-- runs ShellCheck against the deployment helper and its shell test harness
-- builds and verifies a clean, commit-identified production artifact containing
-  the homepage, canonical `/qr/` content, permanent `/tap/` alias, and legacy
-  `/nfc/` fallback
-- uploads Playwright artifacts if the browser suite fails
-
-Pull requests cannot deploy and do not receive production credentials. The
-remote production job is disabled by default behind explicit discovery,
-branch/reviewer, shared-vhost-intent, and master enablement gates. Automatic
-deployment has its own additional disabled-by-default switch.
-
-## Production Deployment
-
-The guarded production path publishes only the verified `dist/client`
-artifact, never the complete repository. Its first production cutover has
-**not** completed. The current legacy `raddadband.com` root still exposes
-repository-only paths such as package metadata, tests, backups, and historical
-ZIP files. Do not describe the live server as clean-artifact-only until public
-`version.json`, `artifact-manifest.json`, and `SHA256SUMS` identify one verified
-release and every forbidden-path probe returns HTTP 404.
-
-GitHub Pages and the existing ChatGPT Sites deployment remain separate from
-this guarded server path. Merging code does not authorize Che's server cutover,
-remove legacy files, or change either independent deployment.
-
-See [the production deployment runbook](docs/production-deployment.md) for the
-mandatory hosting discovery record, `raddadband.com` / `lazypunksunite.com`
-vhost decision, protected branch and Environment reviewer setup, first rollout,
-health verification, rollback drill, and kill switches. No server action is
-authorized merely by merging the pipeline.
-
-## File Structure
-
-```text
-RadDad Website/
-|-- .gitattributes
-|-- .github/workflows/test.yml
-|-- .openai/hosting.json
-|-- assets/
-|   |-- rad-dad-friends-guitars-growlers-2026-561.webp
-|   |-- rad-dad-friends-guitars-growlers-2026-1122.webp
-|   |-- rad-dad-friends-guitars-growlers-2026-full.png
-|   |-- rad-dad-friends-guitars-growlers-2026.ics
-|   |-- rad-dad-social-2026.png
-|   `-- wildflower-2026-poster-720.webp
-|-- docs/
-|   |-- BAND_LAB.md
-|   |-- HOME_WATCH.md
-|   |-- NEXT_ACTION.md
-|   |-- production-deployment.md
-|   |-- QR_LANDING_PAGE.md
-|   `-- raddad-deploy.conf.example
-|-- private/
-|   `-- garage-rehearsal-k7m2n9/   # unlisted band desk; not in the public artifact
-|-- index.html
-|-- live-video.js
-|-- show-state.js
-|-- nfc/
-|   `-- index.html
-|-- qr/
-|   |-- index.html
-|   |-- script.js
-|   `-- styles.css
-|-- tap/
-|   `-- index.html
-|-- styles.css
-|-- script.js
-|-- scripts/
-|   |-- build-sites.mjs
-|   |-- deploy/server-deploy.sh
-|   |-- lib/production-artifact.mjs
-|   `-- verify-production-artifact.mjs
-|-- tests/
-|   |-- deploy/server-deploy.test.sh
-|   |-- e2e/homepage.spec.js
-|   |-- e2e/show-lifecycle.spec.js
-|   |-- setup/vitest.setup.js
-|   |-- unit/homepage.test.js
-|   |-- unit/show-state.test.js
-|   `-- unit/production-artifact.test.js
-|-- playwright.config.js
-|-- vitest.config.js
-|-- package.json
-|-- worker/index.js
-`-- README.md
+```bash
+npm ci
+npm run test:install-browsers
+npm test
+npm run lint:deploy
+npm run build:production
+npm run verify:production -- --expected-sha YOUR_40_CHARACTER_GIT_SHA
 ```
+
+On Windows, use `npm.cmd` and `npx.cmd` when PowerShell blocks the unqualified commands. To isolate browser tests from another local project:
+
+```bash
+RAD_DAD_TEST_PORT=4273 npm run test:e2e
+```
+
+GitHub Actions installs Node 24 and Chromium, runs all tests and shell lint, then builds and verifies the exact production artifact. Browser tests synthesize allowed provider responses and reject unexpected external traffic. See `docs/EVERGREEN_AUDIT.md` for this update's audit and verification boundaries.
+
+## Production deployment boundary
+
+The guarded server deployment remains separate from a GitHub merge. Its existing discovery, reviewer, virtual-host-intent and enablement gates are unchanged. Do not enable them or change Che's server as part of a content update without completing the existing runbook.
+
+The documented legacy public-domain server has not yet been verified as clean-artifact-only. Repository files, historical ZIPs and backups must not be deployed with the clean package. Do not describe the public website as updated until its actual responses are checked.
+
+See [the production runbook](docs/production-deployment.md). GitHub Pages and ChatGPT Sites are independent deployment paths; updating repository source alone is not proof that either has published.
+
+## Future show updates
+
+Keep the band hero and social previews evergreen. Add only confirmed dates under Upcoming shows, with real venues and dates. When a date passes, move it to Past shows and remove its calendar/directions calls to action from active surfaces. Update the QR show status at the same time. Do not restore the hard-coded September controller to today's pages.
+
+The new regression tests cover correct credits, metadata, section priority, responsive headers, hash targets, old-route redirects, no-JavaScript access, opt-in player loading, safe sharing, dated archives and the absence of stale promotion. Existing player recovery, Worker routing, private-surface safety and deployment/rollback tests remain in the suite.
