@@ -1,4 +1,5 @@
 const { test, expect } = require('./fixtures');
+const { makeSpadesSnapshot, makeEightsSnapshot } = require('../fixtures/band-lab-snapshots');
 
 const BAND_LAB_PATH = '/private/garage-rehearsal-k7m2n9/';
 const PUBLIC_SURFACES = ['/', '/qr/', '/tap/', '/nfc/'];
@@ -96,6 +97,83 @@ test('names last-played on a return visit and keeps the no-JavaScript hub ticket
     await expect(staticPage.getByRole('link', { name: 'TurdSpades', exact: true })).toBeVisible();
     await expect(staticPage.locator('aside iframe')).toHaveCount(0);
     await noJs.close();
+});
+
+test('keeps Continue recent through reload, history, ties, and missing timestamps without changing saves', async ({ page }) => {
+    await page.goto(BAND_LAB_PATH);
+    const store = {
+        v: 1,
+        games: {
+            'crapeights.html': { updatedAt: 1000, snapshot: makeEightsSnapshot() },
+            'turdspades.html': { updatedAt: 5000, snapshot: makeSpadesSnapshot() }
+        }
+    };
+    const ticket = page.locator('[data-band-lab-next-play]');
+    async function saveAndReload(expected) {
+        const raw = JSON.stringify(store);
+        await page.evaluate((value) => localStorage.setItem('turdsuite_continue_v1', value), raw);
+        await page.reload();
+        await expect(ticket).toHaveText(expected);
+        expect(await page.evaluate(() => localStorage.getItem('turdsuite_continue_v1'))).toBe(raw);
+    }
+    await saveAndReload('Continue TurdSpades');
+    await page.goto('/');
+    await page.goBack();
+    await expect(ticket).toHaveText('Continue TurdSpades');
+    store.games['crapeights.html'].updatedAt = 9000;
+    await saveAndReload('Continue Crappy Eights');
+    store.games['turdspades.html'].updatedAt = 9000;
+    await saveAndReload('Continue Crappy Eights');
+    delete store.games['crapeights.html'].updatedAt;
+    await saveAndReload('Continue TurdSpades');
+    delete store.games['turdspades.html'].updatedAt;
+    await saveAndReload('Continue Crappy Eights');
+
+    await page.evaluate(() => {
+        localStorage.setItem('turdsuite_continue_v1', 'corrupt');
+        localStorage.setItem('turdsuite_last_game', 'javascript:alert(1)');
+    });
+    await page.reload();
+    await expect(ticket).toHaveText('Open the sewer hub');
+    expect(await page.evaluate(() => localStorage.getItem('turdsuite_continue_v1'))).toBe('corrupt');
+});
+
+for (const width of [320, 390, 768, 1440]) {
+    test(`keeps every door and full-page escape usable at ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(BAND_LAB_PATH);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+        for (const game of SEWER_SET) {
+            await page.getByRole('link', { name: game.label, exact: true }).click();
+            await expect(page).toHaveURL(game.href);
+            await expect(page.locator('body')).toBeVisible();
+            await page.goBack();
+            await expect(page).toHaveTitle(/Band Lab/i);
+        }
+        await page.getByRole('link', { name: 'Open the sewer full-page' }).click();
+        await expect(page).toHaveURL(/\/turdanoid\/index\.html$/);
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    });
+}
+
+test('offers keyboard access and recovers when browser storage is unavailable', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.addInitScript(() => {
+        if (window === window.top) {
+            Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('blocked', 'SecurityError'); } });
+        }
+    });
+    await page.goto(BAND_LAB_PATH);
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: 'Skip to band lab', exact: true })).toBeFocused();
+    await page.keyboard.press('Enter');
+    const ticket = page.getByRole('link', { name: 'Open the sewer hub', exact: true });
+    await page.keyboard.press('Tab');
+    await expect(ticket).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/turdanoid\/index\.html$/);
+    expect(errors).toEqual([]);
 });
 
 test('keeps the band-lab URL off public homepage, QR, tap, and NFC surfaces', async ({ page }) => {
