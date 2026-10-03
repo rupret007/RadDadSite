@@ -564,6 +564,12 @@
 }
 
 @media (max-width: 560px) {
+    .band-lab-poster::after {
+        /* Keep the tall decorative border inside the phone's outer gutter. */
+        right: -0.3rem;
+        transform: none;
+    }
+
     .band-lab-setlist {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }

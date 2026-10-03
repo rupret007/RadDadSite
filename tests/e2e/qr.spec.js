@@ -1,479 +1,65 @@
-const { test, expect, isShowComplete } = require('./fixtures');
-
-test.describe('tap, NFC, and QR landing pages', () => {
-    test('/tap/ redirects to /qr/ via client-side JavaScript', async ({ page }) => {
-        await page.goto('/tap/');
-
-        await expect(page).toHaveURL(/\/qr\/$/);
-        await expect(page).toHaveTitle('Rad Dad | The Cover Band Covering Its Own Cover');
+const { test, expect } = require('./fixtures');
+for (const alias of ['/tap/', '/tap/index.html', '/nfc/', '/nfc/index.html']) {
+    test(`${alias} keeps printed and legacy links working with query and fragment`, async ({ page }) => {
+        await page.goto(`${alias}?utm_source=sticker#song`);
+        await expect(page).toHaveURL(/\/qr\/\?utm_source=sticker#song$/);
+        await expect(page.locator('#song')).toContainText('Taylor Swift cover');
     });
-
-    test('/tap preserves query params and hash through redirect', async ({ page }) => {
-        await page.goto('/tap/?utm_source=sticker&utm_campaign=v7#song');
-
-        await expect(page).toHaveURL(/\/qr\/\?utm_source=sticker&utm_campaign=v7#song$/);
-    });
-
-    test('/nfc/ preserves legacy links while using the canonical QR content', async ({ page }) => {
-        await page.goto('/nfc/?utm_source=legacy#wildflower');
-
-        await expect(page).toHaveURL(/\/qr\/\?utm_source=legacy#wildflower$/);
-        await expect(page).toHaveTitle('Rad Dad | The Cover Band Covering Its Own Cover');
-    });
-
-    test('tag and NFC aliases contain static fallbacks canonicalized to /qr/', async ({ page }) => {
-        for (const path of ['/tap/index.html', '/nfc/index.html']) {
-            const response = await page.request.get(path);
-            const html = await response.text();
-
-            expect(response.ok()).toBe(true);
-            expect(html).toContain('meta http-equiv="refresh"');
-            expect(html).toContain('url=../qr/');
-            expect(html).toContain('rel="canonical" href="https://raddadband.com/qr/"');
-            expect(html).toContain("new URL('../qr/', window.location.href)");
-            expect(html).toContain('window.location.replace');
-            expect(html).toContain('href="../qr/"');
-            expect(html).toContain('Continue to the music');
-            expect(html).not.toContain('url=/qr/');
-            expect(html).not.toMatch(/fault lines/i);
-            expect(html).not.toContain('The Story Of Us');
+}
+test('aliases retain no-JavaScript redirects and canonical QR metadata', async ({ page }) => {
+    for (const path of ['/tap/index.html', '/nfc/index.html']) {
+        const html = await (await page.request.get(path)).text();
+        expect(html).toContain('content="0; url=../qr/"');
+        expect(html).toContain('href="https://raddadband.com/qr/"');
+        expect(html).toContain('href="../qr/"');
+    }
+});
+test('relative QR redirects work beneath a project-site prefix', async ({ page }) => {
+    const html = await (await page.request.get('/tap/index.html')).text();
+    await page.route('**/project/tap/**', route => route.fulfill({ contentType: 'text/html', body: html }));
+    await page.route('**/project/qr/**', route => route.fulfill({ contentType: 'text/html', body: '<title>QR destination</title>' }));
+    await page.goto('/project/tap/?source=printed#song');
+    await expect(page).toHaveURL(/\/project\/qr\/\?source=printed#song$/);
+});
+test('QR is a cover-first landing page with accurate metadata, streaming links and live videos', async ({ page }) => {
+    await page.goto('/qr/');
+    await expect(page).toHaveTitle('Rad Dad | Listen to the Covers & Watch Live');
+    await expect(page.locator('h1')).toHaveCount(1);
+    await expect(page.locator('#song')).toContainText('Taylor Swift cover');
+    await expect(page.locator('#song')).toContainText('Jeff Story');
+    await expect(page.locator('.video-grid a')).toHaveCount(5);
+    await expect(page.locator('.header-socials a')).toHaveCount(3);
+    await expect(page.locator('#next-show')).toContainText('No upcoming dates posted yet');
+    await expect(page.locator('a[href="../#shows"]')).toBeVisible();
+    await expect(page.locator('body')).not.toContainText('September 19');
+    await expect(page.locator('body')).not.toContainText('our song');
+    await expect(page.locator('a[href*="show-night"], a[download]')).toHaveCount(0);
+});
+for (const width of [320, 390, 800, 1440]) {
+    test(`QR remains overflow-free and reachable at ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto('/qr/');
+        for (const section of ['#song', '#wildflower', '#next-show', '#follow']) {
+            await page.locator(section).scrollIntoViewIfNeeded();
+            expect(await page.evaluate(() => Math.max(document.body.scrollWidth, document.documentElement.scrollWidth) <= innerWidth + 1)).toBe(true);
+        }
+        for (const a of await page.locator('.header-socials a').all()) {
+            const rect = await a.boundingBox();
+            expect(rect.width).toBeGreaterThanOrEqual(44);
+            expect(rect.height).toBeGreaterThanOrEqual(44);
+            expect(rect.x).toBeGreaterThanOrEqual(0);
+            expect(rect.x + rect.width).toBeLessThanOrEqual(width);
         }
     });
-
-    test('tag and NFC aliases stay inside a project-site base without redirect loops', async ({ page }) => {
-        const projectPrefix = '/RadDadSite';
-
-        await page.route('**/RadDadSite/**', async (route) => {
-            const proxiedUrl = new URL(route.request().url());
-            proxiedUrl.pathname = proxiedUrl.pathname.slice(projectPrefix.length) || '/';
-            await route.continue({ url: proxiedUrl.toString() });
-        });
-
-        for (const alias of ['tap', 'nfc']) {
-            const navigations = [];
-            const recordNavigation = (frame) => {
-                if (frame === page.mainFrame()) {
-                    navigations.push(frame.url());
-                }
-            };
-            page.on('framenavigated', recordNavigation);
-
-            await page.goto(`${projectPrefix}/${alias}/?utm_source=project-site#wildflower`);
-
-            const expectedUrl = new URL(
-                `${projectPrefix}/qr/?utm_source=project-site#wildflower`,
-                page.url()
-            ).href;
-            await expect(page).toHaveURL(expectedUrl);
-            await expect(page).toHaveTitle('Rad Dad | The Cover Band Covering Its Own Cover');
-            await page.waitForTimeout(200);
-
-            const destinationNavigations = navigations.filter((url) => url === expectedUrl);
-            expect(destinationNavigations).toHaveLength(1);
-            expect(navigations.some((url) => /\/qr\/qr\//.test(url))).toBe(false);
-
-            page.off('framenavigated', recordNavigation);
-        }
-    });
-
-    test('/qr/ loads the Story Of Us landing page with correct metadata', async ({ page }) => {
+}
+test.describe('QR without JavaScript', () => {
+    test.use({ javaScriptEnabled: false });
+    test('streaming and video destinations stay usable with no false playback controls', async ({ page }) => {
         await page.goto('/qr/');
-
-        await expect(page).toHaveTitle('Rad Dad | The Cover Band Covering Its Own Cover');
-        await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://raddadband.com/qr/');
-        await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
-            'content',
-            'https://raddadband.com/assets/rad-dad-tap-og.png'
-        );
-        await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
-            'content',
-            'The cover band covering its own cover.'
-        );
-        await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-            'content',
-            /Story Of Us/
-        );
-        await expect(page.locator('link[rel="stylesheet"][href^="styles.css"]')).toHaveAttribute(
-            'href',
-            'styles.css?v=20260906-3'
-        );
-        await expect(page.locator('script[src^="../show-state.js"]')).toHaveAttribute(
-            'src',
-            '../show-state.js?v=20260906-3'
-        );
-        await expect(page.locator('script[src^="../live-video.js"]')).toHaveAttribute(
-            'src',
-            '../live-video.js?v=20260906-2'
-        );
-        await expect(page.locator('script[src^="script.js"]')).toHaveAttribute(
-            'src',
-            'script.js?v=20260904-1'
-        );
-    });
-
-    test('/qr/ presents the hero with cassette render and call-to-action', async ({ page }) => {
-        await page.goto('/qr/');
-
-        const hero = page.locator('.hero');
-        await expect(hero.getByRole('heading', { level: 1 })).toContainText('cover band');
-        await expect(hero.getByRole('heading', { level: 1 })).toContainText('own cover');
-        await expect(hero.locator('.hero__lede')).toContainText('Rad Dad is a cover band');
-
-        const cassetteImg = hero.locator('.cassette-render img');
-        await expect(cassetteImg).toBeVisible();
-        await expect(cassetteImg).toHaveAttribute('alt', /Story Of Us/);
-        await expect(cassetteImg).toHaveAttribute('src', /story-of-us-cassette-render\.webp/);
-
-        await expect(hero.getByRole('link', { name: /Start with our song/ })).toHaveAttribute('href', '#song');
-        await expect(hero.getByRole('link', { name: /September 19 show/ })).toHaveAttribute('href', '#next-show');
-    });
-
-    test('/qr/ embeds The Story Of Us Apple Music player with streaming links', async ({ page }) => {
-        await page.goto('/qr/');
-
-        const songSection = page.locator('#song');
-        await expect(songSection.getByRole('heading', { level: 2 })).toContainText('song that became');
-        await expect(songSection).toContainText('It started as a solo release');
-        await expect(songSection).toContainText('it became ours');
-        await expect(songSection).not.toContainText(/setlist/i);
-        await expect(songSection).not.toContainText(/part of the set/i);
-
-        const playerCard = songSection.locator('.player-card');
-        await expect(playerCard).toBeVisible();
-        await expect(playerCard.locator('iframe')).toHaveAttribute(
-            'src',
-            /embed\.music\.apple\.com.*1827102667/
-        );
-
-        const serviceLinks = playerCard.locator('.service-links');
-        await expect(serviceLinks.getByRole('link')).toHaveCount(2);
-        await expect(serviceLinks.getByRole('link', { name: 'Apple Music' })).toHaveAttribute(
-            'href',
-            /music\.apple\.com.*1827102667/
-        );
-        await expect(serviceLinks.getByRole('link', { name: 'Amazon Music' })).toHaveAttribute(
-            'href',
-            /music\.amazon\.com\/tracks\/B0FHPB9FN7/
-        );
-        await expect(serviceLinks.getByRole('link', { name: 'Spotify' })).toHaveCount(0);
-        await expect(serviceLinks.getByRole('link', { name: 'YouTube Music' })).toHaveCount(0);
-        await expect(songSection).not.toContainText('open.spotify.com/search');
-        await expect(songSection).not.toContainText('music.youtube.com/search');
-        await expect(playerCard.locator('iframe')).toHaveAttribute(
-            'referrerpolicy',
-            'strict-origin-when-cross-origin'
-        );
-
-        const songPaths = songSection.getByRole('navigation', { name: 'Show and listen paths' });
-        await expect(songPaths.getByRole('link', { name: 'Hear the Wildflower tapes' })).toHaveAttribute(
-            'href',
-            '#wildflower'
-        );
-        await expect(songPaths.getByRole('link', { name: 'September 19 show' })).toHaveAttribute(
-            'href',
-            '#next-show'
-        );
-        await expect(songPaths.getByRole('link', { name: 'Help shape the night' })).toHaveAttribute(
-            'href',
-            '#join-show'
-        );
-
-        await songPaths.getByRole('link', { name: 'Hear the Wildflower tapes' }).click();
-        await expect(page).toHaveURL(/#wildflower$/);
-        await expect(page.locator('#wildflower')).toBeInViewport();
-    });
-
-    test('/qr/ features the latest Wildflower video and earlier live performances', async ({ page }) => {
-        await page.goto('/qr/');
-
-        const wildflowerSection = page.locator('#wildflower');
-        await expect(wildflowerSection.getByRole('heading', { level: 2 })).toContainText('songs outside');
-        await expect(wildflowerSection).toContainText('Texas Credit Union Stage');
-
-        const liveCards = wildflowerSection.locator('.live-card');
-        await expect(liveCards).toHaveCount(5);
-
-        const tomorrowsAnotherDay = liveCards.nth(0);
-        await expect(tomorrowsAnotherDay).toContainText('Tomorrow’s Another Day');
-        await expect(tomorrowsAnotherDay).toContainText('MxPx');
-        await expect(tomorrowsAnotherDay).toHaveAttribute('href', 'https://www.youtube.com/watch?v=4ReFoSZHL7o');
-        await expect(tomorrowsAnotherDay.locator('img')).toHaveAttribute(
-            'src',
-            'https://img.youtube.com/vi/4ReFoSZHL7o/maxresdefault.jpg'
-        );
-        await expect(tomorrowsAnotherDay.locator('.live-card__stamp')).toHaveText('New video');
-
-        const allTheSmallThings = liveCards.nth(1);
-        await expect(allTheSmallThings).toContainText('All the Small Things');
-        await expect(allTheSmallThings).toContainText('blink-182');
-        await expect(allTheSmallThings).toHaveAttribute('href', 'https://www.youtube.com/watch?v=9Re_0wjIbfQ');
-        await expect(allTheSmallThings.locator('.live-card__stamp')).toHaveText("Wildflower '26");
-
-        const she = liveCards.nth(2);
-        await expect(she).toContainText('She');
-        await expect(she).toContainText('Green Day');
-        await expect(she).toHaveAttribute('href', 'https://www.youtube.com/watch?v=GCy4nHIqV5k');
-        await expect(she.locator('img')).toHaveAttribute(
-            'src',
-            '../assets/wildflower-she-green-day.webp'
-        );
-
-        const theMiddle = liveCards.nth(3);
-        await expect(theMiddle).toContainText('The Middle');
-        await expect(theMiddle).toContainText('Jimmy Eat World');
-        await expect(theMiddle).toHaveAttribute('href', 'https://www.youtube.com/watch?v=iMrxzCQ7lVs');
-
-        const linoleum = liveCards.nth(4);
-        await expect(linoleum).toContainText('Linoleum');
-        await expect(linoleum).toContainText('NOFX');
-        await expect(linoleum).toHaveAttribute('href', 'https://www.youtube.com/watch?v=e9mR2sgnJ00');
-
-        await expect(wildflowerSection.locator('.youtube-strip')).toHaveAttribute(
-            'href',
-            'https://www.youtube.com/@RadDadBand'
-        );
-    });
-
-    test('/qr/ plays a live performance inline and returns the fan to the tapped card', async ({ page }) => {
-        await page.goto('/qr/');
-
-        const firstInlineVideo = page.locator('#wildflower [data-inline-video]').first();
-        await firstInlineVideo.scrollIntoViewIfNeeded();
-        await firstInlineVideo.click();
-
-        const dialog = page.locator('#live-video-dialog');
-        const frame = dialog.locator('[data-video-frame]');
-        await expect(dialog).toBeVisible();
-        await expect(page).toHaveURL(/\/qr\/$/);
-        await expect(dialog.getByRole('heading', { name: 'All the Small Things' })).toBeVisible();
-        await expect(dialog.locator('[data-video-context]')).toContainText('blink-182 cover');
-        await expect(frame).toHaveAttribute(
-            'src',
-            'https://www.youtube-nocookie.com/embed/9Re_0wjIbfQ?autoplay=1&rel=0'
-        );
-        await expect(dialog.getByRole('link', { name: /Watch on YouTube/ })).toHaveAttribute(
-            'href',
-            'https://www.youtube.com/watch?v=9Re_0wjIbfQ'
-        );
-        await expect(page.locator('html')).toHaveClass(/has-video-dialog/);
-
-        await dialog.getByRole('button', { name: 'Close video player' }).click();
-
-        await expect(dialog).toBeHidden();
-        await expect(frame).not.toHaveAttribute('src', /.+/);
-        await expect(firstInlineVideo).toBeFocused();
-        await expect(page.locator('html')).not.toHaveClass(/has-video-dialog/);
-
-        const latestVideo = page.locator('#wildflower .live-card').first();
-        await expect(latestVideo).not.toHaveAttribute('data-inline-video', '');
-        await expect(latestVideo).toHaveAttribute('href', 'https://www.youtube.com/watch?v=4ReFoSZHL7o');
-        await expect(latestVideo).toContainText('Watch on YouTube');
-    });
-
-    test('/qr/ promotes the next show with v2 flyer and one lifecycle action', async ({ page }) => {
-        await page.goto('/qr/');
-
-        const nextShowSection = page.locator('#next-show');
-        await expect(nextShowSection.getByRole('heading', { level: 2 })).toContainText('Rad Dad');
-        await expect(nextShowSection.getByRole('heading', { level: 2 })).toContainText('Friends');
-        await expect(nextShowSection.getByRole('link', { name: 'The Fault Lines' })).toHaveAttribute(
-            'href',
-            'https://www.facebook.com/thefaultlinestx'
-        );
-
-        const facts = nextShowSection.locator('.next-show-facts');
-        await expect(facts).toContainText('September 19, 2026');
-        await expect(facts).toContainText('7–10 PM');
-        await expect(facts).toContainText('Guitars & Growlers');
-        await expect(facts).toContainText('Richardson, Texas');
-        await expect(facts).toContainText('Free show');
-
-        const showMoment = nextShowSection.locator('.show-moment');
-
-        if (isShowComplete()) {
-            await expect(showMoment.getByRole('status')).toContainText('Show complete');
-            const watchLink = showMoment.getByRole('link', { name: 'Watch Rad Dad live' });
-            await expect(watchLink).toHaveAttribute('href', '#wildflower');
-        } else {
-            await expect(showMoment.getByRole('status')).toContainText('Next show');
-            const calendarLink = showMoment.getByRole('link', { name: 'Add to Calendar' });
-            await expect(calendarLink).toHaveAttribute('href', '../assets/rad-dad-friends-guitars-growlers-2026.ics');
-            await expect(calendarLink).toHaveAttribute('download', '');
-        }
-
-        const flyerLink = nextShowSection.locator('.next-show-flyer');
-        await expect(flyerLink).toHaveAttribute(
-            'href',
-            '../assets/rad-dad-friends-guitars-growlers-2026-v2-full.png'
-        );
-        const flyerImg = flyerLink.locator('img');
-        await expect(flyerLink).toHaveAttribute('aria-label', 'Open the full Rad Dad + Friends event flyer');
-        await expect(flyerImg).toHaveAttribute('width', '1024');
-        await expect(flyerImg).toHaveAttribute('height', '1536');
-        await expect(flyerImg).toHaveAttribute('src', /rad-dad-friends-guitars-growlers-2026-v2-full\.png/);
-        await expect(flyerImg).toHaveAttribute(
-            'alt',
-            'Rad Dad + Friends at Guitars & Growlers in Richardson, Texas — September 19, 2026, 7–10 PM; free show.'
-        );
-
-        const nextShowPaths = nextShowSection.getByRole('navigation', { name: 'Listen and show paths' });
-        await expect(nextShowPaths.getByRole('link', { name: 'Hear The Story Of Us' })).toHaveAttribute(
-            'href',
-            '#song'
-        );
-        const detailsLinkName = isShowComplete() ? /September 19 show archive/i : /full show details/i;
-        await expect(nextShowPaths.getByRole('link', { name: detailsLinkName })).toHaveAttribute(
-            'href',
-            '../#show'
-        );
-
-        const strip = page.locator('.next-show-strip');
-        await expect(strip).toBeVisible();
-        await expect(strip).toHaveAttribute('href', isShowComplete() ? '#wildflower' : '#next-show');
-        await expect(strip).toContainText('Sep 19');
-        await expect(strip).toContainText('Guitars & Growlers');
-        if (!isShowComplete()) {
-            await expect(strip).toContainText('7–10 PM');
-        }
-
-        await nextShowPaths.getByRole('link', { name: 'Hear The Story Of Us' }).click();
-        await expect(page).toHaveURL(/#song$/);
-        await expect(page.locator('#song')).toBeInViewport();
-    });
-
-    test('/qr/ offers the same review-only public show-board path as the homepage', async ({ page }) => {
-        await page.setViewportSize({ width: 390, height: 844 });
-        await page.goto('/qr/');
-
-        const participation = page.locator('#join-show');
-        const runningOrder = participation.getByRole('link', { name: 'See the running order' });
-        const suggestion = participation.getByRole('link', { name: 'Suggest a song' });
-
-        await expect(participation.getByRole('heading', { level: 2, name: 'Help shape the night.' })).toBeVisible();
-        await expect(participation).toContainText('Every suggestion goes to the band for review');
-        await expect(participation).toContainText('never changes the official show automatically');
-        await expect(runningOrder).toHaveAttribute(
-            'href',
-            'https://rad-dad-show-night.jeffstory007.chatgpt.site/#official-sets'
-        );
-        await expect(suggestion).toHaveAttribute(
-            'href',
-            'https://rad-dad-show-night.jeffstory007.chatgpt.site/#suggestions'
-        );
-        await expect(participation.locator('a[href*="show-control"]')).toHaveCount(0);
-        await expect(page.locator('a[href*="show-control"]')).toHaveCount(0);
-        await expect(participation.getByRole('link', { name: 'September 19 at Guitars & Growlers' })).toHaveAttribute(
-            'href',
-            '#next-show'
-        );
-
-        const layout = await participation.locator('.participation-pass').evaluate((card) => {
-            const rect = card.getBoundingClientRect();
-            return {
-                bodyScrollWidth: document.body.scrollWidth,
-                left: rect.left,
-                right: rect.right,
-                viewportWidth: window.innerWidth
-            };
-        });
-
-        expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
-        expect(layout.left).toBeGreaterThanOrEqual(-1);
-        expect(layout.right).toBeLessThanOrEqual(layout.viewportWidth + 1);
-    });
-
-    test('/qr/ includes follow links and footer navigation back to main site', async ({ page }) => {
-        await page.goto('/qr/');
-
-        const followSection = page.locator('#follow');
-        await expect(followSection.getByRole('heading', { level: 2 })).toContainText('stay for the');
-
-        const followLinks = followSection.locator('.follow-links');
-        await expect(followLinks.getByRole('link', { name: 'YouTube' })).toHaveAttribute(
-            'href',
-            'https://www.youtube.com/@RadDadBand'
-        );
-        await expect(followLinks.getByRole('link', { name: 'Instagram' })).toHaveAttribute(
-            'href',
-            'https://www.instagram.com/rad.dad.band/'
-        );
-        await expect(followLinks.getByRole('link', { name: 'Facebook' })).toHaveAttribute(
-            'href',
-            'https://www.facebook.com/people/Rad-Dad/61581475409339/'
-        );
-        await expect(followLinks.getByRole('link', { name: /full site/ })).toHaveAttribute('href', '../#shows');
-        await expect(followSection.locator('a[href^="mailto:"]')).toHaveCount(0);
-        await expect(followSection.locator('a[href^="tel:"]')).toHaveCount(0);
-        await expect(followSection.locator('form')).toHaveCount(0);
-
-        const footer = page.locator('.tap-footer');
-        await expect(footer.locator('.tap-brand')).toHaveAttribute('href', '../');
-        await expect(footer).toContainText('North Texas');
-    });
-
-    test('/qr/ shared assets load successfully', async ({ page }) => {
-        await page.goto('/qr/');
-
-        const [cassetteResponse, calendarResponse, flyerResponse, ogImageResponse, sheResponse] = await Promise.all([
-            page.request.get('/assets/story-of-us-cassette-render.webp'),
-            page.request.get('/assets/rad-dad-friends-guitars-growlers-2026.ics'),
-            page.request.get('/assets/rad-dad-friends-guitars-growlers-2026-v2-full.png'),
-            page.request.get('/assets/rad-dad-tap-og.png'),
-            page.request.get('/assets/wildflower-she-green-day.webp')
-        ]);
-
-        expect(cassetteResponse.ok()).toBe(true);
-        expect(cassetteResponse.headers()['content-type']).toContain('image/webp');
-
-        expect(calendarResponse.ok()).toBe(true);
-        expect(await calendarResponse.text()).toContain('SUMMARY:Rad Dad + Friends with The Fault Lines');
-
-        expect(flyerResponse.ok()).toBe(true);
-        expect(flyerResponse.headers()['content-type']).toContain('image/png');
-
-        expect(ogImageResponse.ok()).toBe(true);
-        expect(ogImageResponse.headers()['content-type']).toContain('image/png');
-
-        expect(sheResponse.ok()).toBe(true);
-        expect(sheResponse.headers()['content-type']).toContain('image/webp');
-    });
-
-    test('/qr/ is responsive and overflow-free on mobile', async ({ page }) => {
-        await page.setViewportSize({ width: 390, height: 844 });
-        await page.goto('/qr/');
-
-        const layout = await page.evaluate(() => ({
-            bodyScrollWidth: document.body.scrollWidth,
-            documentScrollWidth: document.documentElement.scrollWidth,
-            viewportWidth: window.innerWidth
-        }));
-
-        expect(layout.documentScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
-        expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
-
-        await expect(page.locator('.tap-header')).toBeVisible();
-        await expect(page.locator('.hero')).toBeVisible();
-        await expect(page.locator('#song')).toBeVisible();
-
-        const leftoverCards = await page.locator('.player-card, .next-show-paths, .live-card').evaluateAll((cards) =>
-            cards.map((card) => {
-                const rect = card.getBoundingClientRect();
-                return {
-                    left: rect.left,
-                    right: rect.right
-                };
-            })
-        );
-        for (const card of leftoverCards) {
-            expect(card.left).toBeGreaterThanOrEqual(-1);
-            expect(card.right).toBeLessThanOrEqual(layout.viewportWidth + 1);
-        }
-
-        const strip = page.locator('.next-show-strip');
-        await expect(strip).toBeVisible();
-        await expect(strip).toHaveAttribute('href', isShowComplete() ? '#wildflower' : '#next-show');
-        await expect(strip).toContainText('Sep 19');
-        await expect(strip).toContainText('Guitars & Growlers');
-        await expect(page.locator('a[href*="show-control"]')).toHaveCount(0);
+        await expect(page.locator('#song a[href^="https://music.apple.com"]')).toBeVisible();
+        await expect(page.locator('#song a[href^="https://music.amazon.com"]')).toBeVisible();
+        await expect(page.locator('[data-video-frame]')).not.toHaveAttribute('src');
+        await expect(page.locator('[data-load-preview]')).toBeHidden();
+        await expect(page.locator('#next-show')).not.toContainText('September');
     });
 });

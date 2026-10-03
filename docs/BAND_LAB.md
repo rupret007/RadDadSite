@@ -98,6 +98,35 @@ the same allowlisted key; it does not write storage, add a new key, or touch
 the vendored `table-continue-core.js` file, so the documented Turdanoid pin
 and its blob-match tests stay untouched.
 
+## October 3 reconciliation and hosting decision
+
+PR #46 retains its next-play fix while adopting the evergreen homepage and QR
+tests merged in #49/#50. The September show-date assertions are superseded.
+The expanded checks use the pinned snapshot validator, preserve stored bytes,
+and cover recency ties, missing dates, invalid/finished tables, browser history,
+reloads, storage denial, keyboard access, and all six doors at 320/390/768/1440px.
+These browser widths are emulation; physical phone testing remains NOT RUN.
+
+**Hosting proposal only — owner decision required.** The lab has been observed
+live, but current clean `dist/client` intentionally excludes every lab file.
+A clean-artifact cutover can therefore remove the working lab even when the
+public-site checks pass. The older deployment runbook's legacy-root description
+is dated evidence, not proof of today's routing. Before an owner changes hosting,
+record the actual host/route, deployed revision, lab file hashes, and rollback.
+
+Jeff can approve either an exact lab-file addition to the release manifest,
+or a separately verified lab payload mapped to this exact route on the existing
+host. Either option needs its own explicit review, complete dependency inventory,
+six-door/Continue checks against deployed bytes, and a recorded prior payload and
+route for rollback. Preserve the origin and path: moving origins would strand
+this-browser Continue saves. Do not add a wildcard `/private/` publish rule.
+
+This draft implements neither option and changes no publication allowlist or
+host. Keep public nav, QR, tap, NFC, sitemap, and sharing boundaries unchanged.
+The route is unlisted, not authenticated: anyone with the URL or repository path
+can open it. Keep Turdanoid pinned to `600b96c` and WebJam's placeholder honest
+until their separate version/entry handoffs are approved.
+
 ## What was intentionally not changed
 
 - Public HTML/CSS/nav/footer/homepage/QR/tap/NFC

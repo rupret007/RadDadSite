@@ -199,7 +199,14 @@
             return;
         }
 
-        bind(root, global.localStorage, global.TurdSuiteTableContinue || null);
+        let storage = null;
+        try {
+            storage = global.localStorage;
+        } catch {
+            // The storage property itself can be denied by browser policy.
+            // Keep the ordinary hub ticket usable in that case.
+        }
+        bind(root, storage, global.TurdSuiteTableContinue || null);
     }
 
     global.BandLabNextPlay = Object.freeze({

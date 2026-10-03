@@ -1,4 +1,5 @@
 const { test, expect } = require('./fixtures');
+const { makeSpadesSnapshot, makeEightsSnapshot } = require('../fixtures/band-lab-snapshots');
 
 const BAND_LAB_PATH = '/private/garage-rehearsal-k7m2n9/';
 const PUBLIC_SURFACES = ['/', '/qr/', '/tap/', '/nfc/'];
@@ -98,144 +99,81 @@ test('names last-played on a return visit and keeps the no-JavaScript hub ticket
     await noJs.close();
 });
 
-test('picks the more recently updated Continue table over the hub fixed order', async ({ page }) => {
-    // Build a valid TurdSpades snapshot (phase 'bidding' is live, not 'matchEnd')
-    function makeSpadeCard(id, suit, rank) {
-        return { id: 'c' + id, suit, rank };
-    }
-
-    function makeSpadesSnapshot() {
-        // Minimal valid TurdSpades state: 4 players, 13 cards each dealt, bidding phase
-        const suits = ['S', 'H', 'D', 'C'];
-        const hands = [[], [], [], []];
-        let cardId = 1;
-        for (let r = 2; r <= 14; r++) {
-            for (let s = 0; s < 4; s++) {
-                hands[s].push(makeSpadeCard(cardId++, suits[s], r));
-            }
-        }
-        return {
-            kind: 'turdspades',
-            v: 1,
-            round: 1,
-            dealer: 0,
-            leader: 1,
-            currentPlayer: 1,
-            bidTurn: 1,
-            bidChoice: 3,
-            phase: 'bidding',
-            scores: [0, 0],
-            bags: [0, 0],
-            bids: [3, null, null, null],
-            tricks: [0, 0, 0, 0],
-            hands,
-            trick: [],
-            spadesBroken: false,
-            selected: null,
-            sortMode: 'suit',
-            msg: 'Bidding',
-            summary: '',
-            lastRoundTone: 'neutral'
-        };
-    }
-
-    // Build a valid Crappy Eights snapshot (roundActive: true is live)
-    function makeEightsCard(id, suit, rank) {
-        return { id, suit, rank };
-    }
-
-    function makeEightsSnapshot() {
-        const suits = ['S', 'H', 'D', 'C'];
-        const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-        const deck = [];
-        let cardId = 1;
-        for (const suit of suits) {
-            for (const rank of ranks) {
-                deck.push(makeEightsCard(cardId++, suit, rank));
-            }
-        }
-        // Deal 5 cards to each player, rest in deck
-        const p0Hand = deck.splice(0, 5);
-        const p1Hand = deck.splice(0, 5);
-        const p2Hand = deck.splice(0, 5);
-        const p3Hand = deck.splice(0, 5);
-        const discard = [deck.shift()];
-        return {
-            kind: 'crapeights',
-            v: 1,
-            players: [
-                { name: 'You', human: true, hand: p0Hand, score: 0 },
-                { name: 'Bot A', human: false, hand: p1Hand, score: 0 },
-                { name: 'Bot B', human: false, hand: p2Hand, score: 0 },
-                { name: 'Bot C', human: false, hand: p3Hand, score: 0 }
-            ],
-            deck,
-            discard,
-            roundNumber: 1,
-            currentPlayer: 0,
-            direction: 1,
-            activeSuit: discard[0].suit,
-            pendingDrawCards: 0,
-            pendingSkips: 0,
-            roundActive: true,
-            hasDrawnThisTurn: false,
-            selectedCardId: null,
-            pendingWildCard: null,
-            historyLog: [],
-            nextCardId: 53,
-            overlay: null
-        };
-    }
-
-    // Seed localStorage with two live Continue tables, but with different updatedAt
-    // timestamps. The hub's fixed order is: turdjack, crapeights, turdrummy, turdspades.
-    // We give turdspades an older timestamp and crapeights a newer one.
-    // The recency fix should pick crapeights (newer), not turdspades (older, but
-    // if we put both live, crapeights comes first in fixed order anyway).
-    //
-    // To truly test recency, we put crapeights with updatedAt=1000 and turdspades
-    // with updatedAt=5000. The fixed order would pick crapeights first, but the
-    // recency sort should pick turdspades because it was updated later.
-    const spadesSnapshot = makeSpadesSnapshot();
-    const eightsSnapshot = makeEightsSnapshot();
-
-    await page.addInitScript(({ spadesSnap, eightsSnap }) => {
-        const store = {
-            v: 1,
-            games: {
-                'crapeights.html': { updatedAt: 1000, snapshot: eightsSnap },
-                'turdspades.html': { updatedAt: 5000, snapshot: spadesSnap }
-            }
-        };
-        window.localStorage.setItem('turdsuite_continue_v1', JSON.stringify(store));
-    }, { spadesSnap: spadesSnapshot, eightsSnap: eightsSnapshot });
-
+test('keeps Continue recent through reload, history, ties, and missing timestamps without changing saves', async ({ page }) => {
     await page.goto(BAND_LAB_PATH);
+    const store = {
+        v: 1,
+        games: {
+            'crapeights.html': { updatedAt: 1000, snapshot: makeEightsSnapshot() },
+            'turdspades.html': { updatedAt: 5000, snapshot: makeSpadesSnapshot() }
+        }
+    };
+    const ticket = page.locator('[data-band-lab-next-play]');
+    async function saveAndReload(expected) {
+        const raw = JSON.stringify(store);
+        await page.evaluate((value) => localStorage.setItem('turdsuite_continue_v1', value), raw);
+        await page.reload();
+        await expect(ticket).toHaveText(expected);
+        expect(await page.evaluate(() => localStorage.getItem('turdsuite_continue_v1'))).toBe(raw);
+    }
+    await saveAndReload('Continue TurdSpades');
+    await page.goto('/');
+    await page.goBack();
+    await expect(ticket).toHaveText('Continue TurdSpades');
+    store.games['crapeights.html'].updatedAt = 9000;
+    await saveAndReload('Continue Crappy Eights');
+    store.games['turdspades.html'].updatedAt = 9000;
+    await saveAndReload('Continue Crappy Eights');
+    delete store.games['crapeights.html'].updatedAt;
+    await saveAndReload('Continue TurdSpades');
+    delete store.games['turdspades.html'].updatedAt;
+    await saveAndReload('Continue Crappy Eights');
 
-    // The ticket should name TurdSpades (the more recently updated table), not
-    // Crappy Eights (which comes first in the hub's fixed order).
-    const ticket = page.getByRole('link', { name: 'Continue TurdSpades' });
-    await expect(ticket).toBeVisible();
-    await expect(ticket).toHaveAttribute('href', 'turdanoid/turdspades.html');
-    await expect(page.getByText('Unfinished table on this phone.')).toBeVisible();
+    await page.evaluate(() => {
+        localStorage.setItem('turdsuite_continue_v1', 'corrupt');
+        localStorage.setItem('turdsuite_last_game', 'javascript:alert(1)');
+    });
+    await page.reload();
+    await expect(ticket).toHaveText('Open the sewer hub');
+    expect(await page.evaluate(() => localStorage.getItem('turdsuite_continue_v1'))).toBe('corrupt');
+});
 
-    // Reverse the timestamps: crapeights now fresher
-    await page.addInitScript(({ spadesSnap, eightsSnap }) => {
-        const store = {
-            v: 1,
-            games: {
-                'crapeights.html': { updatedAt: 9000, snapshot: eightsSnap },
-                'turdspades.html': { updatedAt: 2000, snapshot: spadesSnap }
-            }
-        };
-        window.localStorage.setItem('turdsuite_continue_v1', JSON.stringify(store));
-    }, { spadesSnap: spadesSnapshot, eightsSnap: eightsSnapshot });
+for (const width of [320, 390, 768, 1440]) {
+    test(`keeps every door and full-page escape usable at ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(BAND_LAB_PATH);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+        for (const game of SEWER_SET) {
+            await page.getByRole('link', { name: game.label, exact: true }).click();
+            await expect(page).toHaveURL(game.href);
+            await expect(page.locator('body')).toBeVisible();
+            await page.goBack();
+            await expect(page).toHaveTitle(/Band Lab/i);
+        }
+        await page.getByRole('link', { name: 'Open the sewer full-page' }).click();
+        await expect(page).toHaveURL(/\/turdanoid\/index\.html$/);
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    });
+}
 
+test('offers keyboard access and recovers when browser storage is unavailable', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.addInitScript(() => {
+        if (window === window.top) {
+            Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('blocked', 'SecurityError'); } });
+        }
+    });
     await page.goto(BAND_LAB_PATH);
-
-    const ticketReversed = page.getByRole('link', { name: 'Continue Crappy Eights' });
-    await expect(ticketReversed).toBeVisible();
-    await expect(ticketReversed).toHaveAttribute('href', 'turdanoid/crapeights.html');
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: 'Skip to band lab', exact: true })).toBeFocused();
+    await page.keyboard.press('Enter');
+    const ticket = page.getByRole('link', { name: 'Open the sewer hub', exact: true });
+    await page.keyboard.press('Tab');
+    await expect(ticket).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/turdanoid\/index\.html$/);
+    expect(errors).toEqual([]);
 });
 
 test('keeps the band-lab URL off public homepage, QR, tap, and NFC surfaces', async ({ page }) => {

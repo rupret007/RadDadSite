@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { CLIENT_SOURCE_PATHS } from '../../scripts/lib/production-artifact.mjs';
+import snapshots from '../fixtures/band-lab-snapshots.js';
 
 const repoRoot = join(fileURLToPath(new URL('../..', import.meta.url)));
 const BAND_LAB_DIR = 'private/garage-rehearsal-k7m2n9';
@@ -279,6 +280,58 @@ describe('unlisted band lab', () => {
         expect(note.querySelector('script')).toBeNull();
         expect(source).not.toMatch(/innerHTML/);
         expect(source).not.toMatch(/navigator\.share|clipboard/i);
+    });
+
+    it('uses real snapshot validation for recency, ties, missing metadata, and finished tables without writes', async () => {
+        const { JSDOM } = await import('jsdom');
+        const { window } = new JSDOM('', { runScripts: 'outside-only', url: 'https://example.test/' });
+        window.eval(await readFile(join(repoRoot, TURDANOID_DIR, 'games/table-continue-core.js'), 'utf8'));
+        window.eval(await readFile(join(repoRoot, BAND_LAB_NEXT_PLAY), 'utf8'));
+        const tableContinue = window.TurdSuiteTableContinue;
+        const store = {
+            v: 1,
+            games: {
+                'crapeights.html': { updatedAt: 1000, snapshot: snapshots.makeEightsSnapshot() },
+                'turdspades.html': { updatedAt: 5000, snapshot: snapshots.makeSpadesSnapshot() }
+            }
+        };
+        let raw;
+        const reads = [];
+        const writes = [];
+        const storage = {
+            getItem(key) {
+                reads.push(key);
+                return key === tableContinue.CONTINUE_KEY ? raw : null;
+            },
+            setItem(...args) { writes.push(args); throw new Error('The lab must not write saves'); },
+            removeItem(...args) { writes.push(args); throw new Error('The lab must not remove saves'); }
+        };
+        function pick() {
+            raw = JSON.stringify(store);
+            const before = raw;
+            const result = window.BandLabNextPlay.resolveNextPlay(storage, tableContinue);
+            expect(raw).toBe(before);
+            expect(writes).toEqual([]);
+            expect(reads.every((key) => [tableContinue.CONTINUE_KEY, 'turdsuite_last_game'].includes(key))).toBe(true);
+            return result;
+        }
+        expect(pick().page).toBe('turdspades.html');
+        store.games['crapeights.html'].updatedAt = 5000;
+        expect(pick().page).toBe('crapeights.html');
+        delete store.games['crapeights.html'].updatedAt;
+        expect(pick().page).toBe('turdspades.html');
+        delete store.games['turdspades.html'].updatedAt;
+        expect(pick().page).toBe('crapeights.html');
+        store.games['crapeights.html'].updatedAt = 9000;
+        store.games['crapeights.html'].snapshot = {};
+        expect(pick().page).toBe('turdspades.html');
+        store.games['turdspades.html'].snapshot.phase = 'matchEnd';
+        expect(pick().kind).toBe('hub');
+        expect(tableContinue.parseContinueStore(raw).games['turdspades.html']).toBeDefined();
+        raw = 'corrupt';
+        expect(window.BandLabNextPlay.resolveNextPlay(storage, tableContinue).kind).toBe('hub');
+        expect(raw).toBe('corrupt');
+        window.close();
     });
 
     it('keeps the vendored six-game hub playable without rewriting Neon', async () => {
