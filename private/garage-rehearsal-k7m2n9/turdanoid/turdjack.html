@@ -2632,7 +2632,9 @@
         }
       }
 
-      if (canSurrender) {
+      // These surrender rules are for hard totals; a flexible ace keeps the
+      // hand in the soft strategy below, including Smart and Discipline.
+      if (canSurrender && !soft) {
         if (total === 16 && (up === 9 || up === 10 || up === 11)) {
           return { action: 'surrender', reason: 'Late surrender trims a very bad EV spot.' };
         }
@@ -2660,7 +2662,7 @@
           if (canDouble && ((up >= 4 && up <= 6) || (dealerHitsSoft17 && up === 3))) {
             return { action: 'double', reason: 'Soft mid totals double versus weak dealer ranges.' };
           }
-          return { action: 'hit', reason: 'Soft mid totals continue as hits here.' };
+          return { action: 'hit', reason: `Soft ${total}: the ace can count as 1, so take another card.` };
         }
         if (total === 14 || total === 13) {
           if (canDouble && ((up >= 5 && up <= 6) || (dealerHitsSoft17 && up === 4))) {

@@ -69,6 +69,8 @@ Karen review later. Leftovers and honesty:
   main later moved to `2b1864fa118962abf98c5cf34acdbf58f4f1d699` (Crapjack
   Smart #24, hub unchanged). This desk did not silently re-pin. A later slice
   may update the pin only with honest blob-match tests.
+  **October 4, 2026:** the snapshot is re-pinned (see below) to Turdanoid
+  `b3821b40ee272f83e506f1ca5910fe76951a074a`.
 - **Share leftover.** No copy/share widget on the lab page. Jeff still pastes
   the URL by hand.
 - **Future WebJam.** Wire a real attractor only when it exists. Do not turn
@@ -124,8 +126,28 @@ this-browser Continue saves. Do not add a wildcard `/private/` publish rule.
 This draft implements neither option and changes no publication allowlist or
 host. Keep public nav, QR, tap, NFC, sitemap, and sharing boundaries unchanged.
 The route is unlisted, not authenticated: anyone with the URL or repository path
-can open it. Keep Turdanoid pinned to `600b96c` and WebJam's placeholder honest
-until their separate version/entry handoffs are approved.
+can open it. Keep Turdanoid pinned to the commit in `SOURCE.txt` and WebJam's
+placeholder honest until their separate version/entry handoffs are approved.
+
+## Turdanoid feel-pass re-pin — October 4, 2026
+
+The vendored snapshot moves from `600b96caa3064368f44cc8b79eb8c97950211fee`
+to `b3821b40ee272f83e506f1ca5910fe76951a074a`, the head of draft Turdanoid
+[#33](https://github.com/rupret007/Turdanoid/pull/33) (six-game feel pass),
+which sits directly on Turdanoid main `c08c489`. It also carries main's hub
+phone/Continue work from #24–#31. SOURCE.txt and the blob map in
+`tests/unit/band-lab.test.js` change together.
+
+- Same file set: every vendored page still loads only `assets/turdsuite.css`,
+  `assets/turdsuite.js`, `games/table-continue-core.js`, `favicon.svg`, and
+  (Neon only) `game.js`. No new runtime files, no engine sources added.
+- Save compatibility: `games/table-continue-core.js`, `hub.html`, `game.js`,
+  `neon-arkanoid.html`, and `favicon.svg` are byte-identical to the previous
+  pin, so the desk's read-only Continue lookup and existing saves keep working.
+- Land order: Turdanoid #33 must merge first (unchanged) so this pin matches
+  Turdanoid main. If #33 changes, re-pin before this PR merges.
+- No lab copy, nav, allowlist, robots, or hosting change. Feel on a real
+  phone is Jeff's call and remains NOT RUN here.
 
 ## What was intentionally not changed
 

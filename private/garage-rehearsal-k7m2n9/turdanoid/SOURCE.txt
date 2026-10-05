@@ -1,12 +1,18 @@
 Vendored playable snapshot of rupret007/Turdanoid.
 
-Pinned commit: 600b96caa3064368f44cc8b79eb8c97950211fee
+Pinned commit: b3821b40ee272f83e506f1ca5910fe76951a074a
+Pinned source: Turdanoid PR #33 six-game feel pass head, based on Turdanoid
+main c08c48994271d55d1bda7dca1c12a757ac57a70f. Any merge of #33 onto that
+unchanged main yields this same tree. Previous pin:
+600b96caa3064368f44cc8b79eb8c97950211fee.
 Published host for reference only: https://rupret007.github.io/Turdanoid/
 
 Copied as static files so the band-lab page can play the six-game hub
-same-origin (no Neon rewrite, no Turdanoid PR, no live fetch).
+same-origin (no Neon rewrite, no live fetch).
 Engine sources that the HTML never loads were left behind on purpose.
+games/table-continue-core.js is byte-identical to the previous pin, so
+existing Continue / last-played saves on this origin still load.
 
-Do not silently re-pin. A later slice may move this pin to a newer
-Turdanoid main tip only when SOURCE.txt and the band-lab blob-match
-test change together. Arcade mid-run saves stay parked with PR #8.
+Do not silently re-pin. Move this pin only when SOURCE.txt and the
+band-lab blob-match test change together. If PR #33 changes before it
+merges, re-pin to its new head. Arcade mid-run saves stay parked with PR #8.
