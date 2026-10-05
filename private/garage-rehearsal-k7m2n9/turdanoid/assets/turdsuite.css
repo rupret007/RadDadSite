@@ -294,3 +294,33 @@ html.suite-locked, html.suite-locked body {
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* ---------- Phone HUD readability (auto-applied by turdsuite.js) ---------- */
+@media (max-width: 680px) {
+  .suite-phone-hud .card-stat,
+  .suite-phone-hud .score-pill,
+  .suite-phone-hud .hud .col,
+  .suite-phone-hud .card {
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+  .suite-phone-hud .card-stat .v,
+  .suite-phone-hud .hud .val,
+  .suite-phone-hud .card .v {
+    font-size: clamp(0.95rem, 3.6vw, 1.12rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+  }
+  .suite-phone-hud .card-stat .k,
+  .suite-phone-hud .hud .lbl {
+    opacity: 0.78;
+    letter-spacing: 0.14em;
+  }
+}
+.suite-playable-pulse {
+  animation: suiteGlowPulse 1.35s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .suite-playable-pulse { animation: none; }
+}

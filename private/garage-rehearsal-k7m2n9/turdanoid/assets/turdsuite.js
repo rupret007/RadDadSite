@@ -125,6 +125,23 @@
     return arr[Math.floor(Math.random() * arr.length)];
   };
 
+  /** Quick pop on a stat tile or score chip after a score change. */
+  Suite.bump = function (el) {
+    if (!el || !el.classList) return;
+    el.classList.remove('suite-pop');
+    void el.offsetWidth;
+    el.classList.add('suite-pop');
+  };
+
+  function enhancePhoneHud() {
+    try {
+      const targets = document.querySelectorAll('.hud, .topbar, .mobile-run-strip');
+      for (let i = 0; i < targets.length; i++) {
+        targets[i].classList.add('suite-phone-hud');
+      }
+    } catch (e) {}
+  }
+
   // ---------- Back-to-Hub pill ----------
   function injectBackPill() {
     try {
@@ -252,7 +269,17 @@
     }
     const title = card.querySelector('h2');
     if (title && (lastPlayed || inProgress) && !card.getAttribute('aria-label')) {
-      card.setAttribute('aria-label', title.textContent.trim() + (inProgress ? ', in progress' : ', last played'));
+      // aria-label replaces the card's whole accessible name, so spell out the
+      // same things a sighted player reads: game, blurb, then action + state.
+      // The badge is a CSS ::after and is hidden on phones, so this label is the
+      // only "Continue" / "Play again" cue some players get.
+      const blurb = (card.querySelector('.game-info p') || {}).textContent || '';
+      const action = inProgress ? 'Continue' : 'Play again';
+      const state = inProgress ? 'in progress' : 'last played';
+      card.setAttribute(
+        'aria-label',
+        [title.textContent.trim(), blurb.trim(), action + ' — ' + state].filter(Boolean).join('. ')
+      );
     }
   }
 
@@ -270,12 +297,38 @@
         inProgress: continuing.indexOf(href) !== -1
       });
     }
+    markHubResume(continuing, last);
+  }
+
+  // A returning player lands on the hub with the "Continue" tables marked
+  // mid-grid, behind the masthead. Promote the single best pick-up target
+  // into the masthead itself so it is one tap from the top of the page:
+  // the last game opened when that table is still live, otherwise the first
+  // table waiting. The static "no sign-in" badge reassures first-timers; a
+  // player who already has a live table is better served by the shortcut.
+  // Reads the same validated continue list the cards use; writes no storage.
+  function markHubResume(continuing, last) {
+    const badge = document.querySelector('.hero-badge');
+    if (!badge || badge.classList.contains('hero-resume')) return;
+    if (!continuing || !continuing.length) return;
+    const target = continuing.indexOf(last) !== -1 ? last : continuing[0];
+    const card = document.querySelector('.game-card[href="' + target + '"]');
+    const heading = card && card.querySelector('h2');
+    const name = heading ? heading.textContent.trim() : '';
+    if (!name) return;
+    const link = document.createElement('a');
+    link.className = badge.className + ' hero-resume';
+    link.setAttribute('href', target);
+    link.textContent = '↩ Continue ' + name;
+    link.setAttribute('aria-label', 'Continue your ' + name + ' game in progress');
+    badge.replaceWith(link);
   }
 
   // ---------- Boot ----------
   function boot() {
     injectAmbientBg();
     injectBackPill();
+    enhancePhoneHud();
     preventDoubleTapZoom();
     recordLastGame();
     markHubProgress();

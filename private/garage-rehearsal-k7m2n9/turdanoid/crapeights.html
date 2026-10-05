@@ -119,6 +119,13 @@
     .hud-card .v[data-suit="S"],.hud-card .v[data-suit="C"]{color:#f4fff8}
     .hud-card .v.flash{animation:ceHudFlash .5s ease}
     @keyframes ceHudFlash{0%{transform:scale(1)}35%{transform:scale(1.14);color:#fff;text-shadow:0 0 14px rgba(255,215,106,.9)}100%{transform:scale(1)}}
+    .hud-card.hot.pressure{border-color:rgba(255,120,120,.72);box-shadow:0 0 0 1px rgba(255,100,100,.28),0 0 20px rgba(255,90,90,.25),var(--suite-glass-edge,0 12px 24px rgba(0,0,0,.12));animation:cePressurePulse 1.1s ease-in-out infinite}
+    .hud-card.hot.danger .v{color:#ffb3b3;text-shadow:0 0 14px rgba(255,120,120,.5)}
+    @keyframes cePressurePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+    .shell.threat-edge{box-shadow:0 24px 50px rgba(0,0,0,.48),0 0 0 2px rgba(255,120,100,.35),inset 0 1px 0 rgba(255,255,255,.07)}
+    .hand-rail.opponent-threat{box-shadow:inset 0 -3px 0 rgba(255,100,100,.45);border-radius:12px}
+    .shell.play-bump{animation:cePlayBump .28s cubic-bezier(.2,1.4,.4,1)}
+    @keyframes cePlayBump{0%{transform:scale(1)}45%{transform:scale(1.012)}100%{transform:scale(1)}}
 
     /* ---------- layout + table felt ---------- */
     .layout{display:grid;grid-template-columns:1fr 290px;gap:14px;align-items:start}
@@ -485,7 +492,7 @@
     @media (prefers-reduced-motion:reduce){
       .status.hype,.draw-back:not(:disabled),.opp-card.active .ce-avatar,#roundOverlay .overlay-card[data-tone="match-win"]{animation:none}
       .card-btn.dealt,.overlay-card,.opp-card.active::after{animation:none}
-      .hud-card .v.flash{animation:none}
+      .hud-card .v.flash,.hud-card.hot.pressure,.shell.play-bump{animation:none}
       .hud-card[data-dir] .v::before,.card-btn,.suit-btn,.btn{transition:none}
     }
 
@@ -513,7 +520,10 @@
     .ce-avatar.shock{transform:scale(1.25);filter:brightness(1.3)}
     .ce-action-cue{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%) scale(.5);z-index:9996;font:900 clamp(28px,7vw,46px) 'Trebuchet MS','Segoe UI',system-ui,sans-serif;color:#fff;text-shadow:0 0 28px rgba(255,215,106,.95),0 0 6px rgba(255,215,106,.6),0 4px 14px rgba(0,0,0,.7);text-align:center;letter-spacing:.1em;pointer-events:none;opacity:0;transition:opacity .25s ease,transform .35s cubic-bezier(.2,1.6,.4,1);text-transform:uppercase;padding:10px 26px;border-radius:999px;background:radial-gradient(ellipse at 50% 50%,rgba(10,24,16,.78),rgba(10,24,16,0) 74%);white-space:nowrap}
     .ce-action-cue.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
-  </style>
+    @media (prefers-reduced-motion: reduce) {
+    .opp-card.active .ce-avatar { animation: none; }
+  }
+</style>
 </head>
 <body class="suite-ambient suite-no-zoom">
   <div class="overlay" id="welcomeGuide">
@@ -978,8 +988,20 @@
       if (ui.directionText) ui.directionText.textContent = direction === 1 ? 'Clockwise' : 'Counter';
       if (ui.deckText) ui.deckText.textContent = String(deck.length);
       if (ui.suitText) ui.suitText.textContent = `${suitName(activeSuit)} ${suitGlyph(activeSuit)}`;
-      if (ui.youCardsText) ui.youCardsText.textContent = String(players[0] ? players[0].hand.length : 0);
+      const youCount = players[0] ? players[0].hand.length : 0;
+      if (ui.youCardsText) ui.youCardsText.textContent = String(youCount);
       if (ui.leaderText) ui.leaderText.textContent = `${leader.name} (${leader.score})`;
+      const opponentThreat = players.some((p, i) => i > 0 && p.hand.length <= 2);
+      const drawPressure = isHumanTurn() && pendingDrawCards >= 2;
+      const handBloated = youCount >= 10;
+      const youCardHud = ui.youCardsText ? ui.youCardsText.closest('.hud-card') : null;
+      if (youCardHud) {
+        youCardHud.classList.toggle('pressure', drawPressure || handBloated);
+        youCardHud.classList.toggle('danger', opponentThreat);
+      }
+      const shell = document.querySelector('.shell');
+      if (shell) shell.classList.toggle('threat-edge', opponentThreat || drawPressure);
+      if (ui.playerHand) ui.playerHand.classList.toggle('opponent-threat', opponentThreat && isHumanTurn());
       // cosmetic: styling hooks (direction ring, your-turn glow, suit colour, value flash)
       if (ui.directionText && ui.directionText.parentElement) ui.directionText.parentElement.dataset.dir = direction === 1 ? 'cw' : 'ccw';
       if (ui.turnText && ui.turnText.parentElement) ui.turnText.parentElement.dataset.turn = isHumanTurn() ? 'you' : 'bot';
@@ -1020,7 +1042,7 @@
       hand.forEach((card) => {
         const btn = document.createElement('button');
         const styleMeta = cardStyleMeta(card);
-        btn.className = `card-btn${isRedSuit(card.suit) ? ' red' : ''}${isPlayable(card) ? ' playable' : ''}${card.id === selectedCardId ? ' selected' : ''}`;
+        btn.className = `card-btn${isRedSuit(card.suit) ? ' red' : ''}${isPlayable(card) ? ' playable suite-playable-pulse' : ''}${card.id === selectedCardId ? ' selected' : ''}`;
         btn.dataset.face = styleMeta.face;
         btn.dataset.badge = styleMeta.badge;
         btn.dataset.suit = card.suit;
@@ -1329,7 +1351,7 @@
         if (document.hidden) { suspendRoundForBackground(); return; }
         if (focusSuspendedRound) return;
         runAiTurn();
-      }, 760);
+      }, 600);
     }
 
     function advanceTurn() {
@@ -1420,6 +1442,17 @@
       setStatus(detail, true);
       addHistory(detail);
       if (player.hand.length === 0) { endRound(playerIndex); return true; }
+      if (player.human) {
+        const shell = document.querySelector('.shell');
+        if (shell) {
+          shell.classList.remove('play-bump');
+          void shell.offsetWidth;
+          shell.classList.add('play-bump');
+        }
+        try {
+          if (navigator.vibrate) navigator.vibrate(card.rank === '2' || card.rank === 'J' ? 16 : 8);
+        } catch (e) {}
+      }
       advanceTurn();
       return true;
     }

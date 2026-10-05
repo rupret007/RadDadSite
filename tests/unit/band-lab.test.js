@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { CLIENT_SOURCE_PATHS } from '../../scripts/lib/production-artifact.mjs';
+import snapshots from '../fixtures/band-lab-snapshots.js';
 
 const repoRoot = join(fileURLToPath(new URL('../..', import.meta.url)));
 const BAND_LAB_DIR = 'private/garage-rehearsal-k7m2n9';
@@ -14,7 +15,8 @@ const BAND_LAB_NEXT_PLAY = `${BAND_LAB_DIR}/next-play.js`;
 const TURDANOID_DIR = `${BAND_LAB_DIR}/turdanoid`;
 const TURDANOID_HUB = `${TURDANOID_DIR}/index.html`;
 const BAND_LAB_DOC = 'docs/BAND_LAB.md';
-const TURDANOID_PIN = '600b96caa3064368f44cc8b79eb8c97950211fee';
+const TURDANOID_PIN = 'b3821b40ee272f83e506f1ca5910fe76951a074a';
+const PREVIOUS_TURDANOID_PIN = '600b96caa3064368f44cc8b79eb8c97950211fee';
 const SEWER_SET = [
     { label: 'TurdAnoid Turbo', href: 'turdanoid/TurdAnoid.html', page: 'TurdAnoid.html' },
     { label: 'Turdtris', href: 'turdanoid/turdtris.html', page: 'turdtris.html' },
@@ -27,19 +29,19 @@ const SEWER_SET = [
 // Git blob SHAs from rupret007/Turdanoid @ TURDANOID_PIN. Update SOURCE.txt
 // and this map together if the vendored snapshot is intentionally re-pinned.
 const VENDORED_BLOBS = Object.freeze({
-    'TurdAnoid.html': '8bf18983b923e36971d4602d4e0c91e048d07366',
+    'TurdAnoid.html': 'b300c41b08483fca83162647b857f66f3773c784',
     'favicon.svg': '248223aa66a71be257c85a258792d73e251fb46f',
-    'crapeights.html': '5838236bc00725074567e71ab6afe6aee2f0aa4a',
+    'crapeights.html': 'df7526736368cbf0d6b3db58d25238b18de6452c',
     'game.js': 'e3ede9b0906d9e91f7b82e102b97750fd340fec8',
-    'turdrummy.html': 'cc21e4fffa9755be63c3428c88e1fba45fe95888',
-    'index.html': 'afa142ee0dcbeea4e8639d63d8ffcd9dafe41739',
+    'turdrummy.html': '4d2f94ba716fbd5c941baf470dff99a29f91ecd7',
+    'index.html': '67c1e5183a2930f90e6348bccf991c30f8549b40',
     'neon-arkanoid.html': '91da7fd8a4b589ac0f9277c7f72ba52eafc7be8d',
-    'turdtris.html': '8cc809816959bdba2410633fbdddac1032c66e7c',
+    'turdtris.html': 'ad116d81e169518c662ac85768b5e936e0c7e747',
     'hub.html': '81c5bb81596c58a412ce24178104500c6ecd12de',
-    'assets/turdsuite.js': '81abd59da5beae3adf477c9611232d954ea2a8d5',
-    'assets/turdsuite.css': '293760b47d553d6349f5248aff6d3b30a9b6264d',
-    'turdjack.html': 'cb43b6e1e6c154916776a7c26ca0975d5a156623',
-    'turdspades.html': '7d64703e278ab55125b3f6ca347293e0f4b72f6d',
+    'assets/turdsuite.js': '188fb567898770eaa0f267e656c007f457c0c71d',
+    'assets/turdsuite.css': 'b1024eb4e8ec6d76a8a5140bb0bcca147a3139f4',
+    'turdjack.html': '9ee86b580dc6e19ad5b8f3a740624ece2aa5d5f8',
+    'turdspades.html': 'bbf4e3f404d0ef6448e9e06f3fac6fef8e4ecaf6',
     'games/table-continue-core.js': '9d7e18ff87b483d43cdb13ebf5f427c8bf2b6c28'
 });
 
@@ -116,6 +118,7 @@ describe('unlisted band lab', () => {
         expect(leftovers).toContain(TURDANOID_PIN);
         expect(leftovers).toContain('does **not** add `/private/` to that allowlist');
         expect(leftovers).toContain('2b1864fa118962abf98c5cf34acdbf58f4f1d699');
+        expect(leftovers).toContain(PREVIOUS_TURDANOID_PIN);
         expect(leftovers.replace(/\s+/g, ' ')).toContain('never writes those keys');
     });
 
@@ -183,6 +186,77 @@ describe('unlisted band lab', () => {
         expect(ignoredUnknown.kind).toBe('again');
         expect(ignoredUnknown.page).toBe('TurdAnoid.html');
 
+        // Regression: when two tables are both live, the ticket must follow the
+        // most recently touched one (by the store's updatedAt), not whichever
+        // page happens to sort first in the hub's fixed game order. Before this
+        // fix, resolveNextPlay always took continuing[0] as returned by
+        // listLiveContinuePages, so a fresher turdspades game lost out to a
+        // stale turdjack game listed earlier.
+        const CONTINUE_KEY = 'turdsuite_continue_v1';
+        storage.setItem(CONTINUE_KEY, JSON.stringify({
+            v: 1,
+            games: {
+                'turdjack.html': { updatedAt: 1000, snapshot: {} },
+                'turdspades.html': { updatedAt: 5000, snapshot: {} }
+            }
+        }));
+        const recencyPick = api.resolveNextPlay(storage, {
+            CONTINUE_KEY,
+            listLiveContinuePages() {
+                // Fixed hub order lists turdjack before turdspades even though
+                // turdspades was updated later.
+                return ['turdjack.html', 'turdspades.html'];
+            },
+            parseContinueStore(raw) {
+                return JSON.parse(raw);
+            }
+        });
+        expect(recencyPick).toMatchObject({
+            kind: 'continue',
+            page: 'turdspades.html',
+            href: 'turdanoid/turdspades.html',
+            action: 'Continue TurdSpades'
+        });
+
+        // Same scenario reversed: whichever page has the larger updatedAt wins,
+        // proving the order isn't just being flipped.
+        storage.setItem(CONTINUE_KEY, JSON.stringify({
+            v: 1,
+            games: {
+                'turdjack.html': { updatedAt: 9000, snapshot: {} },
+                'turdspades.html': { updatedAt: 4000, snapshot: {} }
+            }
+        }));
+        const recencyPickReversed = api.resolveNextPlay(storage, {
+            CONTINUE_KEY,
+            listLiveContinuePages() {
+                return ['turdjack.html', 'turdspades.html'];
+            },
+            parseContinueStore(raw) {
+                return JSON.parse(raw);
+            }
+        });
+        expect(recencyPickReversed).toMatchObject({
+            kind: 'continue',
+            page: 'turdjack.html',
+            action: 'Continue Crapjack 21'
+        });
+
+        // Missing/unavailable timestamp metadata (e.g. a lighter-weight
+        // tableContinue mock, or a corrupt store) must not crash and must fall
+        // back to the hub's own array order rather than reordering randomly.
+        storage.setItem(CONTINUE_KEY, 'not json');
+        const fallbackOrder = api.resolveNextPlay(storage, {
+            CONTINUE_KEY,
+            listLiveContinuePages() {
+                return ['crapeights.html', 'turdrummy.html'];
+            },
+            parseContinueStore() {
+                throw new Error('bad store');
+            }
+        });
+        expect(fallbackOrder.page).toBe('crapeights.html');
+
         const thrown = api.resolveNextPlay({
             getItem() {
                 throw new Error('blocked');
@@ -208,6 +282,58 @@ describe('unlisted band lab', () => {
         expect(note.querySelector('script')).toBeNull();
         expect(source).not.toMatch(/innerHTML/);
         expect(source).not.toMatch(/navigator\.share|clipboard/i);
+    });
+
+    it('uses real snapshot validation for recency, ties, missing metadata, and finished tables without writes', async () => {
+        const { JSDOM } = await import('jsdom');
+        const { window } = new JSDOM('', { runScripts: 'outside-only', url: 'https://example.test/' });
+        window.eval(await readFile(join(repoRoot, TURDANOID_DIR, 'games/table-continue-core.js'), 'utf8'));
+        window.eval(await readFile(join(repoRoot, BAND_LAB_NEXT_PLAY), 'utf8'));
+        const tableContinue = window.TurdSuiteTableContinue;
+        const store = {
+            v: 1,
+            games: {
+                'crapeights.html': { updatedAt: 1000, snapshot: snapshots.makeEightsSnapshot() },
+                'turdspades.html': { updatedAt: 5000, snapshot: snapshots.makeSpadesSnapshot() }
+            }
+        };
+        let raw;
+        const reads = [];
+        const writes = [];
+        const storage = {
+            getItem(key) {
+                reads.push(key);
+                return key === tableContinue.CONTINUE_KEY ? raw : null;
+            },
+            setItem(...args) { writes.push(args); throw new Error('The lab must not write saves'); },
+            removeItem(...args) { writes.push(args); throw new Error('The lab must not remove saves'); }
+        };
+        function pick() {
+            raw = JSON.stringify(store);
+            const before = raw;
+            const result = window.BandLabNextPlay.resolveNextPlay(storage, tableContinue);
+            expect(raw).toBe(before);
+            expect(writes).toEqual([]);
+            expect(reads.every((key) => [tableContinue.CONTINUE_KEY, 'turdsuite_last_game'].includes(key))).toBe(true);
+            return result;
+        }
+        expect(pick().page).toBe('turdspades.html');
+        store.games['crapeights.html'].updatedAt = 5000;
+        expect(pick().page).toBe('crapeights.html');
+        delete store.games['crapeights.html'].updatedAt;
+        expect(pick().page).toBe('turdspades.html');
+        delete store.games['turdspades.html'].updatedAt;
+        expect(pick().page).toBe('crapeights.html');
+        store.games['crapeights.html'].updatedAt = 9000;
+        store.games['crapeights.html'].snapshot = {};
+        expect(pick().page).toBe('turdspades.html');
+        store.games['turdspades.html'].snapshot.phase = 'matchEnd';
+        expect(pick().kind).toBe('hub');
+        expect(tableContinue.parseContinueStore(raw).games['turdspades.html']).toBeDefined();
+        raw = 'corrupt';
+        expect(window.BandLabNextPlay.resolveNextPlay(storage, tableContinue).kind).toBe('hub');
+        expect(raw).toBe('corrupt');
+        window.close();
     });
 
     it('keeps the vendored six-game hub playable without rewriting Neon', async () => {
