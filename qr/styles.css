@@ -64,6 +64,9 @@
 .evergreen .show-date strong { font-size: 2.5rem; }
 .evergreen .show-card__meta { font-size: .75rem; }
 .evergreen .show-card__body a { text-underline-offset: .2em; }
+/* Keep the inline venue link's text size; widen only its tap area to 44px. */
+.evergreen .show-card__body p a { position: relative; }
+.evergreen .show-card__body p a::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2.75rem; transform: translateY(-50%); }
 .evergreen .contact-panel h2 { max-width: 16ch; }
 .contact-note { font-size: .78rem; color: var(--muted); }
 .contact-email { font-size: .82rem; color: var(--muted); overflow-wrap: anywhere; }
@@ -98,7 +101,7 @@
     .evergreen .brand { grid-column: 1; grid-row: 1; }
     .header-socials { grid-column: 2; grid-row: 1; }
     .evergreen .site-nav { grid-column: 1 / -1; grid-row: 2; justify-content: space-between; gap: .2rem; width: 100%; }
-    .evergreen .site-nav a { justify-content: center; flex: 1 1 auto; min-height: 44px; font-size: .7rem; padding-inline: .3rem; letter-spacing: .025em; }
+    .evergreen .site-nav a { justify-content: center; flex: 1 1 auto; min-height: 44px; font-size: .75rem; padding-inline: .3rem; letter-spacing: .025em; }
     .band-hero__grid { gap: 2rem; }
     .band-members { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -121,7 +124,6 @@
     .evergreen .show-card { padding: .85rem; }
 }
 @media (max-width: 410px) {
-    .evergreen .site-nav a { font-size: .64rem; }
     .band-hero__lede br { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
