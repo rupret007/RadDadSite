@@ -5,7 +5,7 @@ The public site is evergreen as of October 2, 2026. The September 19 show is a d
 
 ## Current public surfaces
 
-- `/`: band introduction, live covers, covered artists, band members, a Taylor Swift cover recording, upcoming-show placeholder, dated history, and direct booking.
+- `/`: band introduction, live covers, covered artists, band members, a Taylor Swift cover recording, upcoming-show placeholder, dated history, direct booking and header links to Instagram/Facebook/YouTube.
 - `/qr/`: music-first landing page with accurate cover credits, the same five live-video destinations, follow links and a path back to the main booking section.
 - `/tap/`: permanent printed-QR URL, still redirects to `/qr/`. Never remove or repurpose it.
 - `/nfc/`: legacy compatibility alias for `/qr/`; the current physical items use printed QR codes rather than NFC hardware.
@@ -26,6 +26,8 @@ Both current pages load `styles.css` followed by **`qr/styles.css`**, which now 
 `script.js` is shared by both pages. It handles logo fallback, sticky-header measurements, optional Apple Music previews and sharing a fixed canonical band URL. Navigation, booking and streaming destinations work without JavaScript. Apple Music loads only after an explicit preview click; YouTube inline frames load only after a card click. Images and Google Fonts remain external where already configured; this is not a claim of zero third-party requests.
 
 `live-video.js` retains direct YouTube fallback, narrow sandboxing, explicit retry, a ten-second opening deadline, focus return and page-exit cleanup. The same five recorded performance destinations are retained. Existing direct-only cards are not changed to unverified embeds. Offline tests do not prove current third-party playback availability.
+
+All public pages keep a 44px-minimum tap target on phone-width interactive elements (brand link, past-show venue link, tap/NFC redirect links), and external links that open in a new tab say so in their accessible name.
 
 `show-state.js` is a retained legacy controller and is **not loaded by either current public page**. Its unit regression contracts use `tests/fixtures/legacy-show.html`, outside the production artifact. Current browser tests prove that neither a clock change nor a history return can revive the retired event UI.
 
@@ -60,4 +62,4 @@ See [the production runbook](docs/production-deployment.md). GitHub Pages and Ch
 
 Keep the band hero and social previews evergreen. Add only confirmed dates under Upcoming shows, with real venues and dates. When a date passes, move it to Past shows and remove its calendar/directions calls to action from active surfaces. Update the QR show status at the same time. Do not restore the hard-coded September controller to today's pages.
 
-The new regression tests cover correct credits, metadata, section priority, responsive headers, hash targets, old-route redirects, no-JavaScript access, opt-in player loading, safe sharing, dated archives and the absence of stale promotion. Existing player recovery, Worker routing, private-surface safety and deployment/rollback tests remain in the suite.
+The regression tests cover correct credits, metadata, section priority, responsive headers, hash targets, old-route redirects, no-JavaScript access, opt-in player loading, safe sharing, dated archives, the absence of stale promotion, phone tap-target sizing, accessible new-tab link naming and the simplified recording cards. Existing player recovery, Worker routing, private-surface safety and deployment/rollback tests remain in the suite.
