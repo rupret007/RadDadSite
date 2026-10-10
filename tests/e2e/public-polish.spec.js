@@ -68,7 +68,7 @@ for (const width of [320, 375, 390, 844]) {
 }
 
 for (const path of ['/', '/qr/']) {
-    test(`${path} announces that every visible external link opens in a new tab`, async ({ page }) => {
+    test(`${path} announces in-page watch cards and new tabs for every visible external link`, async ({ page }) => {
         await page.goto(path);
         const external = page.locator('a[target="_blank"]:visible');
         const count = await external.count();
@@ -77,7 +77,68 @@ for (const path of ['/', '/qr/']) {
             const link = external.nth(index);
             const href = await link.getAttribute('href');
             if (STORY_OF_US_LINK.test(href)) continue;
+            if (await link.getAttribute('data-inline-video') !== null) {
+                await expect(link).toHaveAccessibleName(/^Watch Rad Dad perform .+ here \(opens video player\)$/);
+                await expect(link).not.toHaveAccessibleName(/opens in a new tab/);
+                await expect(link).toHaveAttribute('aria-haspopup', 'dialog');
+                continue;
+            }
             await expect(link).toHaveAccessibleName(/\(opens in a new tab\)/);
+        }
+    });
+}
+
+for (const path of ['/', '/qr/']) {
+    test(`${path} watch-card names match pointer and keyboard in-page activation`, async ({ page, context }) => {
+        await page.goto(path);
+        const originalUrl = page.url();
+        const cards = page.locator('[data-inline-video]');
+        const dialog = page.getByRole('dialog');
+        await expect(cards).toHaveCount(3);
+        const openedPages = [];
+        context.on('page', popup => openedPages.push(popup));
+        for (const card of await cards.all()) {
+            const title = await card.locator('figcaption strong').innerText();
+            const videoId = new URL(await card.getAttribute('href')).searchParams.get('v');
+            await expect(card).toHaveAccessibleName(`Watch Rad Dad perform ${title} here (opens video player)`);
+            for (const activation of ['pointer', 'keyboard']) {
+                if (activation === 'pointer') await card.click();
+                else {
+                    await card.focus();
+                    await page.keyboard.press('Enter');
+                }
+                await expect(dialog).toBeVisible();
+                await expect(dialog.locator('#live-video-title')).toHaveText(title);
+                await expect(dialog.locator('[data-video-frame]')).toHaveAttribute('src', `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`);
+                await page.keyboard.press('Escape');
+                await expect(dialog).toBeHidden();
+                await expect(card).toBeFocused();
+            }
+        }
+        expect(openedPages).toHaveLength(0);
+        await expect(page).toHaveURL(originalUrl);
+    });
+
+    test(`${path} featured and Linoleum watch cards open their exact YouTube links in new tabs`, async ({ page, context }) => {
+        // Fulfill popup navigation locally; this does not exercise YouTube.
+        await context.route('https://www.youtube.com/watch?*', route => route.fulfill({
+            contentType: 'text/html', body: '<!doctype html><title>Offline YouTube destination</title>'
+        }));
+        await page.goto(path);
+        const cards = page.locator('.video-card:not([data-inline-video])');
+        await expect(cards).toHaveCount(2);
+        for (const [index, videoId] of ['4ReFoSZHL7o', 'e9mR2sgnJ00'].entries()) {
+            const card = cards.nth(index);
+            const destination = `https://www.youtube.com/watch?v=${videoId}`;
+            await expect(card).toHaveAccessibleName(/on YouTube \(opens in a new tab\)$/);
+            await expect(card).toHaveAttribute('href', destination);
+            await expect(card).toHaveAttribute('target', '_blank');
+            const popupPromise = context.waitForEvent('page');
+            await card.click();
+            const popup = await popupPromise;
+            await expect(popup).toHaveURL(destination);
+            await expect(page.locator('#live-video-dialog')).toBeHidden();
+            await popup.close();
         }
     });
 }

@@ -116,21 +116,28 @@
         }
     }
 
+    function canOpenInlineVideo() {
+        return liveVideoDialog && liveVideoFrame && liveVideoTitle
+            && liveVideoContext && liveVideoLink && liveVideoStatus
+            && liveVideoRetry && liveVideoFrameTemplate
+            && typeof liveVideoDialog.showModal === 'function';
+    }
+
     document.querySelectorAll('[data-inline-video]').forEach((card) => {
+        const initialVideo = getYouTubeVideo(card);
+        // Keep the HTML's YouTube name until its in-page action is available.
+        // The href and target remain intact for no-JS and modified clicks.
+        if (initialVideo && canOpenInlineVideo()) {
+            card.setAttribute('aria-label', `Watch Rad Dad perform ${initialVideo.title} here (opens video player)`);
+            card.setAttribute('aria-haspopup', 'dialog');
+        }
+
         card.addEventListener('click', (event) => {
             const video = getYouTubeVideo(card);
 
             if (!isPlainPrimaryClick(event)
                 || !video
-                || !liveVideoDialog
-                || !liveVideoFrame
-                || !liveVideoTitle
-                || !liveVideoContext
-                || !liveVideoLink
-                || !liveVideoStatus
-                || !liveVideoRetry
-                || !liveVideoFrameTemplate
-                || typeof liveVideoDialog.showModal !== 'function') return;
+                || !canOpenInlineVideo()) return;
 
             liveVideoTitle.textContent = video.title;
             liveVideoContext.textContent = video.context;
