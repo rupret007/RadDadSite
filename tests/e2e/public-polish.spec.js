@@ -67,6 +67,30 @@ for (const width of [320, 375, 390, 844]) {
     });
 }
 
+for (const width of [320, 390, 1280]) {
+    for (const path of ['/', '/qr/']) {
+        test(`${path} video captions are at least 12px and cards still fit at ${width}px`, async ({ page }) => {
+            await page.setViewportSize({ width, height: 800 });
+            await page.goto(path);
+            const cards = page.locator('.video-card:visible');
+            await expect(cards).toHaveCount(5);
+            for (const card of await cards.all()) {
+                const label = card.locator('.video-card__label');
+                const destination = card.locator('figcaption > span:last-child');
+                await expect(label).toBeVisible();
+                await expect(destination).toBeVisible();
+                await expect(destination).toHaveText(/Watch (here|on YouTube)/);
+                for (const caption of [label, destination]) {
+                    const fontSize = parseFloat(await caption.evaluate((el) => getComputedStyle(el).fontSize));
+                    expect(fontSize, await caption.innerText()).toBeGreaterThanOrEqual(12);
+                }
+                expect(await card.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+            }
+            expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+        });
+    }
+}
+
 for (const path of ['/', '/qr/']) {
     test(`${path} announces that every visible external link opens in a new tab`, async ({ page }) => {
         await page.goto(path);

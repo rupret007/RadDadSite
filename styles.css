@@ -2064,7 +2064,7 @@ html[data-show-phase="complete"] .show-moment {
 
 .video-card figcaption > span:last-child {
     color: var(--muted);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 700;
 }
 
@@ -2078,7 +2078,7 @@ html[data-show-phase="complete"] .show-moment {
 
 .video-card__label {
     color: var(--blue-bright);
-    font-size: 0.63rem;
+    font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.13em;
     text-transform: uppercase;
