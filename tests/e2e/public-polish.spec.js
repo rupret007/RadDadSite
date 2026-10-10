@@ -98,7 +98,8 @@ for (const path of ['/', '/qr/']) {
         const openedPages = [];
         context.on('page', popup => openedPages.push(popup));
         for (const card of await cards.all()) {
-            const title = await card.locator('figcaption strong').innerText();
+            // Accessible names use source text; innerText includes CSS uppercase styling.
+            const title = (await card.locator('figcaption strong').textContent()).trim();
             const videoId = new URL(await card.getAttribute('href')).searchParams.get('v');
             await expect(card).toHaveAccessibleName(`Watch Rad Dad perform ${title} here (opens video player)`);
             for (const activation of ['pointer', 'keyboard']) {
