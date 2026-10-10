@@ -54,6 +54,23 @@ for (const path of ['/tap/', '/nfc/']) {
     });
 }
 
+test.describe('/GPT/ redirect shell without JavaScript', () => {
+    test.use({ javaScriptEnabled: false });
+    test('its continue link is a 44px touch target', async ({ page }) => {
+        // The shell's meta refresh would move on to the homepage. A 204 answers that
+        // navigation with no content, so the browser keeps the shell on screen.
+        await page.route((url) => url.pathname === '/', (route) => route.fulfill({ status: 204 }));
+        for (const [width, height] of [[375, 667], [844, 390]]) {
+            await page.setViewportSize({ width, height });
+            await page.goto('/GPT/');
+            const link = page.getByRole('link', { name: 'Continue to Rad Dad', exact: true });
+            const box = await link.boundingBox();
+            expect(box.height).toBeGreaterThanOrEqual(44);
+            expect(box.width).toBeGreaterThanOrEqual(44);
+        }
+    });
+});
+
 for (const width of [320, 375, 390, 844]) {
     test(`site navigation text is at least 12px and still fits at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 800 });
