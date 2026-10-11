@@ -10,6 +10,20 @@ async function page(path = 'index.html') {
 const paths = ['index.html', 'qr/index.html'];
 const videos = ['4ReFoSZHL7o', '9Re_0wjIbfQ', 'GCy4nHIqV5k', 'iMrxzCQ7lVs', 'e9mR2sgnJ00'];
 describe('evergreen public band surfaces', () => {
+    it.each(paths)('%s offers video cards before the YouTube channel in reading and tab order', async path => {
+        const { doc } = await page(path);
+        const watch = doc.querySelector('.watch-section');
+        const controls = [...watch.querySelectorAll('a, button')];
+        const cards = [...watch.querySelectorAll('.video-card')];
+        const channel = watch.querySelector('a[href="https://www.youtube.com/@RadDadBand"]');
+        expect(cards).toHaveLength(5);
+        expect(controls.map(control => control.href)).toEqual([...cards, channel].map(control => control.href));
+        expect(controls.every(control => !control.hasAttribute('tabindex'))).toBe(true);
+        expect(channel.target).toBe('_blank');
+        expect(channel.rel.split(' ')).toEqual(expect.arrayContaining(['noopener', 'noreferrer']));
+        expect(channel.textContent).toContain('More on YouTube');
+        expect(channel.textContent).toContain('(opens in a new tab)');
+    });
     it.each(paths)('%s identifies a cover band, not a current event or original-song project', async path => {
         const { html, doc } = await page(path);
         const metadata = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent);
@@ -59,6 +73,27 @@ describe('evergreen public band surfaces', () => {
         expect(doc.querySelectorAll('[data-upcoming-shows] time')).toHaveLength(0);
         expect(doc.querySelector('[data-upcoming-shows]').textContent).toContain('No upcoming dates posted yet');
         expect(doc.querySelectorAll('.show-card--featured')).toHaveLength(0);
+    });
+    it('keeps a space in the hero lede so phones do not glue alternative.The together', async () => {
+        const { doc } = await page();
+        const lede = doc.querySelector('.band-hero__lede').textContent;
+        expect(lede).not.toContain('alternative.The');
+        expect(lede).toContain('’90s alternative. The songs you know, played loud.');
+    });
+    it('does not imply a next show when no upcoming dates are in the markup', async () => {
+        const home = await page();
+        const qr = await page('qr/index.html');
+        const emptySentence = 'No upcoming dates posted yet. Follow Rad Dad for show announcements.';
+        const nextShowClaim = /catch|come to the next|next one|next show/i;
+
+        expect(home.doc.querySelector('#shows-title').textContent).not.toMatch(nextShowClaim);
+        expect(qr.doc.querySelector('#qr-shows-title').textContent).not.toMatch(nextShowClaim);
+        expect(home.doc.querySelector('[data-upcoming-shows]').textContent).toContain(emptySentence);
+        expect(qr.doc.querySelector('#next-show').textContent).toContain(emptySentence);
+        expect(home.doc.querySelector('[data-upcoming-shows] a[href*="instagram.com/rad.dad.band"]')).not.toBeNull();
+        expect(home.doc.querySelector('[data-upcoming-shows] a[href="#contact"]')).not.toBeNull();
+        expect(home.doc.querySelectorAll('.show-card--past')).toHaveLength(3);
+        expect(qr.doc.querySelector('#next-show a[href="../#shows"]').textContent).toContain('Show updates & past shows');
     });
     it.each(paths)('%s has a valid local destination for every same-page hash', async path => {
         const { doc } = await page(path);
