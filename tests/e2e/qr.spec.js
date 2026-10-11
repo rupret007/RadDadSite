@@ -29,7 +29,9 @@ test('QR is a cover-first landing page with accurate metadata, streaming links a
     await expect(page.locator('#song')).toContainText('Jeff Story');
     await expect(page.locator('.video-grid a')).toHaveCount(5);
     await expect(page.locator('.header-socials a')).toHaveCount(3);
-    await expect(page.locator('#next-show')).toContainText('No upcoming dates posted yet');
+    await expect(page.locator('#next-show')).toContainText('No upcoming dates posted yet. Follow Rad Dad for show announcements.');
+    await expect(page.locator('#qr-shows-title')).not.toContainText(/catch|come to the next|next one|next show/i);
+    await expect(page.locator('a[href="../#shows"]')).toContainText('Show updates & past shows');
     await expect(page.locator('a[href="../#shows"]')).toBeVisible();
     await expect(page.locator('body')).not.toContainText('September 19');
     await expect(page.locator('body')).not.toContainText('our song');

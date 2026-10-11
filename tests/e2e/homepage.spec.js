@@ -57,6 +57,14 @@ test('booking is an honest direct inquiry with the existing email and phone', as
     await expect(page.locator('#contact .social-nav a')).toHaveCount(3);
 });
 
+test('hero lede keeps a space after alternative on a 390x844 phone', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    const lede = page.locator('.band-hero__lede');
+    await expect(lede).not.toContainText('alternative.The');
+    await expect(lede).toContainText('Pop-punk hooks. Punk anthems. ’90s alternative. The songs you know, played loud.');
+});
+
 for (const width of [320, 390, 768, 980, 981, 1440]) {
     test(`homepage remains usable without overlap at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
@@ -80,6 +88,15 @@ for (const width of [320, 390, 768, 980, 981, 1440]) {
             return section.y >= headerBottom - 1 && section.y < headerBottom + 20
                 && heading.y >= section.y && heading.y + heading.height <= 900;
         }).toBe(true);
+        if (width === 1440) {
+            const lede = page.locator('.band-hero__lede');
+            await expect(lede.locator('br')).toHaveCSS('display', 'inline');
+            const lineCount = await lede.evaluate((el) => {
+                const lineHeight = parseFloat(getComputedStyle(el).lineHeight);
+                return Math.round(el.getBoundingClientRect().height / lineHeight);
+            });
+            expect(lineCount).toBeGreaterThanOrEqual(2);
+        }
     });
 }
 
