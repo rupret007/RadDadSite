@@ -33,6 +33,7 @@
 .evergreen .video-card figcaption strong { font-size: clamp(1.2rem, 1.7vw, 1.65rem); }
 .evergreen .video-card figcaption > span { font-size: .72rem; line-height: 1.6; }
 .evergreen .watch-section__tapes { margin-block: 0 1.5rem; }
+.evergreen .watch-section__more { margin: 2rem 0 0; }
 .evergreen .covers-poster { padding-top: 2.5rem; }
 .evergreen .covers-poster__header h2 { font-size: clamp(3.2rem, 6vw, 5rem); }
 .evergreen .covers-poster__footer { letter-spacing: .06em; }

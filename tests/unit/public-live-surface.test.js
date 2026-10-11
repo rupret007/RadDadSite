@@ -10,6 +10,20 @@ async function page(path = 'index.html') {
 const paths = ['index.html', 'qr/index.html'];
 const videos = ['4ReFoSZHL7o', '9Re_0wjIbfQ', 'GCy4nHIqV5k', 'iMrxzCQ7lVs', 'e9mR2sgnJ00'];
 describe('evergreen public band surfaces', () => {
+    it.each(paths)('%s offers video cards before the YouTube channel in reading and tab order', async path => {
+        const { doc } = await page(path);
+        const watch = doc.querySelector('.watch-section');
+        const controls = [...watch.querySelectorAll('a, button')];
+        const cards = [...watch.querySelectorAll('.video-card')];
+        const channel = watch.querySelector('a[href="https://www.youtube.com/@RadDadBand"]');
+        expect(cards).toHaveLength(5);
+        expect(controls.map(control => control.href)).toEqual([...cards, channel].map(control => control.href));
+        expect(controls.every(control => !control.hasAttribute('tabindex'))).toBe(true);
+        expect(channel.target).toBe('_blank');
+        expect(channel.rel.split(' ')).toEqual(expect.arrayContaining(['noopener', 'noreferrer']));
+        expect(channel.textContent).toContain('More on YouTube');
+        expect(channel.textContent).toContain('(opens in a new tab)');
+    });
     it.each(paths)('%s identifies a cover band, not a current event or original-song project', async path => {
         const { html, doc } = await page(path);
         const metadata = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent);
