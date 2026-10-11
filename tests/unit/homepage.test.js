@@ -15,13 +15,20 @@ const rawHtml = fs.readFileSync(htmlPath, 'utf8').replace(
 );
 const scriptSource = fs.readFileSync(scriptPath, 'utf8');
 
-function loadHomepage() {
+function loadHomepage({ share, writeText } = {}) {
     const dom = new JSDOM(rawHtml, {
         pretendToBeVisual: true,
         runScripts: 'dangerously',
         url: 'http://127.0.0.1:4173/'
     });
     const { window } = dom;
+
+    if (share !== undefined) {
+        Object.defineProperty(window.navigator, 'share', { configurable: true, value: share });
+    }
+    if (writeText !== undefined) {
+        Object.defineProperty(window.navigator, 'clipboard', { configurable: true, value: { writeText } });
+    }
 
     window.eval(scriptSource);
     window.document.dispatchEvent(new window.Event('DOMContentLoaded', { bubbles: true }));
@@ -30,6 +37,16 @@ function loadHomepage() {
         document: window.document,
         window
     };
+}
+
+async function settle() {
+    for (let tick = 0; tick < 12; tick += 1) await Promise.resolve();
+}
+
+function deferred() {
+    let resolve;
+    const promise = new Promise((yes) => { resolve = yes; });
+    return { promise, resolve };
 }
 
 describe('homepage script behavior', () => {
@@ -47,5 +64,70 @@ describe('homepage script behavior', () => {
         expect(fallbacks).toHaveLength(1);
         expect(fallbacks[0].textContent).toBe('RAD DAD');
         expect(brand.contains(fallbacks[0])).toBe(true);
+    });
+});
+
+describe('share and copy single-flight behavior', () => {
+    it('re-enables Copy after a Share click interleaves while Copy is still pending', async () => {
+        const pendingCopy = deferred();
+        const share = () => Promise.resolve();
+        const writeText = () => pendingCopy.promise;
+        const { document } = loadHomepage({ share, writeText });
+        const shareButton = document.querySelector('[data-share-band]');
+        const copyButton = document.querySelector('[data-copy-band]');
+        const status = document.querySelector('[data-share-status]');
+
+        copyButton.click();
+        expect(copyButton.disabled).toBe(true);
+        expect(shareButton.disabled).toBe(true);
+
+        shareButton.click();
+        await settle();
+        // Share was blocked by the shared busy flag, so it must not have closed the window.
+        expect(shareButton.disabled).toBe(true);
+        expect(copyButton.disabled).toBe(true);
+
+        pendingCopy.resolve();
+        await settle();
+
+        expect(copyButton.disabled).toBe(false);
+        expect(shareButton.disabled).toBe(false);
+        expect(status.textContent).toBe('Band website copied.');
+    });
+
+    it('disables both Share and Copy together while either action is in flight', async () => {
+        const pendingShare = deferred();
+        const share = () => pendingShare.promise;
+        const writeText = () => Promise.resolve();
+        const { document } = loadHomepage({ share, writeText });
+        const shareButton = document.querySelector('[data-share-band]');
+        const copyButton = document.querySelector('[data-copy-band]');
+
+        shareButton.click();
+        expect(shareButton.disabled).toBe(true);
+        expect(copyButton.disabled).toBe(true);
+
+        pendingShare.resolve();
+        await settle();
+
+        expect(shareButton.disabled).toBe(false);
+        expect(copyButton.disabled).toBe(false);
+    });
+
+    it('does not copy automatically when the native share sheet is canceled', async () => {
+        const share = () => Promise.reject(Object.assign(new Error('Cancelled'), { name: 'AbortError' }));
+        const writeText = () => Promise.resolve();
+        const writeTextSpy = (...args) => { writeTextSpy.calls.push(args); return writeText(...args); };
+        writeTextSpy.calls = [];
+        const { document } = loadHomepage({ share, writeText: writeTextSpy });
+        const shareButton = document.querySelector('[data-share-band]');
+        const status = document.querySelector('[data-share-status]');
+
+        shareButton.click();
+        await settle();
+
+        expect(writeTextSpy.calls).toHaveLength(0);
+        expect(status.textContent).toMatch(/cancel/i);
+        expect(shareButton.disabled).toBe(false);
     });
 });
