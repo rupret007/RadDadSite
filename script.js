@@ -57,11 +57,15 @@
         let generation = 0;
         share.hidden = false;
         const showFallback = () => { fallback.hidden = false; status.textContent = 'Copy the band website below.'; };
+        const setBusy = (value) => {
+            busy = value;
+            share.disabled = value;
+            copy.disabled = value;
+        };
         share.addEventListener('click', async () => {
             if (busy) return;
             if (typeof navigator.share !== 'function') { showFallback(); return; }
-            busy = true;
-            share.disabled = true;
+            setBusy(true);
             const request = ++generation;
             status.textContent = '';
             try {
@@ -72,13 +76,13 @@
                 if (error?.name === 'AbortError') status.textContent = 'Sharing canceled.';
                 else showFallback();
             } finally {
-                if (request === generation) { busy = false; share.disabled = false; }
+                if (request === generation) setBusy(false);
             }
         });
         copy.addEventListener('click', async () => {
-            if (copy.disabled) return;
-            copy.disabled = true;
-            const request = generation;
+            if (busy) return;
+            setBusy(true);
+            const request = ++generation;
             try {
                 if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
                 await navigator.clipboard.writeText(bandUrl);
@@ -86,14 +90,12 @@
             } catch {
                 if (request === generation) status.textContent = 'Select the website address and copy it manually.';
             } finally {
-                if (request === generation) copy.disabled = false;
+                if (request === generation) setBusy(false);
             }
         });
         window.addEventListener('pagehide', () => {
             generation += 1;
-            busy = false;
-            share.disabled = false;
-            copy.disabled = false;
+            setBusy(false);
             status.textContent = '';
         });
     }
