@@ -26,9 +26,14 @@ for (const path of ['/', '/qr/']) {
     test(`${path} cancellation never copies or claims a post was delivered`, async ({ page }) => {
         await sharing(page, 'cancel'); await page.goto(path);
         await page.locator('[data-share-band]').click();
-        await expect(page.locator('[data-share-status]')).toHaveText('Sharing canceled.');
+        await expect(page.locator('[data-share-status]')).toHaveText('Sharing canceled or unavailable.');
         expect(await page.evaluate(() => window.copyCalls)).toEqual([]);
-        await expect(page.locator('[data-share-fallback]')).toBeHidden();
+        await expect(page.locator('[data-share-fallback]')).toBeVisible();
+        await expect(page.locator('[data-copy-band]')).toBeVisible();
+        await expect(page.locator('#band-share-url')).toHaveValue('https://raddadband.com/');
+        await page.locator('[data-copy-band]').click();
+        expect(await page.evaluate(() => window.copyCalls)).toEqual(['https://raddadband.com/']);
+        await expect(page.locator('[data-share-status]')).toHaveText('Band website copied.');
     });
     test(`${path} unsupported sharing waits for a separate copy click`, async ({ page }) => {
         await sharing(page, 'missing'); await page.goto(path);
