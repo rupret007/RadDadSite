@@ -73,8 +73,11 @@
                 if (request === generation) status.textContent = 'Sharing options closed.';
             } catch (error) {
                 if (request !== generation) return;
-                if (error?.name === 'AbortError') status.textContent = 'Sharing canceled.';
-                else showFallback();
+                if (error?.name === 'AbortError') {
+                    // AbortError is cancel or no share targets; never copy for the user.
+                    fallback.hidden = false;
+                    status.textContent = 'Sharing canceled or unavailable.';
+                } else showFallback();
             } finally {
                 if (request === generation) setBusy(false);
             }
