@@ -3,20 +3,24 @@
 import { describe, expect, it, vi } from 'vitest';
 import worker from '../../worker/index.js';
 
+const QR_ALIASES = [
+    '/qr',
+    '/qr/index.html',
+    '/tap',
+    '/tap/',
+    '/tap/index.html',
+    '/nfc',
+    '/nfc/',
+    '/nfc/index.html'
+];
+
 describe('QR route aliases', () => {
-    it.each([
-        '/qr',
-        '/qr/index.html',
-        '/tap',
-        '/tap/',
-        '/tap/index.html',
-        '/nfc',
-        '/nfc/',
-        '/nfc/index.html'
-    ])('redirects %s to the one canonical landing page', async (path) => {
+    it.each(
+        QR_ALIASES.flatMap((path) => ['GET', 'HEAD'].map((method) => [method, path]))
+    )('%s %s redirects to the one canonical landing page', async (method, path) => {
         const assetFetch = vi.fn();
         const response = await worker.fetch(
-            new Request(`https://raddadband.com${path}?utm_source=route-test`),
+            new Request(`https://raddadband.com${path}?utm_source=route-test`, { method }),
             { ASSETS: { fetch: assetFetch } }
         );
 
@@ -25,6 +29,34 @@ describe('QR route aliases', () => {
             'https://raddadband.com/qr/?utm_source=route-test'
         );
         expect(assetFetch).not.toHaveBeenCalled();
+    });
+
+    it.each(
+        QR_ALIASES.flatMap((path) => ['POST', 'PUT', 'DELETE'].map((method) => [method, path]))
+    )('%s %s still hits assets instead of the QR alias redirect', async (method, path) => {
+        const assetResponse = new Response('alias asset', { status: 200 });
+        const assetFetch = vi.fn(async () => assetResponse);
+        const request = new Request(`https://raddadband.com${path}?utm_source=route-test`, { method });
+        const response = await worker.fetch(request, { ASSETS: { fetch: assetFetch } });
+
+        expect(response).toBe(assetResponse);
+        expect(response.status).toBe(200);
+        expect(response.headers.get('location')).toBeNull();
+        expect(assetFetch).toHaveBeenCalledOnce();
+        expect(assetFetch).toHaveBeenCalledWith(request);
+    });
+
+    it('does not 301 POST on an alias when the asset is missing', async () => {
+        const assetResponse = new Response('missing', { status: 404 });
+        const assetFetch = vi.fn(async () => assetResponse);
+        const request = new Request('https://raddadband.com/tap/', { method: 'POST' });
+        const response = await worker.fetch(request, { ASSETS: { fetch: assetFetch } });
+
+        expect(response).toBe(assetResponse);
+        expect(response.status).toBe(404);
+        expect(response.headers.get('location')).toBeNull();
+        expect(assetFetch).toHaveBeenCalledOnce();
+        expect(assetFetch).toHaveBeenCalledWith(request);
     });
 
     it.each([
