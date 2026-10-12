@@ -14,7 +14,10 @@ const worker = {
             '/nfc/index.html'
         ]);
 
-        if (request.method === 'GET' && qrAliases.has(requestUrl.pathname)) {
+        if (
+            (request.method === 'GET' || request.method === 'HEAD')
+            && qrAliases.has(requestUrl.pathname)
+        ) {
             requestUrl.pathname = canonicalQrPath;
             return Response.redirect(requestUrl.toString(), 301);
         }
