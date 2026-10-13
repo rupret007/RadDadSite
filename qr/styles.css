@@ -3,7 +3,7 @@
 :root { color-scheme: dark; }
 .evergreen .site-header__inner { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 1.25rem; }
 .header-socials { display: flex; align-items: center; gap: .5rem; }
-.header-socials__link { width: 44px; height: 44px; flex: 0 0 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--cream); text-decoration: none; transition: color 160ms, border-color 160ms; }
+.header-socials__link { width: 44px; height: 44px; flex: 0 0 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--surface); color: var(--cream); text-decoration: none; transition: color 160ms, border-color 160ms; }
 .header-socials__link svg { width: 22px; height: 22px; display: block; }
 .header-socials__link:hover { color: var(--blue-bright); border-color: currentColor; }
 .header-socials__link:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; }
@@ -22,7 +22,7 @@
 .band-hero__lede { max-width: 36rem; color: var(--cream); font-size: clamp(1rem, 1.5vw, 1.18rem); line-height: 1.8; }
 .band-hero__actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 1.5rem; }
 .band-hero__note { max-width: 35rem; margin: 1.5rem 0 0; font-size: .82rem; color: var(--muted); }
-.band-hero__art { position: relative; margin: 0; padding: 1rem; background: #000; border: 1px solid var(--line); transform: rotate(3deg); box-shadow: 8px 8px 0 rgba(0,158,232,.18); }
+.band-hero__art { position: relative; margin: 0; padding: 1rem; background: var(--ink); border: 1px solid var(--line); transform: rotate(3deg); box-shadow: 8px 8px 0 rgba(0,158,232,.18); }
 .band-hero__art img { display: block; width: 100%; height: auto; }
 .band-hero__art figcaption { padding: .5rem; text-align: center; color: var(--lime); font-family: var(--display); text-transform: uppercase; letter-spacing: .1em; font-size: .78rem; }
 .evergreen .video-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem 1.4rem; }
@@ -76,11 +76,11 @@
 .footer-layout nav { display: flex; flex-wrap: wrap; gap: .75rem; }
 .footer-layout nav a { min-height: 44px; display: inline-flex; align-items: center; font-size: .78rem; }
 .band-share { grid-column: 1 / -1; }
-.share-button { min-height: 44px; padding: .55rem .9rem; font: 700 .78rem var(--body); color: var(--cream); background: var(--surface); border: 1px solid var(--line); border-radius: 3px; cursor: pointer; }
+.share-button { min-height: 44px; padding: .55rem .9rem; font: 700 .78rem var(--body); color: var(--cream); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 3px; cursor: pointer; }
 .share-button:hover { border-color: var(--blue-bright); }
 .band-share :is(p, label) { color: var(--muted); font-size: .78rem; }
 .band-share [data-share-status]:empty { display: none; }
-.band-share input { display: block; width: min(100%, 26rem); min-height: 44px; padding: .7rem; margin: .5rem 0; border: 1px solid var(--line); font: inherit; font-size: .85rem; background: var(--ink); color: var(--cream); }
+.band-share input { display: block; width: min(100%, 26rem); min-height: 44px; padding: .7rem; margin: .5rem 0; border: 1px solid var(--line-strong); font: inherit; font-size: .85rem; background: var(--ink); color: var(--cream); }
 .band-share input:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; }
 .qr-intro { padding-block: clamp(2.5rem, 6vw, 5rem); }
 .qr-intro h1 { margin: 0; font-family: var(--display); font-size: clamp(2.9rem, 6vw, 5.5rem); line-height: 1.1; text-transform: uppercase; }
