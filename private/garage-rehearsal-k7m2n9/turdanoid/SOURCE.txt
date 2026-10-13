@@ -16,3 +16,10 @@ existing Continue / last-played saves on this origin still load.
 Do not silently re-pin. Move this pin only when SOURCE.txt and the
 band-lab blob-match test change together. If PR #33 changes before it
 merges, re-pin to its new head. Arcade mid-run saves stay parked with PR #8.
+
+Local overlay (not a re-pin): assets/turdsuite.js resolves localStorage
+behind a try/catch before Suite.table / Suite.guide call into
+table-continue-core. A storage-denied top window used to throw
+SecurityError "blocked" during hub boot (markHubProgress →
+Suite.table.list()), so keyboard recovery from the band-lab desk crashed
+the hub. Pin commit is unchanged. Update the blob map with this overlay.
