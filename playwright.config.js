@@ -1,16 +1,8 @@
+const path = require('node:path');
 const { defineConfig } = require('@playwright/test');
+const { testBaseURL } = require('./scripts/lib/e2e-test-server.cjs');
 
-const rawTestPort = process.env.RAD_DAD_TEST_PORT || '4173';
-const testPort = Number(rawTestPort);
-
-if (!Number.isInteger(testPort) || testPort < 1024 || testPort > 65535) {
-    throw new Error('RAD_DAD_TEST_PORT must be an integer between 1024 and 65535.');
-}
-
-const testBaseURL = `http://127.0.0.1:${testPort}`;
-const serveCommand = process.platform === 'win32'
-    ? `npx.cmd --no-install http-server . -p ${testPort} -a 127.0.0.1 -c-1 --silent`
-    : `npx --no-install http-server . -p ${testPort} -a 127.0.0.1 -c-1 --silent`;
+const baseURL = testBaseURL(process.env);
 
 module.exports = defineConfig({
     testDir: './tests/e2e',
@@ -24,8 +16,9 @@ module.exports = defineConfig({
         ['list'],
         ['html', { open: 'never' }]
     ],
+    globalSetup: path.join(__dirname, 'tests/e2e/assert-test-origin.setup.js'),
     use: {
-        baseURL: testBaseURL,
+        baseURL,
         browserName: 'chromium',
         headless: true,
         screenshot: 'only-on-failure',
@@ -33,8 +26,8 @@ module.exports = defineConfig({
         video: 'retain-on-failure'
     },
     webServer: {
-        command: serveCommand,
-        url: testBaseURL,
+        command: 'node scripts/serve-test.cjs',
+        url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 30000
     }
