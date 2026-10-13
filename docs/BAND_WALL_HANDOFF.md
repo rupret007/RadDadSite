@@ -53,6 +53,11 @@ scraps together. At the 1080px reflow, horizontal offsets reset; the existing
 phone transforms remain. The fourteen names, order, navigation, JavaScript,
 fonts, and dependencies are unchanged.
 
+Later hover-lift, spring transitions, and extra soft shadows that landed on
+this branch are not part of the recovery. Those rules were removed so
+`styles.css` only carries the tighter gap, the per-scrap `--artist-shift-x`
+offsets, and the 1080px reset.
+
 The September 8 recovery recorded unit, deployment-helper, and Chromium
 journey results at that unsigned head. Those counts are historical receipts,
 not current totals; use the October 10, 2026 audit above for the corrected
@@ -62,8 +67,10 @@ passed at that head.
 Additional character-center hit checks cover 320, 390, 700, 768, 1080, 1081,
 1440 and 2048px, with web fonts loaded and external font requests blocked:
 all fourteen names stay unobscured and the page has no horizontal overflow.
-Desktop and phone screenshots were inspected; physical devices and other
-browser engines remain unverified. OPEN DRAFT PRE_KAREN only.
+Desktop and phone screenshots of the live covers wall (main vs this
+branch) are stored at `pr-assets/45-shots/` and linked from the PR
+description. Physical devices and other browser engines remain
+unverified. OPEN DRAFT PRE_KAREN only.
 
 Publication correction: GitHub's legacy Pages source is `main:/`, separate
 from the custom production job. #44's main was automatically published by
