@@ -28,12 +28,6 @@ Desk JavaScript only reads the same allowlisted Continue / last-played keys
 the vendored hub already writes. It does not write storage, share the URL, or
 invent a seventh game.
 
-`assets/turdsuite.js` carries a local overlay (same Turdanoid pin, updated
-blob hash) so `Suite.table` / `Suite.guide` resolve `localStorage` inside a
-try/catch. A storage-denied browser can still open the full-page hub; the
-previous argument-eval of `localStorage` threw `SecurityError` "blocked"
-during hub boot.
-
 ## Exact URL to share (Jeff / Che only)
 
 After an owner publishes this path on the GitHub Pages host (this draft does

@@ -52,7 +52,6 @@ describe('public surface security', () => {
             const source = await readFile(join(repoRoot, relativePath), 'utf8');
 
             expect(source, relativePath).not.toContain('/private/');
-            expect(source, relativePath).not.toContain('/band-lab/');
             expect(source, relativePath).not.toContain('garage-rehearsal-k7m2n9');
             expect(source, relativePath).not.toMatch(/band-lab|Turdanoid|WebJam/i);
         }

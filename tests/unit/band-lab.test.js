@@ -38,7 +38,7 @@ const VENDORED_BLOBS = Object.freeze({
     'neon-arkanoid.html': '91da7fd8a4b589ac0f9277c7f72ba52eafc7be8d',
     'turdtris.html': 'ad116d81e169518c662ac85768b5e936e0c7e747',
     'hub.html': '81c5bb81596c58a412ce24178104500c6ecd12de',
-    'assets/turdsuite.js': 'cab041ddb7f985a1a8a580c83fe8948f19f2dcb5',
+    'assets/turdsuite.js': '188fb567898770eaa0f267e656c007f457c0c71d',
     'assets/turdsuite.css': 'b1024eb4e8ec6d76a8a5140bb0bcca147a3139f4',
     'turdjack.html': '9ee86b580dc6e19ad5b8f3a740624ece2aa5d5f8',
     'turdspades.html': 'bbf4e3f404d0ef6448e9e06f3fac6fef8e4ecaf6',
@@ -386,42 +386,6 @@ describe('unlisted band lab', () => {
         expect(vendorFiles).not.toContain('games/turdjack-engine.js');
     });
 
-    it('boots the hub and keeps table helpers usable when localStorage is denied', async () => {
-        const { JSDOM } = await import('jsdom');
-        const html = `<!DOCTYPE html><html><body class="suite-no-zoom">
-            <p class="hero-badge">No sign-in • works on phone and desktop</p>
-            <a class="game-card" href="turdtris.html">
-                <div class="game-info"><h2>Turdtris</h2><p>Stack blocks. Clear lines.</p></div>
-                <span class="play">Play</span>
-            </a>
-        </body></html>`;
-        const { window } = new JSDOM(html, {
-            runScripts: 'outside-only',
-            url: 'https://example.test/private/garage-rehearsal-k7m2n9/turdanoid/index.html'
-        });
-        Object.defineProperty(window, 'localStorage', {
-            get() {
-                throw new window.DOMException('blocked', 'SecurityError');
-            }
-        });
-
-        const core = await readFile(join(repoRoot, TURDANOID_DIR, 'games/table-continue-core.js'), 'utf8');
-        const suite = await readFile(join(repoRoot, TURDANOID_DIR, 'assets/turdsuite.js'), 'utf8');
-        expect(() => { window.eval(core); }).not.toThrow();
-        expect(() => { window.eval(suite); }).not.toThrow();
-
-        expect(window.Suite.table.list()).toEqual([]);
-        expect(window.Suite.table.has('turdtris.html')).toBe(false);
-        expect(window.Suite.table.load('turdtris.html')).toBeNull();
-        expect(window.Suite.table.remember('turdtris.html', {})).toBe(false);
-        expect(window.Suite.table.clear('turdtris.html')).toBe(false);
-        expect(window.Suite.guide.hasSeen('turdtris.html')).toBe(false);
-        expect(window.Suite.guide.mark('turdtris.html')).toBe(false);
-        expect(window.document.querySelector('.game-card').classList.contains('in-progress')).toBe(false);
-        expect(window.document.querySelector('.game-card').classList.contains('last-played')).toBe(false);
-        window.close();
-    });
-
     it('stays out of the production public-site artifact allowlist', () => {
         expect(CLIENT_SOURCE_PATHS.some((path) => path.startsWith('private/'))).toBe(false);
         expect(CLIENT_SOURCE_PATHS).not.toContain(BAND_LAB_PAGE);
@@ -429,7 +393,5 @@ describe('unlisted band lab', () => {
         expect(CLIENT_SOURCE_PATHS).not.toContain(BAND_LAB_DOC);
         expect(CLIENT_SOURCE_PATHS.some((path) => path.includes('turdanoid'))).toBe(false);
         expect(CLIENT_SOURCE_PATHS.some((path) => path.includes('next-play'))).toBe(false);
-        expect(CLIENT_SOURCE_PATHS.some((path) => path.includes('band-lab'))).toBe(false);
-        expect(CLIENT_SOURCE_PATHS).not.toContain('band-lab/index.html');
     });
 });

@@ -222,49 +222,30 @@
       .replace(/>/g, '&gt;');
   };
 
-  // The storage property itself can be denied (Safari ITP, locked-down
-  // browsers, Playwright's storage-blocked recovery case). Evaluating
-  // `localStorage` as an argument throws before TableContinue can catch
-  // getItem/setItem failures, which used to crash hub boot.
-  function safeLocalStorage() {
-    try {
-      return localStorage;
-    } catch (e) {
-      return null;
-    }
-  }
-
   Suite.table = {
     remember(page, snapshot) {
-      const storage = safeLocalStorage();
-      return !!(storage && TableContinue && TableContinue.rememberContinue(storage, page, snapshot));
+      return !!(TableContinue && TableContinue.rememberContinue(localStorage, page, snapshot));
     },
     load(page) {
-      const storage = safeLocalStorage();
-      return (storage && TableContinue) ? TableContinue.loadContinue(storage, page) : null;
+      return TableContinue ? TableContinue.loadContinue(localStorage, page) : null;
     },
     clear(page) {
-      const storage = safeLocalStorage();
-      return !!(storage && TableContinue && TableContinue.clearContinue(storage, page));
+      return !!(TableContinue && TableContinue.clearContinue(localStorage, page));
     },
     has(page) {
-      const storage = safeLocalStorage();
-      return !!(storage && TableContinue && TableContinue.hasLiveContinue(storage, page));
+      return !!(TableContinue && TableContinue.hasLiveContinue(localStorage, page));
     },
     list() {
-      const storage = safeLocalStorage();
-      return (storage && TableContinue) ? TableContinue.listLiveContinuePages(storage) : [];
+      return TableContinue ? TableContinue.listLiveContinuePages(localStorage) : [];
     }
   };
 
   Suite.guide = {
     hasSeen(page) {
-      const storage = safeLocalStorage();
-      return !!(storage && TableContinue && TableContinue.hasSeenGuide(storage, page));
+      return !!(TableContinue && TableContinue.hasSeenGuide(localStorage, page));
     },
     mark(page) {
-      const storage = safeLocalStorage();
-      return !!(storage && TableContinue && TableContinue.markGuideSeen(storage, page));
+      return !!(TableContinue && TableContinue.markGuideSeen(localStorage, page));
     }
   };
 
