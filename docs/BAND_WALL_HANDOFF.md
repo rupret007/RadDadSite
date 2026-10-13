@@ -41,3 +41,39 @@ No merge, Pages, deployment, signing, release, sending, or spending.
 
 Markers: `BOB_NEW_SESSION_FREELANE_20260907_2307` /
 `OVERNIGHT_FREELANE_RADDAD_20260907_2307`.
+
+## Wide-wall overlap recovery
+
+Base: `66fc392708c9a8b34a88680de715adccd4e28795` after #44. Marker:
+`BOB_CODEX_CLOSEOUT_20260908`.
+
+Recovered the interrupted follow-up CSS patch without changing its original
+worktree. Tighter gaps and individual horizontal offsets bring the wide-screen
+scraps together. At the 1080px reflow, horizontal offsets reset; the existing
+phone transforms remain. The fourteen names, order, navigation, JavaScript,
+fonts, and dependencies are unchanged.
+
+Later hover-lift, spring transitions, and extra soft shadows that landed on
+this branch are not part of the recovery. Those rules were removed so
+`styles.css` only carries the tighter gap, the per-scrap `--artist-shift-x`
+offsets, and the 1080px reset.
+
+The September 8 recovery recorded unit, deployment-helper, and Chromium
+journey results at that unsigned head. Those counts are historical receipts,
+not current totals; use the October 10, 2026 audit above for the corrected
+dated numbers. Deployment-shell lint and clean production packaging also
+passed at that head.
+
+Additional character-center hit checks cover 320, 390, 700, 768, 1080, 1081,
+1440 and 2048px, with web fonts loaded and external font requests blocked:
+all fourteen names stay unobscured and the page has no horizontal overflow.
+Desktop and phone screenshots of the live covers wall (main vs this
+branch) are stored at `pr-assets/45-shots/` and linked from the PR
+description. Physical devices and other browser engines remain
+unverified. OPEN DRAFT PRE_KAREN only.
+
+Publication correction: GitHub's legacy Pages source is `main:/`, separate
+from the custom production job. #44's main was automatically published by
+Pages run `34189663719` even though that custom deployment job was skipped.
+This recovery does not change or trigger publication. Any later main merge
+remains held for Jeff to reconcile the Pages source setting first.
