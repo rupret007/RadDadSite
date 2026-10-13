@@ -51,7 +51,7 @@ Recovered the interrupted follow-up CSS patch without changing its original
 worktree. Tighter gaps and individual horizontal offsets bring the wide-screen
 scraps together. At the 1080px reflow, horizontal offsets reset; the existing
 phone transforms remain. The fourteen names, order, navigation, JavaScript,
-fonts, dependencies and band-lab are unchanged.
+fonts, and dependencies are unchanged.
 
 The September 8 recovery recorded unit, deployment-helper, and Chromium
 journey results at that unsigned head. Those counts are historical receipts,
