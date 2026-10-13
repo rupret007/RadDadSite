@@ -40,26 +40,36 @@ cutover decisions.
 
 ## Verification and handoff
 
-- Before implementation, the actual worker returned200 with no redirect for a
+- Before implementation, the actual worker returned 200 with no redirect for a
   synthetic nested URL; its stylesheet resolved to a nonexistent nested path.
 - `tests/unit/worker-recovery.test.js` covers recovery destination/status,
   privacy headers, positive HTML negotiation, loop prevention, error/method/
   resource boundaries and existing owner holds.
 - `tests/e2e/worker-recovery.spec.js` imports the real worker and uses a strictly
   same-origin synthetic ASSETS adapter. It exercises Chromium at phone widths,
-  stylesheet and show-state loading, flyer links, actual local calendar download
-  bytes, no-JavaScript recovery, QR aliases, owner errors and non-GET behavior.
+  stylesheet and `script.js` loading, a direct calendar-resource request,
+  no-JavaScript recovery, QR aliases, owner errors and non-GET behavior.
+  The recovered homepage does not load `show-state.js`: `data-show-phase` is
+  absent and `window.RadDadShowState` is undefined. Current recovery coverage
+  checks the calendar resource for `BEGIN:VCALENDAR`; it does not exercise a
+  homepage flyer link or calendar download control.
 - Existing unit, synthetic deployment-helper and browser suites remain required;
   clean-commit Sites and production packages must build and verify. Exact
   counts, frozen tip, hosted results and limitations belong in the draft PR.
 
-The first isolated Mac browser run canceled both direct and recovered calendar
+October 10, 2026 audit: Chromium e2e: **NOT RUN** in that audit. Live hosting:
+**NOT RUN** in that audit. The coverage description above reflects the current
+test source; it is not evidence of another browser or live-host run.
+
+Historical September 6 browser validation (before the evergreen homepage):
+the first isolated Mac browser run canceled both direct and recovered calendar
 downloads. The unchanged tests passed after setting `MAC_CHROMIUM_TMPDIR` to
 the existing permitted task scratch, alongside `TMPDIR`; no filesystem or
 network permissions were widened. Chromium's [macOS temporary-directory
 implementation](https://chromium.googlesource.com/chromium/src/+/0b85fca82f6d5506a9cc9cfcaa1d746aa9b4ef66/base/files/file_util_mac.mm)
 explains that separate override. Retain the real download-completion and byte
-assertions; do not replace them with a URL-only check. Local Node22.22.3 and
+assertions when testing download controls; do not replace them with a URL-only
+check. The current evergreen homepage has no such controls. Local Node22.22.3 and
 hosted Node24 are separate execution environments, not an exact-version claim.
 
 Offline provider fixtures do not verify real Apple Music/YouTube playback,
