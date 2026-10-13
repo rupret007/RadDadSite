@@ -28,9 +28,11 @@ The original logo is used as the evergreen social image with its true 1024 × 10
 
 ## Evidence and validation boundaries
 
-The published pages were inspected at `https://raddadband.com/` and `https://raddadband.com/qr/`; repository source was checked independently. Google's official Organization structured-data documentation supports using the most specific organization subtype and real identity/social-profile data. No search-result, ranking or rich-result appearance is guaranteed.
+At the original October 2 assessment, the published pages were inspected at `https://raddadband.com/` and `https://raddadband.com/qr/`; repository source was checked independently. Google's official Organization structured-data documentation supports using the most specific organization subtype and real identity/social-profile data. No search-result, ranking or rich-result appearance is guaranteed.
 
-Local unit tests cover all 166 existing/new contracts. Layout previews render exact local HTML/CSS/images at 320, 390 and 1440 CSS pixels. The local browser's administrator policy blocks loopback navigation, so previews use an offline document rather than claiming full local end-to-end tests. External video thumbnails and web fonts are synthetic/fallback in offline checks. Hosted Chromium tests and production verification must pass before merge; record their result in the PR.
+October 10, 2026 audit: `npm run test:unit` passed 167 tests and `npm run test:deploy` passed 85 deployment-helper fixture checks. These are dated audit results, not fixed totals for later revisions. Chromium e2e: **NOT RUN** in that audit. Live hosting: **NOT RUN** in that audit.
+
+Original October 2 layout previews rendered exact local HTML/CSS/images at 320, 390 and 1440 CSS pixels. The local browser's administrator policy blocked loopback navigation, so previews used an offline document rather than claiming full local end-to-end tests. External video thumbnails and web fonts were synthetic/fallback in offline checks. Hosted Chromium tests and production verification must pass before merge; record their result in the PR.
 
 Obsolete event-promotion browser scenarios are replaced by evergreen coverage, not skipped or mislabeled as passing. Legacy sharing and visit-planning unit tests target `tests/fixtures/legacy-show.html`. Current pages do not load that controller. Unchanged inline-player recovery, private-path, Worker and deployment/rollback coverage remains active.
 
