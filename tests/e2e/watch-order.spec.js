@@ -14,6 +14,13 @@ for (const javaScriptEnabled of [true, false]) {
                     const channel = watch.getByRole('link', { name: /More on YouTube/ });
 
                     await expect(watch.getByRole('heading', { name: 'Watch Rad Dad live' })).toBeInViewport();
+                    let previousHeadingY = Number.POSITIVE_INFINITY;
+                    await expect.poll(async () => {
+                        const heading = await watch.locator('#watch-title').boundingBox();
+                        const stable = Math.abs(heading.y - previousHeadingY) < 0.5;
+                        previousHeadingY = heading.y;
+                        return stable;
+                    }).toBe(true);
                     await expect(cards).toHaveCount(5);
                     await expect(watch.locator('a, button').first()).toHaveClass(/video-card/);
                     await expect(channel).toHaveCount(1);
