@@ -53,8 +53,12 @@ scraps together. At the 1080px reflow, horizontal offsets reset; the existing
 phone transforms remain. The fourteen names, order, navigation, JavaScript,
 fonts, dependencies and band-lab are unchanged.
 
-The recovery passes 166 unit tests, 85 deployment-helper fixture checks and
-78 Chromium journeys, plus deployment-shell lint and clean production packaging.
+The September 8 recovery recorded unit, deployment-helper, and Chromium
+journey results at that unsigned head. Those counts are historical receipts,
+not current totals; use the October 10, 2026 audit above for the corrected
+dated numbers. Deployment-shell lint and clean production packaging also
+passed at that head.
+
 Additional character-center hit checks cover 320, 390, 700, 768, 1080, 1081,
 1440 and 2048px, with web fonts loaded and external font requests blocked:
 all fourteen names stay unobscured and the page has no horizontal overflow.
