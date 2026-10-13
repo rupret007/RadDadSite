@@ -21,9 +21,14 @@ are unchanged. No new font request, asset, dependency, motion, or interaction.
 Band names remain plain text, not links or a promised show lineup. Band-lab
 remains unlisted; its files and public navigation are unchanged.
 
-Validation: the existing local suite passed 166 unit tests, 85 deployment-helper
-fixture checks, and 78 Chromium browser tests. Deployment shell lint and Sites
-packaging passed. Homepage checks were repeated after final typography changes.
+October 10, 2026 audit: `npm run test:unit` passed 167 tests and
+`npm run test:deploy` passed 85 deployment-helper fixture checks. These are
+dated audit results, not fixed totals for later revisions. Chromium e2e:
+**NOT RUN** in that audit; the earlier 78-test browser result was not re-measured.
+Live hosting: **NOT RUN** in that audit.
+
+Historical band-wall validation: 78 Chromium browser tests, deployment shell
+lint and Sites packaging passed. Homepage checks were repeated after final typography changes.
 Additional Chromium inspection used widths 320, 390, 700, 768, 1080, 1440, and
 2048 with the existing web fonts loaded and with font fallback; character-center
 hit checks caught and resolved the fallback Pennywise collision. Desktop and

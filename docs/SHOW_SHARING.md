@@ -1,19 +1,28 @@
+> Historical handoff. Superseded for current public pages on October 2, 2026 by [the evergreen assessment](EVERGREEN_AUDIT.md). September promotion, show-specific sharing and visit invitations are retired. The notes below document prior behavior, not the current homepage or QR contract.
+
 # Show sharing — September 5, 2026 product handoff
 
-## What changed
+## Current public sharing
 
-Fans can share one complete show note from the existing homepage or QR show
-panel. The compact secondary control preserves the primary show lifecycle
-action and reuses `show-state.js`; no new page, store, dependency, or service.
+The current homepage and QR page use `script.js` for Share Rad Dad, which shares
+the canonical band website URL. They do not load `show-state.js` or offer the
+retired show-note widgets. The following sections describe the legacy controller
+retained for fixture tests; do not use them as the current public-page contract.
+
+## Historical behavior
+
+Fans could share one complete show note from the former homepage or QR show
+panel. The compact secondary control preserved the primary show lifecycle
+action and reused `show-state.js`; no new page, store, dependency, or service.
 
 `RadDadShowState.shareDetails(now)` returns frozen phase/title/text/url/copyText
-fields. Both surfaces use the same named bands, date, Central time, venue,
+fields in that legacy controller. Both former surfaces used the same named bands, date, Central time, venue,
 address, free cover, and fixed `https://raddadband.com/#show` link. Tests compare
 the facts against the existing calendar and event metadata. Do not use preview
 URLs, query parameters, private fragments, arbitrary DOM copy, or invented
 future bookings to construct this note.
 
-## Happy path and recovery
+## Historical happy path and recovery
 
 - A user gesture opens native share options if available; otherwise the action
   is labeled Copy show details. There is no API call on load.
@@ -35,7 +44,7 @@ targets, and promise fulfillment is not recipient-delivery proof. See the
 can be rejected by browser permissions; see the
 [Clipboard specification](https://w3c.github.io/clipboard-apis/#dom-clipboard-writetext).
 
-## Verification
+## Verification scope
 
 Run from a clean checkout with the lockfile's supported Node version:
 
@@ -43,7 +52,7 @@ Run from a clean checkout with the lockfile's supported Node version:
 npm ci
 npm run test:unit
 npm run test:deploy
-CI=1 RAD_DAD_TEST_PORT=51314 npm run test:e2e -- --workers=1 --retries=0
+CI=1 RAD_DAD_TEST_PORT=4317 npm run test:e2e -- --workers=1 --retries=0
 npm run lint:deploy
 npm run build:sites
 npm run build:production
@@ -55,13 +64,20 @@ equivalent substitute. Build from the final clean commit so artifact identity
 matches the source being reviewed. Building the second package replaces the
 first local `dist` output; neither build deploys it.
 
-`tests/unit/show-share.test.js` exercises canonical facts, phase boundaries,
-single-flight behavior, teardown, and native/clipboard failure paths.
-`tests/e2e/show-share.spec.js` covers both actual pages, 320/390 px recovery,
-focus, transient activation, no-JavaScript access, and a late clipboard result.
+`tests/unit/show-share.test.js` uses `tests/fixtures/legacy-show.html` to exercise
+the legacy controller's canonical facts, phase boundaries, single-flight
+behavior, teardown, and native/clipboard failure paths.
+`tests/unit/band-share.test.js` covers current public sharing recovery.
+`tests/e2e/show-share.spec.js` covers current Share Rad Dad behavior on both
+actual pages: canonical band-link sharing, cancellation without automatic
+copying, explicit Copy fallback, provider/clipboard failures, and retirement
+of a pending share when leaving the page. It does not exercise legacy show notes.
 The shared browser fixture allows the local server only, stubs known external
 media/font responses, and fails unexpected external requests. These are
 controlled offline browser tests, not real OS/device/provider acceptance.
+
+October 10, 2026 audit: Chromium e2e and live hosting were **NOT RUN**. The
+commands and coverage descriptions above are not new execution results.
 
 ## What is still owner-only
 

@@ -1,3 +1,5 @@
+> Historical handoff. Superseded for current public pages on October 2, 2026 by [the evergreen assessment](EVERGREEN_AUDIT.md). September promotion, show-specific sharing and visit invitations are retired. The notes below document prior behavior, not the current homepage or QR contract.
+
 # Useful next action — September 6, 2026
 
 ## Product behavior

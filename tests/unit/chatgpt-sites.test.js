@@ -63,18 +63,13 @@ async function collectTextFiles(directory) {
 }
 
 describe('ChatGPT Sites video', () => {
-    it('features the Wildflower Tomorrow’s Another Day clip on GPT/index.html', async () => {
+    it('redirects the legacy GPT page to the canonical band homepage', async () => {
         const html = await readFile(gptHtmlPath, 'utf8');
-
-        expect(html).toContain(`videoId: "${FEATURED_VIDEO_ID}"`);
-        expect(html).toContain(`https://youtu.be/${FEATURED_VIDEO_ID}`);
-        expect(html).toContain(`https://i.ytimg.com/vi/${FEATURED_VIDEO_ID}/maxresdefault.jpg`);
-        expect(html).toContain('Tomorrow’s Another Day — MxPx cover');
-        expect(html).toContain('New on YouTube · Wildflower 2026');
-        expect(html).toContain('Rad Dad performing Tomorrow’s Another Day by MxPx live at Wildflower Festival');
-        expect(html).not.toContain(RETIRED_VIDEO_ID);
-        expect(html).not.toContain('startSeconds: 14');
-        expect(html).not.toContain('Starts at 0:14');
+        expect(html).toContain('content="noindex"');
+        expect(html).toContain('content="0; url=../"');
+        expect(html).toContain('href="https://raddadband.com/"');
+        expect(html).toContain("new URL('../', window.location.href)");
+        expect(html).not.toMatch(/September|EventScheduled|original song/i);
     });
 
     it('does not keep the retired Tomorrow’s Another Day clip outside backup_restore_point', async () => {

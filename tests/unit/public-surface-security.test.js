@@ -57,7 +57,7 @@ describe('public surface security', () => {
         }
     });
 
-    it('limits homepage and QR board links to the two public review-safe anchors', async () => {
+    it('removes retired show-board links from all current public HTML', async () => {
         for (const relativePath of PUBLIC_HTML) {
             const html = await readFile(join(repoRoot, relativePath), 'utf8');
             const hrefs = boardHrefs(html);
@@ -67,7 +67,7 @@ describe('public surface security', () => {
                 continue;
             }
 
-            expect(hrefs, relativePath).toEqual(ALLOWED_BOARD_HREFS);
+            expect(hrefs, relativePath).toEqual([]);
         }
     });
 

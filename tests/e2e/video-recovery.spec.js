@@ -259,6 +259,13 @@ for (const path of ['/', '/qr/']) {
             expect(await cards.evaluateAll(links => links.map(link => new URL(link.href).searchParams.get('v')))).toEqual([
                 '4ReFoSZHL7o', FIRST_VIDEO, 'GCy4nHIqV5k', 'iMrxzCQ7lVs', 'e9mR2sgnJ00'
             ]);
+            for (const card of await cards.all()) {
+                await expect(card).toHaveAttribute('href', /^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/);
+                await expect(card).toHaveAttribute('target', '_blank');
+                await expect(card).toHaveAttribute('rel', 'noopener noreferrer');
+                await expect(card).toHaveAccessibleName(/on YouTube \(opens in a new tab\)$/);
+                await expect(card).not.toHaveAttribute('aria-haspopup', 'dialog');
+            }
             expect(external.filter(url => url.hostname === 'www.youtube-nocookie.com')).toHaveLength(0);
             await expect(player(page).frame).not.toHaveAttribute('src', /.+/);
         } finally {

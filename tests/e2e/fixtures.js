@@ -4,6 +4,17 @@ const { test: base, expect } = require('@playwright/test');
 // external response is synthetic; only this test server can receive traffic.
 const test = base.extend({
     serviceWorkers: 'block',
+    // The event-first smoke tests describe the pre-show state, not the runner's
+    // wall-clock date. Keep Date deterministic while leaving timers running.
+    // Lifecycle tests still exercise explicit upcoming/live/complete times;
+    // individual tests may replace this time or opt out with showTime: null.
+    showTime: ['2026-09-10T12:00:00-05:00', { option: true }],
+    page: async ({ page, showTime }, use) => {
+        if (showTime !== null) {
+            await page.clock.setFixedTime(new Date(showTime));
+        }
+        await use(page);
+    },
     launchOptions: async ({ launchOptions }, use) => {
         await use({
             ...launchOptions,

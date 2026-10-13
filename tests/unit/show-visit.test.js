@@ -14,8 +14,9 @@ const END = Date.parse('2026-09-19T22:00:00-05:00');
 const windows = [];
 
 function loadPage(page = 'index.html', now = BEFORE) {
-    const html = fs.readFileSync(path.join(root, page), 'utf8');
-    // Real markup and controller, with no provider frames or remote scripts run.
+    const html = fs.readFileSync(path.join(root, 'tests/fixtures/legacy-show.html'), 'utf8')
+        .replaceAll('#watch', page.startsWith('qr/') ? '#wildflower' : '#watch');
+    // Retained legacy controller fixture; evergreen integration tests prove it is not public UI.
     const { window } = new JSDOM(html, {
         runScripts: 'outside-only', pretendToBeVisual: true, url: 'https://raddadband.com/'
     });

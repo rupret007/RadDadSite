@@ -179,6 +179,31 @@
       color: #ffe4af;
     }
 
+    /* Returning-player shortcut: the suite runtime swaps the reassurance
+       badge for a link straight to the table waiting to be continued. */
+    a.hero-badge.hero-resume {
+      border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+      background: linear-gradient(180deg, rgba(18, 54, 44, 0.72), rgba(10, 32, 26, 0.72));
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    a.hero-badge.hero-resume:hover,
+    a.hero-badge.hero-resume:focus-visible {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent), 0 10px 24px rgba(0, 0, 0, 0.25);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      a.hero-badge.hero-resume { transition: none; }
+      a.hero-badge.hero-resume:hover,
+      a.hero-badge.hero-resume:focus-visible { transform: none; }
+    }
+
     /* ---------- Card grid ---------- */
     .games {
       display: grid;
@@ -274,9 +299,6 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
-    .game-card.last-played .play,
-    .game-card.in-progress .play { color: var(--gold); }
-
     .game-card.last-played .title-row h2::after,
     .game-card.in-progress .title-row h2::after {
       display: inline-block;
@@ -328,6 +350,13 @@
 
     .body {
       padding: 12px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .game-info {
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -516,21 +545,69 @@
     }
 
     @media (max-width: 600px) {
+      body { align-items: flex-start; }
       .shell {
         width: min(640px, 94vw);
         padding: 14px 10px 12px;
         border-radius: 16px;
       }
-      h1 { font-size: 1.45rem; letter-spacing: 0.06em; }
+      h1 {
+        display: block;
+        font-size: 1.45rem;
+        letter-spacing: 0.03em;
+        overflow-wrap: anywhere;
+        background: none;
+        color: var(--accent);
+      }
       .subtitle { font-size: 0.84rem; margin-bottom: 10px; }
       .hero-badge { font-size: 0.68rem; padding: 6px 10px; }
-      .games { grid-template-columns: 1fr; gap: 12px; }
-      .cover { aspect-ratio: 32 / 13; }
-      .body { padding: 10px 12px 12px; }
-      .emoji { width: 36px; height: 36px; flex-basis: 36px; font-size: 1.2rem; }
-      .game-card h2 { font-size: 1rem; }
-      .game-card p { font-size: 0.8rem; }
-      .game-card::after { max-width: 62%; font-size: 0.6rem; }
+      .masthead { margin-bottom: 12px; }
+      .games { grid-template-columns: 1fr; gap: 8px; }
+      .game-card { border-radius: 12px; }
+      .cover, .emoji, .game-card::after,
+      .game-card.last-played .title-row h2::after,
+      .game-card.in-progress .title-row h2::after { display: none; }
+
+      /* The "In progress" / "Last played" badge above is hidden on phones, so
+         the only returning-player cue left is the small "Continue" / "Play again"
+         verb. Give the row itself an edge accent a player can scan straight to:
+         gold for last played, live accent for a table still in progress. When a
+         card is both, .in-progress is declared last and wins — the honest call. */
+      .game-card.last-played,
+      .game-card.in-progress {
+        border-left: 4px solid var(--gold);
+        background:
+          linear-gradient(90deg, color-mix(in srgb, var(--gold) 13%, transparent), transparent 62%),
+          linear-gradient(180deg, rgba(16, 30, 50, 0.82), rgba(8, 18, 34, 0.9));
+      }
+      .game-card.in-progress {
+        border-left-color: var(--accent);
+        background:
+          linear-gradient(90deg, color-mix(in srgb, var(--accent) 15%, transparent), transparent 62%),
+          linear-gradient(180deg, rgba(16, 30, 50, 0.82), rgba(8, 18, 34, 0.9));
+      }
+      .body {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+      }
+      .game-info { flex: 1 1 8.5rem; min-width: 0; gap: 4px; }
+      .game-card h2 { font-size: 1rem; overflow-wrap: anywhere; }
+      .game-card p { font-size: 0.78rem; overflow-wrap: anywhere; }
+      .play {
+        align-self: center;
+        justify-content: center;
+        margin: 0 0 0 auto;
+        min-width: 66px;
+        padding: 8px 10px;
+        font-size: 0.65rem;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+      }
+      .game-card:hover,
+      .game-card:focus-visible { transform: none; }
     }
   </style>
 </head>
@@ -538,7 +615,7 @@
   <div class="shell">
     <header class="masthead">
       <h1><span class="logo">💩</span> Turdanoid</h1>
-      <p class="subtitle">Six complete games. Pick your chaos and play.</p>
+      <p class="subtitle">Six games. Pick your next round.</p>
       <div class="meta-row">
         <p class="hero-badge">No sign-in • works on phone and desktop</p>
       </div>
@@ -587,8 +664,10 @@
           </svg>
         </div>
         <div class="body">
-          <div class="title-row"><span class="emoji">🚽</span><h2>TurdAnoid Turbo</h2></div>
-          <p>Fully remastered brick-breaker. 19 power-ups, real screen shake, real combos, iPhone-friendly. Aggressively silly.</p>
+          <div class="game-info">
+            <div class="title-row"><span class="emoji">🚽</span><h2>TurdAnoid Turbo</h2></div>
+            <p>Break bricks. Grab boosts.</p>
+          </div>
           <span class="play">Play <i>→</i></span>
         </div>
       </a>
@@ -621,8 +700,10 @@
           </svg>
         </div>
         <div class="body">
-          <div class="title-row"><span class="emoji">🧱</span><h2>Turdtris</h2></div>
-          <p>Tetris-inspired stacker with hold, ghost, SRS kicks, and escalating difficulty.</p>
+          <div class="game-info">
+            <div class="title-row"><span class="emoji">🧱</span><h2>Turdtris</h2></div>
+            <p>Stack blocks. Clear lines.</p>
+          </div>
           <span class="play">Play <i>→</i></span>
         </div>
       </a>
@@ -667,8 +748,10 @@
           </svg>
         </div>
         <div class="body">
-          <div class="title-row"><span class="emoji">🃏</span><h2>Crapjack 21</h2></div>
-          <p>Themed blackjack table with betting, double down, bankroll tracking, and toilet dealer vibes.</p>
+          <div class="game-info">
+            <div class="title-row"><span class="emoji">🃏</span><h2>Crapjack 21</h2></div>
+            <p>Blackjack vs. the dealer.</p>
+          </div>
           <span class="play">Play <i>→</i></span>
         </div>
       </a>
@@ -714,8 +797,10 @@
           </svg>
         </div>
         <div class="body">
-          <div class="title-row"><span class="emoji">🎴</span><h2>Crappy Eights</h2></div>
-          <p>Uno-style card chaos: match suit/rank, fire action cards, and race to 200 match points.</p>
+          <div class="game-info">
+            <div class="title-row"><span class="emoji">🎴</span><h2>Crappy Eights</h2></div>
+            <p>Match cards. Race to 200.</p>
+          </div>
           <span class="play">Play <i>→</i></span>
         </div>
       </a>
@@ -750,8 +835,10 @@
           </svg>
         </div>
         <div class="body">
-          <div class="title-row"><span class="emoji">♣️</span><h2>TurdRummy</h2></div>
-          <p>Gin Rummy showdown with meld/deadwood strategy, knock/gin scoring, and mobile-first controls.</p>
+          <div class="game-info">
+            <div class="title-row"><span class="emoji">♣️</span><h2>TurdRummy</h2></div>
+            <p>Gin Rummy: meld and knock.</p>
+          </div>
           <span class="play">Play <i>→</i></span>
         </div>
       </a>
@@ -777,8 +864,10 @@
           </svg>
         </div>
         <div class="body">
-          <div class="title-row"><span class="emoji">♠️</span><h2>TurdSpades</h2></div>
-          <p>4-player Spades: bid tricks or Nil, break spades, manage bags, and beat the bot partnership.</p>
+          <div class="game-info">
+            <div class="title-row"><span class="emoji">♠️</span><h2>TurdSpades</h2></div>
+            <p>Spades: bid tricks or Nil.</p>
+          </div>
           <span class="play">Play <i>→</i></span>
         </div>
       </a>
@@ -787,6 +876,10 @@
     <details class="changelog">
       <summary>Latest Changelog</summary>
       <ul>
+        <li><strong>Hub leftover after the phone resume cue:</strong> when you have a table in progress, the masthead badge turns into a one-tap "Continue &lt;Game&gt;" link — the last game you opened if it is still live, otherwise the first table waiting. First visits keep the "No sign-in" badge. No rules, storage, continue-validation, or layout change.</li>
+        <li><strong>Hub leftover after phone rows:</strong> a marked card's <code>aria-label</code> now spells out the game, its blurb, and the action with its state ("Continue — in progress" / "Play again — last played"). The badge is hidden on phones, so this was the only cue some players had and it used to drop the blurb and the verb. No layout, storage, or continue-rule change.</li>
+        <li><strong>TurdAnoid leftover after Bomb scoring:</strong> Mega Flush now pays its 15 × level bonus for the bottom-row bricks it removes, including Gold Rush 2×, a <code>+points</code> float, and the usual pickup roll. Upper bricks stay on the wall. Arcade mid-run saves stay parked with PR #8.</li>
+        <li><strong>TurdAnoid leftover after #21:</strong> Bomb now pays the destroy bonus for bricks it kills, including Gold Rush 2× and the usual pickup roll. Splash-damaged survivors still score nothing. Arcade mid-run saves stay parked with PR #8.</li>
         <li><strong>TurdAnoid leftover after #9 / #20:</strong> Enlarge and Shrink keep their paddle size when the next wall builds, so the Big/Shrunk chip matches the bat you serve with. Death still strips both. Arcade mid-run saves stay parked with PR #8.</li>
         <li><strong>Turdtris leftover after #19:</strong> Hold and Next stay on the thumb dock so a phone run can see the held piece and the incoming piece without scrolling. Hold dims after it is used this piece, and a second tap does not swap. Arcade mid-run saves stay parked with PR #8.</li>
         <li><strong>Turdtris leftover after #18:</strong> Hold, soft drop, and Pause stay on the thumb dock instead of behind More Controls. A stalled frame cannot dump extra gravity. Game over shows a new-best receipt, and Space or Enter starts the next run. Arcade mid-run saves stay parked with PR #8.</li>

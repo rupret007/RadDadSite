@@ -71,25 +71,17 @@ async function expectUsableHomepage(page, origin) {
     expect(location.pathname).toBe('/');
     expect(location.search).toBe('');
     expect(location.hash).toBe('');
-    await expect(page.locator('#show h1')).toHaveText(/Rad Dad/);
-    await expect(page.locator('.hero-grid')).toHaveCSS('display', 'grid');
-    const flyer = page.locator('#show .event-flyer');
-    await expect(flyer).toBeVisible();
-    await expect.poll(() => flyer.evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
-    await expect(page.locator('#show .flyer-link')).toHaveJSProperty('href', `${origin}${FLYER_PATH}`);
-    const calendar = page.locator('#show [data-show-primary-action]');
-    await expect(calendar).toHaveJSProperty('href', `${origin}${CALENDAR_PATH}`);
-    await expect(calendar).toHaveAttribute('download', '');
-    const [download] = await Promise.all([
-        page.waitForEvent('download'),
-        calendar.click()
-    ]);
-    expect(download.url()).toBe(`${origin}${CALENDAR_PATH}`);
-    expect(download.suggestedFilename()).toBe(CALENDAR_PATH.split('/').pop());
-    expect(await download.failure()).toBeNull();
-    const calendarText = await fs.readFile(await download.path(), 'utf8');
-    expect(calendarText).toContain('BEGIN:VCALENDAR');
-    expect(calendarText).toContain('SUMMARY:Rad Dad + Friends with The Fault Lines');
+    await expect(page.locator('#band-title')).toContainText('Rad Dad');
+    await expect(page.locator('.band-hero__grid')).toHaveCSS('display', 'grid');
+    await expect(page.locator('.header-socials a')).toHaveCount(3);
+    await expect(page.locator('#home a[href="#watch"]')).toBeVisible();
+    await expect(page.locator('#home a[href="#contact"]')).toBeVisible();
+    const stylesheet = await page.request.get('/qr/styles.css');
+    expect(stylesheet.ok()).toBe(true);
+    expect(await stylesheet.text()).toContain('.band-hero');
+    const calendar = await page.request.get(CALENDAR_PATH);
+    expect(calendar.ok()).toBe(true);
+    expect(await calendar.text()).toContain('BEGIN:VCALENDAR');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
 }
 
@@ -107,18 +99,18 @@ test('a stale nested link recovers to a working phone homepage without retaining
     expect(redirect.headers()['cache-control']).toBe('no-store');
     expect(redirect.headers()['referrer-policy']).toBe('no-referrer');
     await expectUsableHomepage(page, origin);
-    await expect(page.locator('html')).toHaveAttribute('data-show-phase', 'upcoming');
-    expect(await page.evaluate(() => typeof window.RadDadShowState?.apply)).toBe('function');
+    await expect(page.locator('html')).not.toHaveAttribute('data-show-phase');
+    expect(await page.evaluate(() => typeof window.RadDadShowState)).toBe('undefined');
     const loaded = requests.filter(request => request.url !== original.url());
     expect(loaded.some(request => new URL(request.url).pathname === '/styles.css')).toBe(true);
-    expect(loaded.some(request => new URL(request.url).pathname === '/show-state.js')).toBe(true);
+    expect(loaded.some(request => new URL(request.url).pathname === '/script.js')).toBe(true);
     for (const request of loaded) {
         expect(request.url).not.toContain('fixture-secret');
         expect(request.headers.referer || '').not.toContain('fixture-secret');
     }
 });
 
-test('the direct homepage calendar download works without worker interception', async ({ page, baseURL }) => {
+test('the direct evergreen homepage works without worker interception', async ({ page, baseURL }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.clock.setFixedTime(BEFORE_SHOW);
     await page.goto('/');
@@ -128,7 +120,7 @@ test('the direct homepage calendar download works without worker interception', 
 test.describe('worker recovery without JavaScript', () => {
     test.use({ javaScriptEnabled: false, viewport: { width: 320, height: 844 } });
 
-    test('a stale nested HTML link retains the actual flyer and calendar download', async ({ page, context, baseURL }) => {
+    test('a stale nested HTML link reaches usable cover-band content without JavaScript', async ({ page, context, baseURL }) => {
         const { origin } = await routeThroughWorker(context, baseURL);
         const response = await page.goto('/past-show/details.html?token=fixture-secret#private');
         expect(response.status()).toBe(200);

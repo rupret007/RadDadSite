@@ -266,6 +266,18 @@ body::after {
 .card.warn { --tile-accent: var(--danger); }
 .card.good { --tile-accent: var(--accent-2); }
 .card.warn .v { color: var(--danger); text-shadow: 0 0 14px rgba(255, 143, 143, 0.35); }
+.card.warn.stack-danger {
+  border-color: rgba(255, 110, 100, 0.62);
+  box-shadow: 0 0 0 1px rgba(255, 90, 80, 0.25), 0 0 22px rgba(255, 80, 70, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  animation: stackDangerPulse 1.15s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card.warn.stack-danger { animation: none; }
+}
+@keyframes stackDangerPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
 .card.good .v { color: var(--accent-2); text-shadow: 0 0 14px rgba(142, 232, 199, 0.35); }
 
 .game-grid {
@@ -735,7 +747,13 @@ body::after {
     width: min(380px, 92vw, 42dvh);
   }
   .card .v {
-    font-size: 1rem;
+    font-size: 1.08rem;
+    font-weight: 800;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+  }
+  .card .k {
+    letter-spacing: 0.12em;
+    opacity: 0.82;
   }
   .btn {
     padding: 8px 11px;
@@ -914,7 +932,10 @@ body::after {
       .pb-bubble{bottom:max(258px,calc(env(safe-area-inset-bottom) + 252px))}
     }
 
-  </style>
+    @media (prefers-reduced-motion: reduce) {
+    .pb-danger.warn,.pb-danger.alarm { animation: none; }
+  }
+</style>
 </head>
 <body class="suite-ambient suite-no-zoom">
 <div class="welcome-guide" id="welcomeGuide">
@@ -1079,6 +1100,7 @@ body::after {
 
 <script>
 // Turdtris Turbo - enhanced with Tetris Guideline-inspired systems.
+const reducedMotion = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
 let score = 0;
 function readStoredHighScore() {
   try {
@@ -1138,6 +1160,43 @@ const cols = 10;
 const MAX_LEVEL = 69;
 const lockDelayMs = 500;
 const maxMoveResets = 12;
+// DAS / ARR — mirrors games/turdtris-input.js
+const DAS_DELAY_MS = 156;
+const ARR_MS = 33;
+// Mirrors games/turdtris-input.js (mobile D-pad repeat).
+const MOBILE_REPEAT_MS = 52;
+const MOBILE_REPEAT_INITIAL_DELAY_MS = 148;
+const FEEL_DANGER_HUD_RATIO = 0.55;
+let dasLeftHeld = false;
+let dasRightHeld = false;
+let dasLeftMs = 0;
+let dasRightMs = 0;
+let arrLeftMs = 0;
+let arrRightMs = 0;
+
+function tickDasRepeat(delta) {
+  if (!tetromino || gameOver || paused) return;
+  if (dasLeftHeld) {
+    dasLeftMs += delta;
+    if (dasLeftMs >= DAS_DELAY_MS) {
+      arrLeftMs += delta;
+      while (arrLeftMs >= ARR_MS) {
+        arrLeftMs -= ARR_MS;
+        movePiece(-1);
+      }
+    }
+  }
+  if (dasRightHeld) {
+    dasRightMs += delta;
+    if (dasRightMs >= DAS_DELAY_MS) {
+      arrRightMs += delta;
+      while (arrRightMs >= ARR_MS) {
+        arrRightMs -= ARR_MS;
+        movePiece(1);
+      }
+    }
+  }
+}
 
 const themes = [
   { name: 'Amber Brick', bgA: '#140f0c', bgB: '#2d1f17', grid: 'rgba(255,225,190,0.08)', ghost: 'rgba(255,219,175,0.2)' },
@@ -1256,6 +1315,17 @@ let onboardingOpen = false;
 let guidePausedGame = false;
 let clearHoldIntervalRef = () => {};
 
+function clearHeldInput() {
+  softDrop = false;
+  clearHoldIntervalRef();
+  dasLeftHeld = false;
+  dasRightHeld = false;
+  dasLeftMs = 0;
+  dasRightMs = 0;
+  arrLeftMs = 0;
+  arrRightMs = 0;
+}
+
 function stopLoop() {
   if (rAF) {
     cancelAnimationFrame(rAF);
@@ -1275,6 +1345,7 @@ function ensureLoopRunning() {
 }
 
 function showWelcomeGuide() {
+  clearHeldInput();
   const guide = document.getElementById('welcomeGuide');
   if (guide) guide.style.display = 'flex';
   onboardingOpen = true;
@@ -1310,8 +1381,7 @@ function quickStartRun() {
 }
 
 function handleWindowBlur() {
-  softDrop = false;
-  clearHoldIntervalRef();
+  clearHeldInput();
   stopLoop();
   if (!paused && !gameOver && !onboardingOpen) {
     paused = true;
@@ -2125,7 +2195,7 @@ function drawPlayfield() {
 
   const dangerRatio = getDangerRatio();
   if (dangerRatio > 0) {
-    const pulse = 0.55 + Math.sin(Date.now() / 130) * 0.35;
+    const pulse = reducedMotion?.matches ? 1 : 0.55 + Math.sin(Date.now() / 130) * 0.35;
     const alpha = (0.08 + dangerRatio * 0.3) * Math.max(0.2, pulse);
     const danger = context.createLinearGradient(0, 0, 0, BOARD_H * 0.55);
     danger.addColorStop(0, `rgba(255, 70, 70, ${alpha.toFixed(3)})`);
@@ -2135,7 +2205,7 @@ function drawPlayfield() {
   }
 
   context.save();
-  if (sceneShake > 0) {
+  if (sceneShake > 0 && !reducedMotion?.matches) {
     const shakeX = (Math.random() * 2 - 1) * sceneShake;
     const shakeY = (Math.random() * 2 - 1) * sceneShake;
     context.translate(shakeX, shakeY);
@@ -2383,6 +2453,8 @@ function updateScore() {
   if (levelEl) levelEl.textContent = String(level);
   if (linesEl) linesEl.textContent = String(linesCleared);
   if (comboEl) comboEl.textContent = String(combo);
+  const comboCard = comboEl ? comboEl.closest('.card.warn') : null;
+  if (comboCard) comboCard.classList.toggle('stack-danger', getDangerRatio() >= FEEL_DANGER_HUD_RATIO);
   if (b2bEl) b2bEl.textContent = String(b2b);
   const boundedGoal = Math.max(1, Number.isFinite(levelGoal) ? Math.floor(levelGoal) : 1);
   const boundedProgress = Math.max(0, Math.min(boundedGoal, Number.isFinite(levelLines) ? Math.floor(levelLines) : 0));
@@ -2474,7 +2546,10 @@ function togglePause() {
   const overlayEl = document.getElementById('pauseOverlay');
   if (overlayEl) overlayEl.style.display = paused ? 'grid' : 'none';
 
-  if (paused) stopLoop();
+  if (paused) {
+    clearHeldInput();
+    stopLoop();
+  }
   else ensureLoopRunning();
 }
 
@@ -2572,6 +2647,8 @@ function loop(timestamp) {
       lockAccumulator = 0;
       lockResets = 0;
     }
+
+    tickDasRepeat(delta);
   }
 
   updateSceneFx();
@@ -2614,11 +2691,21 @@ document.addEventListener('keydown', (e) => {
   switch (e.code) {
     case 'ArrowLeft':
       e.preventDefault();
-      movePiece(-1);
+      if (!e.repeat) {
+        movePiece(-1);
+        dasLeftHeld = true;
+        dasLeftMs = 0;
+        arrLeftMs = 0;
+      }
       break;
     case 'ArrowRight':
       e.preventDefault();
-      movePiece(1);
+      if (!e.repeat) {
+        movePiece(1);
+        dasRightHeld = true;
+        dasRightMs = 0;
+        arrRightMs = 0;
+      }
       break;
     case 'ArrowUp':
     case 'KeyX':
@@ -2650,15 +2737,30 @@ document.addEventListener('keydown', (e) => {
 
 document.addEventListener('keyup', (e) => {
   if (e.code === 'ArrowDown') softDrop = false;
+  if (e.code === 'ArrowLeft') {
+    dasLeftHeld = false;
+    dasLeftMs = 0;
+    arrLeftMs = 0;
+  }
+  if (e.code === 'ArrowRight') {
+    dasRightHeld = false;
+    dasRightMs = 0;
+    arrRightMs = 0;
+  }
 });
 
 const mobileControls = document.getElementById('mobileControls');
 let holdInterval = null;
+let holdDelayTimeout = null;
 if (mobileControls) {
   const clearHoldInterval = () => {
     if (holdInterval) {
       clearInterval(holdInterval);
       holdInterval = null;
+    }
+    if (holdDelayTimeout) {
+      clearTimeout(holdDelayTimeout);
+      holdDelayTimeout = null;
     }
   };
   clearHoldIntervalRef = clearHoldInterval;
@@ -2671,6 +2773,7 @@ if (mobileControls) {
     unlockAudio();
 
     const action = target.getAttribute('data-action');
+    if (paused && action !== 'pause') return;
     clearHoldInterval();
     if (action !== 'down') softDrop = false;
     const run = () => {
@@ -2688,7 +2791,10 @@ if (mobileControls) {
 
     run();
     if (action === 'left' || action === 'right' || action === 'down') {
-      holdInterval = setInterval(run, 90);
+      holdDelayTimeout = setTimeout(() => {
+        holdDelayTimeout = null;
+        holdInterval = setInterval(run, MOBILE_REPEAT_MS);
+      }, MOBILE_REPEAT_INITIAL_DELAY_MS);
     }
   });
 

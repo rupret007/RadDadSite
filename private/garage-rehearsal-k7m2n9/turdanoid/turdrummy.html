@@ -1672,7 +1672,7 @@
       }
       focusPausedAiTurn = false;
       renderAll();
-      if (!state.roundOver && state.turn === "ai") queueAiTurn(220);
+      if (!state.roundOver && state.turn === "ai") queueAiTurn(180);
       try { Suite.toast("Picked up where you left off."); } catch (e) {}
       return true;
     }
@@ -1710,7 +1710,7 @@
       if (document.hidden || !focusPausedAiTurn) return;
       focusPausedAiTurn = false;
       if (!el.guideOverlay.classList.contains("show") && !state.roundOver && state.turn === "ai") {
-        queueAiTurn(220);
+        queueAiTurn(180);
       }
     }
 
@@ -2273,7 +2273,7 @@
       saveStats();
       renderAll();
       if (state.turn === "ai") {
-        queueAiTurn(650);
+        queueAiTurn(540);
       }
     }
 
@@ -2324,7 +2324,7 @@
       state.drawnCardSource = null;
       state.message = "You discarded " + cardText(discardCard) + ". AI turn...";
       renderAll();
-      queueAiTurn(700);
+      queueAiTurn(580);
     }
 
     function playerDiscardSelected() {
@@ -2743,7 +2743,7 @@
       el.guideOverlay.classList.remove("show");
       if (window.Suite && Suite.guide) Suite.guide.mark("turdrummy.html");
       if (!state.roundOver && state.turn === "ai") {
-        queueAiTurn(220);
+        queueAiTurn(180);
       }
     }
 

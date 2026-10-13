@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..', '..');
 const scriptSource = fs.readFileSync(path.join(repoRoot, 'live-video.js'), 'utf8');
 
-function loadPage(relativeHtml, url) {
+function loadPage(relativeHtml, url, prepare = () => {}) {
     const rawHtml = fs.readFileSync(path.join(repoRoot, relativeHtml), 'utf8')
         .replace(/<script\b[^>]*><\/script>/gi, '');
     const dom = new JSDOM(rawHtml, {
@@ -35,6 +35,7 @@ function loadPage(relativeHtml, url) {
         dialog.dispatchEvent(new window.Event('close'));
     });
 
+    prepare(window);
     window.eval(scriptSource);
 
     return {
@@ -63,6 +64,47 @@ const PAGES = [
 ];
 
 describe('shared inline live-video player', () => {
+    it.each(PAGES)('names every %s watch card for its enhanced action', (_label, html, url) => {
+        const page = loadPage(html, url);
+        const cards = [...page.document.querySelectorAll('.video-card')];
+        expect(cards).toHaveLength(5);
+        for (const card of cards) {
+            expect(card.target).toBe('_blank');
+            if (card.hasAttribute('data-inline-video')) {
+                const title = card.querySelector('figcaption strong').textContent.trim();
+                expect(card.getAttribute('aria-label')).toBe(`Watch Rad Dad perform ${title} here (opens video player)`);
+                expect(card.getAttribute('aria-haspopup')).toBe('dialog');
+                expect(click(page.window, card).defaultPrevented).toBe(true);
+                expect(page.dialog.open).toBe(true);
+                page.dialog.close();
+            } else {
+                expect(card.getAttribute('aria-label')).toMatch(/on YouTube \(opens in a new tab\)$/);
+                expect(click(page.window, card).defaultPrevented).toBe(false);
+                expect(page.dialog.open).toBe(false);
+            }
+        }
+        page.window.close();
+    });
+
+    it.each(PAGES.flatMap(([label, html, url]) => [
+        'unsupported dialog', 'missing player', 'invalid video'
+    ].map(reason => ({ label, html, url, reason }))))('keeps $label external watch names with $reason', ({ html, url, reason }) => {
+        const page = loadPage(html, url, window => {
+            if (reason === 'unsupported dialog') window.document.querySelector('#live-video-dialog').showModal = undefined;
+            if (reason === 'missing player') window.document.querySelector('[data-video-frame]').remove();
+            if (reason === 'invalid video') {
+                for (const card of window.document.querySelectorAll('[data-inline-video]')) card.href = 'https://www.youtube.com/watch?v=invalid';
+            }
+        });
+        for (const card of page.document.querySelectorAll('[data-inline-video]')) {
+            expect(card.getAttribute('aria-label')).toMatch(/on YouTube \(opens in a new tab\)$/);
+            expect(card.hasAttribute('aria-haspopup')).toBe(false);
+            expect(click(page.window, card).defaultPrevented).toBe(false);
+        }
+        expect(page.dialog.open).toBe(false);
+        page.window.close();
+    });
+
     it.each(PAGES)('keeps %s dialog interior/edges open but closes for each outside edge', (_label, html, url) => {
         const page = loadPage(html, url);
         const card = page.document.querySelector('[data-inline-video]');
@@ -99,7 +141,7 @@ describe('shared inline live-video player', () => {
 
     it.each([
         ['homepage', 'index.html', 'https://raddadband.com/', 'All the Small Things — blink-182 cover', 'Wildflower 2026 · Live performance'],
-        ['QR', 'qr/index.html', 'https://raddadband.com/qr/', 'All the Small Things', 'blink-182 cover']
+        ['QR', 'qr/index.html', 'https://raddadband.com/qr/', 'All the Small Things — blink-182 cover', 'Wildflower 2026 · Live performance']
     ])('loads a validated YouTube video after an explicit plain click on %s', (label, html, url, title, context) => {
         const { dialog, document, window } = loadPage(html, url);
         const card = document.querySelector('[data-inline-video]');

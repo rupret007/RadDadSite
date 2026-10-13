@@ -5,18 +5,21 @@
 }
 
 :root {
-    --ink: #020810;
-    --ink-soft: #06111d;
-    --surface: #091725;
-    --surface-raised: #0d1e2d;
-    --cream: #f3f2ee;
-    --muted: #aebbc6;
+    color-scheme: dark;
+    --ink: #171410;
+    --ink-rgb: 23, 20, 16;
+    --ink-soft: #1f1a16;
+    --surface: #27201b;
+    --surface-raised: #302820;
+    --cream: #f4f0e6;
+    --muted: #c9bba9;
     --blue: #009ee8;
     --blue-bright: #20baff;
     --lime: #b5dc08;
     --pink: #ed2765;
     --amber: #c98a24;
-    --line: rgba(243, 242, 238, 0.15);
+    --line: rgba(244, 240, 230, 0.36);
+    --line-strong: rgba(244, 240, 230, 0.5);
     --display: "Oswald", sans-serif;
     --body: "Montserrat", sans-serif;
     --shadow: 0 26px 80px rgba(0, 0, 0, 0.48);
@@ -61,9 +64,12 @@ a {
 }
 
 a:focus-visible,
-button:focus-visible {
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
     outline: 3px solid var(--lime);
-    outline-offset: 4px;
+    outline-offset: 3px;
 }
 
 ::selection {
@@ -113,7 +119,7 @@ button:focus-visible {
     z-index: 50;
     min-height: 4.75rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.11);
-    background: rgba(2, 8, 16, 0.9);
+    background: rgba(var(--ink-rgb), 0.92);
     backdrop-filter: blur(18px);
 }
 
@@ -127,6 +133,7 @@ button:focus-visible {
 
 .brand {
     min-width: 0;
+    min-height: 2.75rem;
     display: inline-flex;
     align-items: center;
     gap: 0.8rem;
@@ -538,7 +545,7 @@ html[data-show-phase="complete"] .show-moment {
     min-height: 2.75rem;
     max-width: 100%;
     padding: 0.65rem 0.9rem;
-    border: 1px solid var(--line);
+    border: 1px solid var(--line-strong);
     border-radius: 0;
     color: var(--cream);
     background: transparent;
@@ -600,17 +607,12 @@ html[data-show-phase="complete"] .show-moment {
     width: 100%;
     min-width: 0;
     padding: 0.7rem;
-    border: 1px solid var(--line);
+    border: 1px solid var(--line-strong);
     border-radius: 0;
     color: var(--cream);
     background: var(--ink);
     font: 1rem/1.5 var(--body);
     resize: vertical;
-}
-
-.show-share__fallback textarea:focus-visible {
-    outline: 2px solid var(--blue-bright);
-    outline-offset: 3px;
 }
 
 .show-share__actions {
@@ -716,7 +718,7 @@ html[data-show-phase="complete"] .show-moment {
 }
 
 .button--secondary {
-    border-color: rgba(243, 242, 238, 0.44);
+    border-color: var(--line-strong);
     background: rgba(255, 255, 255, 0.025);
 }
 
@@ -807,7 +809,7 @@ html[data-show-phase="complete"] .show-moment {
     width: 100%;
     height: auto;
     display: block;
-    background: #00101d;
+    background: var(--ink);
 }
 
 .flyer-stage__bolt {
@@ -843,7 +845,7 @@ html[data-show-phase="complete"] .show-moment {
     background:
         repeating-linear-gradient(
             -38deg,
-            rgba(2, 8, 16, 0.07) 0 2px,
+            rgba(var(--ink-rgb), 0.07) 0 2px,
             transparent 2px 9px
         ),
         var(--lime);
@@ -868,7 +870,7 @@ html[data-show-phase="complete"] .show-moment {
     padding: 0.55rem 0.9rem;
     background: var(--cream);
     clip-path: polygon(1% 9%, 27% 0, 63% 6%, 99% 2%, 98% 85%, 70% 100%, 33% 93%, 2% 99%);
-    box-shadow: 3px 3px 0 rgba(2, 8, 16, 0.32);
+    box-shadow: 3px 3px 0 rgba(var(--ink-rgb), 0.32);
     font-family: var(--display);
     font-size: clamp(0.9rem, 1.4vw, 1.1rem);
     font-weight: 700;
@@ -965,7 +967,7 @@ html[data-show-phase="complete"] .show-moment {
     border: 0.3rem solid var(--pink);
     border-radius: 50%;
     color: var(--cream);
-    background: rgba(2, 8, 16, 0.78);
+    background: rgba(var(--ink-rgb), 0.78);
     text-align: center;
     text-transform: uppercase;
     transform: rotate(-6deg);
@@ -1039,7 +1041,7 @@ html[data-show-phase="complete"] .show-moment {
     align-items: center;
     padding: 0.8rem 0.95rem;
     border: 1px solid rgba(243, 242, 238, 0.2);
-    background: rgba(2, 8, 16, 0.6);
+    background: rgba(var(--ink-rgb), 0.6);
     text-decoration: none;
     transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
 }
@@ -1206,7 +1208,7 @@ html[data-show-phase="complete"] .show-moment {
     border-bottom: 2px solid var(--poster-cream);
     background:
         linear-gradient(90deg, rgba(0, 158, 232, 0.08), transparent 22% 78%, rgba(237, 39, 101, 0.08)),
-        rgba(2, 8, 16, 0.72);
+        rgba(var(--ink-rgb), 0.72);
     isolation: isolate;
 }
 
@@ -1909,7 +1911,7 @@ html[data-show-phase="complete"] .show-moment {
 .song-desk__art {
     margin: 0;
     overflow: hidden;
-    background: #000;
+    background: var(--ink);
 }
 
 .song-desk__art img {
@@ -2031,14 +2033,14 @@ html[data-show-phase="complete"] .show-moment {
     position: relative;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    background: #000;
+    background: var(--ink);
 }
 
 .video-card__image::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(2, 8, 16, 0.45), transparent 58%);
+    background: linear-gradient(to top, rgba(var(--ink-rgb), 0.45), transparent 58%);
     pointer-events: none;
 }
 
@@ -2100,7 +2102,7 @@ html[data-show-phase="complete"] .show-moment {
 
 .video-card figcaption > span:last-child {
     color: var(--muted);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 700;
 }
 
@@ -2114,7 +2116,7 @@ html[data-show-phase="complete"] .show-moment {
 
 .video-card__label {
     color: var(--blue-bright);
-    font-size: 0.63rem;
+    font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.13em;
     text-transform: uppercase;
@@ -2131,12 +2133,12 @@ html[data-show-phase="complete"] .show-moment {
     overflow: auto;
     border: 1px solid rgba(32, 186, 255, 0.62);
     color: var(--cream);
-    background: #020810;
+    background: var(--ink);
     box-shadow: 0 2rem 7rem rgba(0, 0, 0, 0.82), 0 0 0 1px rgba(181, 220, 8, 0.12);
 }
 
 .video-dialog::backdrop {
-    background: rgba(0, 4, 9, 0.86);
+    background: rgba(var(--ink-rgb), 0.86);
     backdrop-filter: blur(9px);
 }
 
@@ -2147,7 +2149,7 @@ html[data-show-phase="complete"] .show-moment {
     background:
         linear-gradient(135deg, rgba(0, 158, 232, 0.1), transparent 34%),
         linear-gradient(315deg, rgba(237, 39, 101, 0.1), transparent 38%),
-        #020810;
+        var(--ink);
 }
 
 .video-dialog__panel::before {
@@ -2228,7 +2230,7 @@ html[data-show-phase="complete"] .show-moment {
     aspect-ratio: 16 / 9;
     max-height: 55dvh;
     border-block: 1px solid var(--line);
-    background: #000;
+    background: var(--ink);
 }
 
 .video-dialog__frame iframe {
@@ -2292,7 +2294,7 @@ html[data-show-phase="complete"] .show-moment {
 
 .video-dialog__recovery button:not(:disabled):hover,
 .video-dialog__recovery button:focus-visible {
-    outline: 2px solid var(--lime);
+    outline: 3px solid var(--lime);
     outline-offset: 3px;
 }
 
@@ -2957,7 +2959,7 @@ html[data-show-phase="complete"] .show-moment {
     .signal-strip span {
         min-height: 3.1rem;
         font-size: 0.83rem;
-        box-shadow: 2px 2px 0 rgba(2, 8, 16, 0.3);
+        box-shadow: 2px 2px 0 rgba(var(--ink-rgb), 0.3);
     }
 
     .content-section {
