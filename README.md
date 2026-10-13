@@ -42,10 +42,10 @@ npm run build:production
 npm run verify:production -- --expected-sha YOUR_40_CHARACTER_GIT_SHA
 ```
 
-On Windows, use `npm.cmd` and `npx.cmd` when PowerShell blocks the unqualified commands. To isolate browser tests from another local project:
+On Windows, use `npm.cmd` and `npx.cmd` when PowerShell blocks the unqualified commands. Local browser tests listen on **4317** unless `RAD_DAD_TEST_PORT` is set. A different process already bound to that port is not skipped: Playwright still runs, and a non–Rad Dad homepage fails before any spec.
 
 ```bash
-RAD_DAD_TEST_PORT=4273 npm run test:e2e
+RAD_DAD_TEST_PORT=4317 npm run test:e2e
 ```
 
 GitHub Actions installs Node 24 and Chromium, runs all tests and shell lint, then builds and verifies the exact production artifact. Browser tests synthesize allowed provider responses and reject unexpected external traffic. See `docs/EVERGREEN_AUDIT.md` for this update's audit and verification boundaries.
