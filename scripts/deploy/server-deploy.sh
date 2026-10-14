@@ -1205,6 +1205,9 @@ for path in sorted(paths):
 PY
     )
     ((${#public_paths[@]} > 0)) || return 1
+    # Printed entry URLs and their destination must work through Apache's
+    # directory handling as well as through the explicit index-file URLs.
+    public_paths+=("qr/" "tap/" "nfc/")
 
     for ((attempt = 1; attempt <= RADDAD_HEALTH_ATTEMPTS; attempt += 1)); do
         attempt_ok=1
@@ -1213,6 +1216,8 @@ PY
             HEALTH_TEMP="$(mktemp "$STAGING_ROOT/.health.${sha}.XXXXXX")"
             url_path="/$path"
             [[ "$path" != "index.html" ]] || url_path="/"
+            # These routes serve their own static index, including redirect shells.
+            [[ "$path" != */ ]] || path="${path}index.html"
 
             if ! curl \
                 --fail \

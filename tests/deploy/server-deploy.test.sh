@@ -126,8 +126,14 @@ request=/${request#*/}
 request=${request%%\?*}
 request=${request#/}
 [[ -n "$request" ]] || request=index.html
+if [[ -n "${MOCK_REQUEST_LOG:-}" ]]; then
+    printf '%s /%s\n' "$sha" "$request" >>"$MOCK_REQUEST_LOG"
+fi
+# Apache serves each directory's own index, including the static redirect shells.
+response_path=$request
+[[ "$request" != */ ]] || response_path=${request}index.html
 
-if [[ ! -e "$MOCK_RELEASE_ROOT/current/$request" ]]; then
+if [[ ! -e "$MOCK_RELEASE_ROOT/current/$response_path" ]]; then
     status=404
     if [[ "${MOCK_HEALTH:-success}" == "leak-path" ]] &&
        [[ "$request" == "${MOCK_FAIL_PATH:-}" ]] &&
@@ -159,6 +165,15 @@ case "${MOCK_HEALTH:-success}" in
             exit 0
         fi
         ;;
+    wrong-page)
+        if [[ "$request" == "${MOCK_FAIL_PATH:-}" ]] &&
+           [[ -z "${MOCK_FAIL_SHA:-}" || "$sha" == "$MOCK_FAIL_SHA" ]]; then
+            other_page=qr/index.html
+            [[ "$request" != qr/ ]] || other_page=index.html
+            cp "$MOCK_RELEASE_ROOT/current/$other_page" "$output"
+            exit 0
+        fi
+        ;;
     block-sha)
         if [[ "$sha" == "${MOCK_BLOCK_SHA:-}" ]]; then
             : >"${MOCK_BLOCK_STARTED:?}"
@@ -170,7 +185,7 @@ case "${MOCK_HEALTH:-success}" in
     block-after-path)
         if [[ "$request" == "${MOCK_BLOCK_PATH:-}" ]] &&
            [[ -z "${MOCK_BLOCK_SHA:-}" || "$sha" == "$MOCK_BLOCK_SHA" ]]; then
-            cp "$MOCK_RELEASE_ROOT/current/$request" "$output"
+            cp "$MOCK_RELEASE_ROOT/current/$response_path" "$output"
             : >"${MOCK_BLOCK_STARTED:?}"
             while [[ ! -e "${MOCK_BLOCK_RELEASE:?}" ]]; do
                 sleep 0.05
@@ -185,7 +200,7 @@ case "${MOCK_HEALTH:-success}" in
         ;;
 esac
 
-cp "$MOCK_RELEASE_ROOT/current/$request" "$output"
+cp "$MOCK_RELEASE_ROOT/current/$response_path" "$output"
 EOF
 
 chmod +x "$MOCK_BIN/curl"
@@ -298,7 +313,10 @@ with tempfile.TemporaryDirectory() as temporary:
         path = root / relative_path
         path.parent.mkdir(parents=True, exist_ok=True)
         if path.suffix == ".html":
-            path.write_text("<!doctype html><title>Rad Dad</title>\n", encoding="utf-8")
+            path.write_text(
+                f"<!doctype html><title>Rad Dad</title><!-- {relative_path} -->\n",
+                encoding="utf-8",
+            )
         elif path.suffix == ".css":
             path.write_text("body { color: white; }\n", encoding="utf-8")
         elif path.suffix == ".js":
@@ -696,7 +714,8 @@ grep -q "prepare succeeded for $SHA_A" "$TEST_TMP/prepare-a.log" ||
     fail "prepare did not report success"
 pass "prepare installs a verified bootstrap release without changing current"
 
-MOCK_HEALTH=success "$DEPLOY_HELPER" deploy --sha "$SHA_A" \
+MOCK_HEALTH=success MOCK_REQUEST_LOG=$TEST_TMP/healthy-requests.log \
+    "$DEPLOY_HELPER" deploy --sha "$SHA_A" \
     --artifact "$ARTIFACT_A" --config "$CONFIG" >"$TEST_TMP/deploy-a.log"
 [[ -L $RELEASE_ROOT/current ]] || fail "deploy did not create current symlink"
 [[ $(readlink "$RELEASE_ROOT/current") = "releases/$SHA_A" ]] ||
@@ -740,6 +759,29 @@ MOCK_FAIL_PATH=assets/rad-dad-social-2026.png \
 [[ $(readlink "$RELEASE_ROOT/current") = "releases/$SHA_A" ]] ||
     fail "asset health failure did not restore previous current"
 pass "all-file asset health restores the previous known-good release"
+
+for directory_path in qr/ tap/ nfc/; do
+    for directory_failure in fail-path corrupt-path wrong-page; do
+        : >"$TEST_TMP/directory-requests.log"
+        MOCK_HEALTH=$directory_failure MOCK_FAIL_SHA=$SHA_B \
+        MOCK_FAIL_PATH=$directory_path MOCK_REQUEST_LOG=$TEST_TMP/directory-requests.log \
+            expect_failure "directory /$directory_path $directory_failure rejects candidate" \
+            "$DEPLOY_HELPER" deploy --sha "$SHA_B" --artifact "$ARTIFACT_B" --config "$CONFIG"
+        grep -Fxq "$SHA_B /$directory_path" "$TEST_TMP/directory-requests.log" ||
+            fail "candidate directory /$directory_path was not requested"
+        [[ $(readlink "$RELEASE_ROOT/current") = "releases/$SHA_A" ]] ||
+            fail "directory /$directory_path $directory_failure did not restore previous current"
+        if grep -qx "$SHA_B" "$RELEASE_ROOT/.known-good"; then
+            fail "directory-failed release was recorded as known-good"
+        fi
+        pass "directory /$directory_path $directory_failure restores known-good release"
+    done
+    grep -Fxq "$SHA_A /$directory_path" "$TEST_TMP/healthy-requests.log" ||
+        fail "successful health omitted directory /$directory_path"
+    grep -Fxq "$SHA_A /${directory_path}index.html" "$TEST_TMP/healthy-requests.log" ||
+        fail "successful health omitted file /${directory_path}index.html"
+done
+pass "successful health checks directory URLs and their separate index files"
 
 MOCK_HEALTH=leak-path MOCK_FAIL_SHA=$SHA_B MOCK_FAIL_PATH=package.json \
     expect_failure "public repository path exposure fails deployment health" \
