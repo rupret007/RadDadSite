@@ -1042,13 +1042,46 @@ pass "retention keeps healthy history and removes failed installed releases"
 ACTUAL_SHA=$(git -C "$PROJECT_ROOT" rev-parse --verify 'HEAD^{commit}')
 ACTUAL_TIMESTAMP=$(git -C "$PROJECT_ROOT" show -s --format=%cI "$ACTUAL_SHA")
 ACTUAL_ARTIFACT=$TEST_TMP/actual-production-artifact.tar.gz
+ACTUAL_BUILD_ROOT=$TEST_TMP/actual-build
+# Record entries and bytes, including the Worker output of an existing Sites build.
+# An absent dist must remain absent; do not create or clean it up for this test.
+snapshot_checkout_build() {
+    python3 - "$PROJECT_ROOT/dist" <<'PY'
+import hashlib
+import os
+import sys
+
+root = sys.argv[1]
+def snapshot(path):
+    relative = os.path.relpath(path, root)
+    if os.path.islink(path):
+        print("link", relative, os.readlink(path))
+    elif os.path.isdir(path):
+        print("directory", relative)
+        for name in sorted(os.listdir(path)):
+            snapshot(os.path.join(path, name))
+    elif os.path.isfile(path):
+        with open(path, "rb") as source:
+            print("file", relative, hashlib.sha256(source.read()).hexdigest())
+    else:
+        print("absent", relative)
+snapshot(root)
+PY
+}
+snapshot_checkout_build >"$TEST_TMP/checkout-build-before"
 DEPLOY_COMMIT_SHA=$ACTUAL_SHA BUILD_TIMESTAMP=$ACTUAL_TIMESTAMP \
-    npm --prefix "$PROJECT_ROOT" run build:production >"$TEST_TMP/actual-build.log"
-COPYFILE_DISABLE=1 tar -C "$PROJECT_ROOT/dist/client" -czf "$ACTUAL_ARTIFACT" .
+    npm --prefix "$PROJECT_ROOT" run build:production -- --output-dir "$ACTUAL_BUILD_ROOT" \
+    >"$TEST_TMP/actual-build.log"
+COPYFILE_DISABLE=1 tar -C "$ACTUAL_BUILD_ROOT/client" -czf "$ACTUAL_ARTIFACT" .
 "$DEPLOY_HELPER" check --sha "$ACTUAL_SHA" --artifact "$ACTUAL_ARTIFACT" \
     --config "$CONFIG" >"$TEST_TMP/actual-check.log"
 grep -q "Dry run passed for $ACTUAL_SHA" "$TEST_TMP/actual-check.log" ||
     fail "the workflow-shaped production tar did not pass the server verifier"
-pass "the real clean dist/client tar passes the server-side dry run"
+pass "the real clean production client tar passes the server-side dry run"
+
+snapshot_checkout_build >"$TEST_TMP/checkout-build-after"
+cmp "$TEST_TMP/checkout-build-before" "$TEST_TMP/checkout-build-after" ||
+    fail "production fixture changed the checkout build"
+pass "production fixture preserves the checkout build, including an absent dist"
 
 printf '1..%d\n' "$PASS_COUNT"
