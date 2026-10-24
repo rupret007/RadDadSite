@@ -53,6 +53,8 @@ try {
   let suite = fs.readFileSync(suiteFile, 'utf8');
   suite = replaceRequired(suite, "const STALEMATE_MUSIC_KEY = 'stalemate.music';", "const STALEMATE_MUSIC_KEY = 'raddad.music';", 'music preference');
   suite = replaceRequired(suite, 'isMusicEnabled() { return musicEnabled; }', 'isMusicEnabled() { return false; }', 'music contract');
+  suite = replaceRequired(suite, "    return (location.pathname || '').split('/').pop() || '';",
+    "    if (document.body?.dataset.arcadeGame === 'hub') return 'index.html';\n    const raw = (location.pathname || '').split('/').pop() || '';\n    return LIVE_HUB_GAMES.find(name => name.replace(/\\.html$/i, '').toLowerCase() === raw.toLowerCase()) || raw;", 'clean game URLs');
   suite = suite.replace(/Suite\.music = function \(\) \{[\s\S]*?\n  let fxEngine = null;/,
     'Suite.music = function () { return Promise.resolve(null); };\n\n  let fxEngine = null;');
   if (suite.includes('m.createSuiteMusic(')) throw new Error('Music adapter was not applied');

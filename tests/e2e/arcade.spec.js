@@ -1,5 +1,23 @@
 const { test, expect } = require('./fixtures');
 
+test('clean hosted game URLs keep canonical records and the return-to-arcade control', async ({ page }) => {
+    const files = ['TurdAnoid.html', 'turdtris.html', 'turdomania.html', 'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html'];
+    for (const file of files) {
+        const clean = '/play/' + file.replace(/\.html$/, '');
+        await page.route('**' + clean, async route => {
+            const html = await page.request.get('/play/' + file);
+            await route.fulfill({ status: 200, contentType: 'text/html', body: await html.text() });
+        });
+        await page.goto(clean);
+        await expect(page.locator('.suite-back-pill')).toBeVisible();
+        await expect(page.locator('body')).not.toHaveClass(/suite-hub-door/);
+        expect(await page.evaluate(() => localStorage.getItem('turdsuite_last_game'))).toBe(file);
+        await page.unroute('**' + clean);
+    }
+    await page.locator('.suite-back-pill').click();
+    await expect(page.locator('h1')).toHaveText('Rad Dad Arcade');
+});
+
 test('a slow first game load shows a disabled action until the game can start', async ({ page }) => {
     let release;
     const ready = new Promise(resolve => { release = resolve; });

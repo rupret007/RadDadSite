@@ -22,4 +22,6 @@ The separate preview omits five unused legacy PNG poster/social exports after ch
 
 The public-host check exposed early taps on Turdanoid's painted menu before its parser-blocking scripts finished. The Rad Dad importer now shows “Loading game…” and disables menu actions until the game boot completes; a stalled-script browser regression covers this. The separate demo is hosted at https://rad-dad-design-preview.jeffstory007.chatgpt.site/ using its own project ID, never the established Rad Dad project.
 
+Sites serves clean game URLs without `.html`. The importer normalizes those URLs to the suite's existing page identities, preserving the back button, local records and continue lookup. A browser regression serves all seven pages at their clean URLs and checks canonical records and return navigation.
+
 Next: commit this feature branch, build the exact committed source, check the isolated preview locally, deploy only `preview-dist/` via the Vercel preview workflow, and record the returned preview URL in `../RADDAD-PREVIEW-HANDOFF.md`. Never push main or merge this branch.

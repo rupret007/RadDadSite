@@ -352,7 +352,9 @@
   const CONTINUE_KEY = (TableContinue && TableContinue.CONTINUE_KEY) || 'turdsuite_continue_v1';
 
   function currentPageName() {
-    return (location.pathname || '').split('/').pop() || '';
+    if (document.body?.dataset.arcadeGame === 'hub') return 'index.html';
+    const raw = (location.pathname || '').split('/').pop() || '';
+    return LIVE_HUB_GAMES.find(name => name.replace(/\.html$/i, '').toLowerCase() === raw.toLowerCase()) || raw;
   }
 
   function isSuiteHubPage(page) {
