@@ -30,6 +30,20 @@ async function pages(dir) {
     }
 }
 await pages(target);
+// These legacy print/social exports are unused by either review page. Keep them
+// in the verified source artifact, but don't upload them to the preview host.
+const reviewMarkup = (await Promise.all(['index.html', 'qr/index.html', 'styles.css', 'qr/styles.css', 'raddad.css', 'script.js']
+    .map(path => readFile(join(target, path), 'utf8')))).join('\n');
+for (const name of [
+    'rad-dad-friends-guitars-growlers-2026-full.png',
+    'rad-dad-friends-guitars-growlers-2026-v2-full.png',
+    'rad-dad-social-2026.png',
+    'rad-dad-social-2026-v2.png',
+    'rad-dad-tap-og.png'
+]) {
+    if (reviewMarkup.includes(name)) throw new Error(`Preview still references ${name}; keep the asset.`);
+    await rm(join(target, 'assets', name));
+}
 await writeFile(join(target, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
 await writeFile(join(target, 'vercel.json'), JSON.stringify({
     trailingSlash: true,

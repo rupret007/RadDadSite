@@ -18,4 +18,6 @@ Final visual review corrected the hub's inherited flex layout after adding band 
 
 Evidence lives in `../release-evidence/raddad-preview/`, outside the deployable site. Desktop and phone rendered screenshots have been inspected; final preview screenshots and publication URL follow the final source commit. External media is stubbed in automated browser tests, so those checks do not establish provider playback availability or physical-phone acceptance.
 
+The separate preview omits five unused legacy PNG poster/social exports after checking that the rendered pages/styles do not reference them. They remain in the verified source artifact and repository; this only reduces preview upload size.
+
 Next: commit this feature branch, build the exact committed source, check the isolated preview locally, deploy only `preview-dist/` via the Vercel preview workflow, and record the returned preview URL in `../RADDAD-PREVIEW-HANDOFF.md`. Never push main or merge this branch.
