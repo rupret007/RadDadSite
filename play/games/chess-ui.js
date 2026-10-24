@@ -163,7 +163,7 @@ function render() {
   $('resume-playing').hidden = !suspended || !!ended;
   $('result').hidden = !ended;
   $('result-details').textContent = ended ? `${game.mode === 'local' ? 'Local two-player game' : `Computer practice · ${LEVELS[game.level].label}`}. ${game.chess.history().length} half-moves. ${game.hints} hints, ${game.undos} takebacks. ${ended.winner ? ended.winner === game.side && !local ? 'Nice work! Ready for another?' : 'Every game teaches you something.' : 'Want a rematch?'}` : '';
-  $('mode-help').textContent = local ? 'Two players, one device. Undo takes back one move; both players should agree. Use Flip board when passing the device. Resign concedes for the side whose turn it is.' : 'Untimed practice. Undo takes back your last turn (your move and the computer reply, if played). Hints suggest a move without playing it. Hints and takebacks are counted in your result. Resign concedes your game, even during the computer’s turn.';
+  $('mode-help').textContent = local ? 'Two players, one device. Undo takes back one move; both players should agree. Use Flip board when passing the device. Resign concedes for the side whose turn it is. Takebacks are available until the game ends.' : 'Untimed practice. Undo takes back your last turn (your move and the computer reply, if played). Hints suggest a move without playing it. Hints and takebacks are counted in your result. Resign concedes your game, even during the computer’s turn. Takebacks are available until the game ends.';
   const stats = readResults(storage);
   $('records').textContent = `On this device: computer ${stats.wins} wins · ${stats.losses} losses · ${stats.draws} draws. Local games: ${stats.local}. Completed games with hints/takebacks: ${stats.assisted}.`;
 }
@@ -253,8 +253,8 @@ function activate(square) {
   }
   if (piece?.color === game.chess.turn()) {
     selected = square; hintMove = null;
-    const count = game.chess.moves({ square, verbose: true }).length;
-    feedback = `${colorName(piece.color)} ${pieceName(piece.type)} at ${square}. ${count ? `${count} legal destinations marked.` : 'No legal moves for this piece.'}`;
+    const count = new Set(game.chess.moves({ square, verbose: true }).map(move => move.to)).size;
+    feedback = `${colorName(piece.color)} ${pieceName(piece.type)} at ${square}. ${count ? `${count} legal ${count === 1 ? 'destination' : 'destinations'} marked.` : 'No legal moves for this piece.'}`;
   } else { feedback = selected ? 'That move is not legal. Choose a marked square or another piece.' : 'Select one of the pieces whose turn it is.'; }
   render();
 }
@@ -379,5 +379,8 @@ document.addEventListener('visibilitychange', () => {
 globalThis.addEventListener('pagehide', () => { cancelSearch(); persist(); suspended = true; });
 globalThis.addEventListener('pageshow', event => { if (event.persisted) { render(); } });
 settings(); syncMute(); openSetup();
+const playButton = $('new-game').querySelector('button[type=submit]');
+playButton.disabled = false; playButton.textContent = 'Play chess →';
+$('how-to').disabled = false;
 suite?.setMusicGameBlocked?.(() => !opened || !!game?.result || suspended || !!document.querySelector('dialog[open]'));
 globalThis.SuiteLoading?.ready();

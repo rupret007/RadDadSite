@@ -16,3 +16,13 @@ existing Continue / last-played saves on this origin still load.
 Do not silently re-pin. Move this pin only when SOURCE.txt and the
 band-lab blob-match test change together. If PR #33 changes before it
 merges, re-pin to its new head. Arcade mid-run saves stay parked with PR #8.
+
+Local integration patch, October 24, 2026: assets/turdsuite.js guards denied
+storage-property access in the table/guide facade. Game rules and save formats
+are unchanged. Upstream baseline blob: 188fb567898770eaa0f267e656c007f457c0c71d.
+Distributed patched blob: 464ee37312db0d243323d09ce849ef73a4680c6a.
+Reproduce after importing the pinned baseline:
+  git apply --no-index /absolute/path/to/scripts/arcade/legacy-storage-guard.patch
+Run from this turdanoid directory. Reverse the same patch to recover the exact
+upstream blob. All other pinned blobs remain byte-identical. This private lab
+is excluded from the public artifact; no established-site publication occurs.

@@ -1,7 +1,8 @@
 // @vitest-environment node
 
 import { execFileSync } from 'node:child_process';
-import { readFile, access, readdir } from 'node:fs/promises';
+import { readFile, access, readdir, mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -358,12 +359,28 @@ describe('unlisted band lab', () => {
         ]);
     });
 
-    it('blob-matches the documented Turdanoid pin and leaves unused engine sources behind', async () => {
+    it('blob-matches the pinned baseline and verifies the reversible storage integration patch', async () => {
         const sourceNote = await readFile(join(repoRoot, `${TURDANOID_DIR}/SOURCE.txt`), 'utf8');
         expect(sourceNote).toContain(`Pinned commit: ${TURDANOID_PIN}`);
 
         for (const [relativePath, expectedSha] of Object.entries(VENDORED_BLOBS)) {
-            expect(gitHashObject(`${TURDANOID_DIR}/${relativePath}`), relativePath).toBe(expectedSha);
+            if (relativePath === 'assets/turdsuite.js') {
+                const patchedSha = '464ee37312db0d243323d09ce849ef73a4680c6a';
+                expect(gitHashObject(`${TURDANOID_DIR}/${relativePath}`)).toBe(patchedSha);
+                expect(sourceNote).toContain(`Distributed patched blob: ${patchedSha}`);
+                const scratch = await mkdtemp(join(tmpdir(), 'raddad-legacy-patch-'));
+                try {
+                    await mkdir(join(scratch, 'assets'));
+                    await writeFile(join(scratch, relativePath), await readFile(join(repoRoot, TURDANOID_DIR, relativePath)));
+                    const patch = join(repoRoot, 'scripts/arcade/legacy-storage-guard.patch');
+                    execFileSync('git', ['apply', '--no-index', '--reverse', patch], { cwd: scratch });
+                    expect(execFileSync('git', ['hash-object', relativePath], { cwd: scratch, encoding: 'utf8' }).trim()).toBe(expectedSha);
+                    execFileSync('git', ['apply', '--no-index', patch], { cwd: scratch });
+                    expect(execFileSync('git', ['hash-object', relativePath], { cwd: scratch, encoding: 'utf8' }).trim()).toBe(patchedSha);
+                } finally { await rm(scratch, { recursive: true, force: true }); }
+            } else {
+                expect(gitHashObject(`${TURDANOID_DIR}/${relativePath}`), relativePath).toBe(expectedSha);
+            }
         }
 
         const presentEngines = await Promise.all(

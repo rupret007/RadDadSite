@@ -22,6 +22,7 @@
 <body class="arcade chess-page" data-arcade-game="chess" data-suite-no-difficulty="1" data-suite-no-back="1" data-suite-no-bg="1">
 <a class="chess-skip" href="#board">Skip to chessboard</a>
 <main class="chess-shell">
+<noscript><p>Chess needs JavaScript to play on your device. <a href="./">Return to the arcade</a>.</p></noscript>
 <header class="chess-header">
 <a class="chess-hub" href="./" aria-label="Back to arcade">← Arcade</a>
 <div><p class="chess-kicker">TAKE THE THRONE</p><h1>Royal Flush <span>Chess</span></h1></div>
@@ -33,8 +34,8 @@
 <label for="mode">Play against</label><select id="mode"><option value="computer">The computer</option><option value="local">A friend · same device</option></select>
 <div id="computer-options"><label for="level">Opponent</label><select id="level"><option value="friendly" selected>Friendly</option><option value="casual">Casual</option><option value="club">Club</option><option value="sharp">Sharp</option></select><p id="level-description" class="subtle"></p><label for="side">Your pieces</label><select id="side"><option value="w">White · you move first</option><option value="b">Black · computer moves first</option><option value="random">Surprise me</option></select></div>
 <p id="local-description" class="subtle" hidden>White goes first. Pass the device after your move. Flip the board whenever you like.</p>
-<button class="primary" type="submit">Play chess →</button>
-<button type="button" id="how-to">How to play</button>
+<button class="primary" type="submit" disabled>Loading chess…</button>
+<button type="button" id="how-to" disabled>How to play</button>
 </form>
 </section>
 <section id="game" class="chess-game" aria-label="Chess game" hidden>

@@ -173,6 +173,8 @@ test('offers keyboard access and recovers when browser storage is unavailable', 
     await expect(ticket).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(/\/turdanoid\/index\.html$/);
+    await page.waitForLoadState('load');
+    expect(await page.evaluate(() => Suite.table.list())).toEqual([]);
     expect(errors).toEqual([]);
 });
 

@@ -57,12 +57,13 @@ test('chess local checkmate, result review and PGN export work without a server 
     await expect(page.locator('.game-card[href="chess.html"] .suite-hub-stat')).toContainText('1 completed');
 });
 
-for (const viewport of [{ width: 320, height: 568 }, { width: 844, height: 390 }]) {
+for (const viewport of [{ width: 320, height: 568 }, { width: 844, height: 390 }, { width: 568, height: 320 }, { width: 667, height: 375 }]) {
     test(`chess board stays square and its controls remain reachable at ${viewport.width}px`, async ({ page }) => {
         await page.setViewportSize(viewport);
         await start(page, 'local');
         const board = await page.locator('#board').boundingBox();
         expect(Math.abs(board.height - board.width)).toBeLessThan(1);
+        if (viewport.width > viewport.height) expect(board.y + board.height).toBeLessThanOrEqual(viewport.height);
         const square = await page.locator('[data-square=e2]').boundingBox();
         expect(Math.abs(square.height - square.width)).toBeLessThan(1);
         await page.locator('[data-square=e2]').focus();
