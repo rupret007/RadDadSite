@@ -354,7 +354,7 @@
   // ---------- Last-played + honest table continue ----------
   const TableContinue = globalThis.TurdSuiteTableContinue || null;
   const LIVE_HUB_GAMES = (TableContinue && TableContinue.LIVE_HUB_GAMES) || [
-    'TurdAnoid.html', 'turdtris.html', 'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'turdomania.html'
+    'TurdAnoid.html', 'turdtris.html', 'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'turdomania.html', 'chess.html'
   ];
   const LAST_GAME_KEY = 'turdsuite_last_game';
   const CONTINUE_KEY = (TableContinue && TableContinue.CONTINUE_KEY) || 'turdsuite_continue_v1';
@@ -585,7 +585,7 @@
       play.appendChild(arrow);
     }
     const title = card.querySelector('h2');
-    if (title && (lastPlayed || inProgress) && !card.getAttribute('aria-label')) {
+    if (title && (lastPlayed || inProgress) && (!card.getAttribute('aria-label') || card.dataset.suiteHubGeneratedLabel === '1')) {
       // aria-label replaces the card's whole accessible name, so spell out the
       // same things a sighted player reads: game, blurb, then action + state.
       // The badge is a CSS ::after and is hidden on phones, so this label is the
@@ -593,6 +593,7 @@
       const blurb = (card.querySelector('.game-info p') || {}).textContent || '';
       const action = inProgress ? 'Continue' : 'Play again';
       const state = inProgress ? 'in progress' : 'last played';
+      card.dataset.suiteHubGeneratedLabel = '1';
       card.setAttribute(
         'aria-label',
         [title.textContent.trim(), blurb.trim(), action + ' — ' + state].filter(Boolean).join('. ')
@@ -606,6 +607,16 @@
     try { last = localStorage.getItem(LAST_GAME_KEY) || ''; } catch (e) {}
     if (!LIVE_HUB_GAMES.includes(last)) last = '';
     const continuing = Suite.table.list();
+    applyHubProgress(continuing, last);
+    // Chess owns its save format; importing its validator here leaves old table
+    // saves and their storage cap untouched. No engine is loaded by the hub.
+    suiteImport('../games/chess-core.js').then(function (m) {
+      const game = m.loadGame(suiteStorage());
+      if (game && !game.result) applyHubProgress(continuing.concat('chess.html'), last);
+    }).catch(function () {});
+  }
+
+  function applyHubProgress(continuing, last) {
     const cards = document.querySelectorAll('.game-card');
     for (let i = 0; i < cards.length; i++) {
       const href = cards[i].getAttribute('href') || '';
@@ -791,7 +802,7 @@
 
   function markHubResume(continuing, last) {
     const badge = document.querySelector('.hero-badge');
-    if (!badge || badge.classList.contains('hero-resume')) return;
+    if (!badge) return;
     if (!continuing || !continuing.length) return;
     const target = continuing.indexOf(last) !== -1 ? last : continuing[0];
     const card = document.querySelector('.game-card[href="' + target + '"]');

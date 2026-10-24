@@ -6,11 +6,11 @@ const path = require('node:path');
 const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..');
-const PIN = '410cf3f9a96a2afcf05ad82f286d0e166785708d';
+const PIN = 'cc45a19ba516366e85ff229f66f53891c3ef1816';
 const FILES = ['index.html', 'hub.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
-  'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html',
+  'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html',
   'neon-arkanoid.html', 'game.js', 'favicon.svg', 'assets', 'games'];
-const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'";
+const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'";
 const git = (args, cwd) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 function replaceRequired(text, before, after, label) {
   if (!text.includes(before)) throw new Error(`Upstream integration changed: ${label}`);
@@ -71,12 +71,13 @@ try {
     fs.writeFileSync(path.join(stage, `assets/cover-${name}.svg`), `<svg xmlns="http://www.w3.org/2000/svg"${match[2]}</svg>\n`);
   }
   fs.copyFileSync(path.join(ROOT, 'scripts/arcade/raddad-arcade.css'), path.join(stage, 'assets/raddad-arcade.css'));
-  for (const file of fs.readdirSync(stage).filter(file => file.endsWith('.html'))) {
+  for (const file of walk(stage).filter(file => file.endsWith('.html')).map(file => path.relative(stage, file))) {
     let html = fs.readFileSync(path.join(stage, file), 'utf8');
     html = html.replace(/<meta\b[^>]*\bname=["']robots["'][^>]*>\s*/gi, '')
       .replace(/<meta\b[^>]*\bhttp-equiv=["']Content-Security-Policy["'][^>]*>\s*/gi, '');
     html = html.replace(/<head\b[^>]*>/i, `$&\n<meta name="robots" content="noindex,nofollow">\n<meta http-equiv="Content-Security-Policy" content="${CSP}">`);
-    html = html.replace('</head>', '<link rel="stylesheet" href="assets/raddad-arcade.css">\n</head>');
+    const themePath = path.relative(path.dirname(file), 'assets/raddad-arcade.css').split(path.sep).join('/');
+    html = html.replace('</head>', `<link rel="stylesheet" href="${themePath}">\n</head>`);
     if (file === 'turdtris.html') {
       // This review uses game effects, with approved performances on the band
       // pages. Don't expose a game-specific switch for the disabled playlist.
@@ -86,14 +87,14 @@ try {
     if (file === 'index.html') {
       html = html.replaceAll('Stalemate Arcade', 'Rad Dad Arcade')
         .replace('Punk rock. Bathroom humor. One more round.', 'Loud guitars. Silly games. One more round.')
-        .replace('Seven games. Zero dignity.', 'Pick a game. Beat your best.')
-        .replace('Seven games • one sewer • Stalemate punk rock on every table', 'Seven free games. Sound effects optional. No sign-in.')
+        .replace('Eight games. Zero dignity.', 'Pick a game. Beat your best.')
+        .replace('Eight games • one sewer • Stalemate punk rock on every table', 'Eight free games. Sound effects optional. No sign-in.')
         .replace(/\s*<details class="changelog">[\s\S]*?<\/details>/, '');
       html = html.replace(/<body\b[^>]*>/, '$&\n<nav class="rad-arcade-nav" aria-label="Rad Dad"><a href="../"><img src="../RadDad_Logo.jpg" width="40" height="40" alt="">Rad Dad</a><a href="../#watch">Do your homework ↗</a></nav>');
     }
     fs.writeFileSync(path.join(stage, file), html);
   }
-  fs.writeFileSync(path.join(stage, 'VENDORED.txt'), `Rad Dad Arcade: github.com/rupret007/Turdanoid@${sha}\nSame owner as RadDadSite; no separate license file upstream.\nGenerated with node scripts/sync-arcade.cjs ${sha}. Edit the importer and scripts/arcade/, not play/.\nNo Stalemate recordings or private band-lab files are included.\n`);
+  fs.writeFileSync(path.join(stage, 'VENDORED.txt'), `Rad Dad Arcade: github.com/rupret007/Turdanoid@${sha}\nOriginal arcade material: same owner as RadDadSite. New chess modules/page/art: GPL-3.0-or-later. chess.js 1.4.0: BSD-2-Clause. Stockfish.js 19.0.1: GPL-3.0. See assets/chess/credits.html, included licenses and corresponding-source archive.\nGenerated with node scripts/sync-arcade.cjs ${sha}. Edit the importer and scripts/arcade/, not play/.\nNo Stalemate recordings or private band-lab files are included.\n`);
   const inventory = walk(stage).map(file => `play/${path.relative(stage, file).split(path.sep).join('/')}`).sort();
   const dest = path.join(ROOT, 'play');
   const backup = `${stage}-previous`;

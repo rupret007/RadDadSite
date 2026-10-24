@@ -1,7 +1,7 @@
 const { test, expect } = require('./fixtures');
 
 test('clean hosted game URLs keep canonical records and the return-to-arcade control', async ({ page }) => {
-    const files = ['TurdAnoid.html', 'turdtris.html', 'turdomania.html', 'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html'];
+    const files = ['TurdAnoid.html', 'turdtris.html', 'turdomania.html', 'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html'];
     for (const file of files) {
         const clean = '/play/' + file.replace(/\.html$/, '');
         await page.route('**' + clean, async route => {
@@ -9,12 +9,12 @@ test('clean hosted game URLs keep canonical records and the return-to-arcade con
             await route.fulfill({ status: 200, contentType: 'text/html', body: await html.text() });
         });
         await page.goto(clean);
-        await expect(page.locator('.suite-back-pill')).toBeVisible();
+        await expect(page.locator('.suite-back-pill, .chess-hub')).toBeVisible();
         await expect(page.locator('body')).not.toHaveClass(/suite-hub-door/);
         expect(await page.evaluate(() => localStorage.getItem('turdsuite_last_game'))).toBe(file);
         await page.unroute('**' + clean);
     }
-    await page.locator('.suite-back-pill').click();
+    await page.locator('.suite-back-pill, .chess-hub').click();
     await expect(page.locator('h1')).toHaveText('Rad Dad Arcade');
 });
 
@@ -55,7 +55,7 @@ test('homework, hero video and arcade art work from the homepage', async ({ page
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
     await page.locator('.arcade-ticket a').click();
     await expect(page.locator('h1')).toHaveText('Rad Dad Arcade');
-    await expect(page.locator('.game-card')).toHaveCount(7);
+    await expect(page.locator('.game-card')).toHaveCount(8);
     expect((await page.locator('.shell').boundingBox()).width).toBeGreaterThanOrEqual(272);
     expect((await page.locator('.game-card').first().boundingBox()).width).toBeGreaterThan(110);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
@@ -68,7 +68,8 @@ const games = [
     ['turdjack.html', '#quickGuideBtn', '#welcomeGuide'],
     ['crapeights.html', '#quickStartBtn', '#welcomeGuide'],
     ['turdrummy.html', '#startRoundBtn', '#guideOverlay'],
-    ['turdspades.html', '#quickStart', '#guide']
+    ['turdspades.html', '#quickStart', '#guide'],
+    ['chess.html', '#new-game button[type=submit]', '#setup']
 ];
 
 for (const width of [390, 1280]) {
@@ -85,11 +86,11 @@ for (const width of [390, 1280]) {
             if (dismissed) await expect(page.locator(dismissed)).toBeHidden();
             if (file === 'TurdAnoid.html') { await expect(page.locator('canvas#game')).toBeVisible(); await page.keyboard.press('Space'); }
             if (file === 'turdtris.html') await expect(page.locator('canvas#game')).toBeVisible();
-            if (file === 'turdomania.html') await expect(page.locator('#board')).toBeVisible();
+            if (file === 'turdomania.html' || file === 'chess.html') await expect(page.locator('#board')).toBeVisible();
             await expect(page.locator('#suite-music-toggle, #suite-listen-manic, #suite-music-status, #musicToggle')).toHaveCount(0);
             expect(await page.evaluate(async () => ({ player: await Suite.music(), enabled: Suite.isMusicEnabled() }))).toEqual({ player: null, enabled: false });
             expect(music).toEqual([]);
-            const back = page.locator('.suite-back-pill');
+            const back = page.locator('.suite-back-pill, .chess-hub');
             await expect(back).toBeVisible();
             if (width === 1280) {
                 await back.focus();
@@ -109,7 +110,7 @@ test('arcade hub works with denied storage and keeps its band return link', asyn
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto('/play/');
-    await expect(page.locator('.game-card')).toHaveCount(7);
+    await expect(page.locator('.game-card')).toHaveCount(8);
     await expect(page.locator('.suite-skip-link')).not.toBeInViewport();
     await page.keyboard.press('Tab');
     await expect(page.locator('.suite-skip-link')).toBeFocused();

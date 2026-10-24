@@ -1,4 +1,4 @@
-Rad Dad Arcade: github.com/rupret007/Turdanoid@410cf3f9a96a2afcf05ad82f286d0e166785708d
-Same owner as RadDadSite; no separate license file upstream.
-Generated with node scripts/sync-arcade.cjs 410cf3f9a96a2afcf05ad82f286d0e166785708d. Edit the importer and scripts/arcade/, not play/.
+Rad Dad Arcade: github.com/rupret007/Turdanoid@cc45a19ba516366e85ff229f66f53891c3ef1816
+Original arcade material: same owner as RadDadSite. New chess modules/page/art: GPL-3.0-or-later. chess.js 1.4.0: BSD-2-Clause. Stockfish.js 19.0.1: GPL-3.0. See assets/chess/credits.html, included licenses and corresponding-source archive.
+Generated with node scripts/sync-arcade.cjs cc45a19ba516366e85ff229f66f53891c3ef1816. Edit the importer and scripts/arcade/, not play/.
 No Stalemate recordings or private band-lab files are included.

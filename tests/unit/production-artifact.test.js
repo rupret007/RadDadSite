@@ -327,6 +327,13 @@ describe('production artifact verification', () => {
                 pattern: /Unexpected file/
             },
             {
+                name: 'unapproved source archive',
+                mutate: async (root) => {
+                    await writeFile(join(root, 'play/assets/chess/private-source.tar.gz'), 'not public');
+                },
+                pattern: /Forbidden repository, archive, log, or credential file/
+            },
+            {
                 name: 'development file',
                 mutate: async (root) => {
                     await writeFile(join(root, 'package.json'), '{}\n', 'utf8');
