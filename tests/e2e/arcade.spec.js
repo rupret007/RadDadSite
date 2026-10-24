@@ -1,5 +1,23 @@
 const { test, expect } = require('./fixtures');
 
+test('a slow first game load shows a disabled action until the game can start', async ({ page }) => {
+    let release;
+    const ready = new Promise(resolve => { release = resolve; });
+    await page.route('**/play/games/turdanoid-theme-core.js', async route => { await ready; await route.continue(); });
+    try {
+        await page.goto('/play/TurdAnoid.html', { waitUntil: 'commit' });
+        await expect(page.locator('#btnStart')).toBeDisabled();
+        await expect(page.locator('#btnStart')).toHaveText('Loading game…');
+        await expect(page.locator('#btnBoss')).toBeDisabled();
+        release();
+        await page.waitForLoadState('load');
+        await expect(page.locator('#btnStart')).toBeEnabled();
+        await page.locator('#btnStart').click();
+        await expect(page.locator('#titleScreen')).toHaveAttribute('aria-hidden', 'true');
+        expect(await page.evaluate(() => window.__turdanoid.state)).toBe('playing');
+    } finally { release(); }
+});
+
 test('homework, hero video and arcade art work from the homepage', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 844 });
     await page.goto('/');

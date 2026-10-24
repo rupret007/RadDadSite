@@ -298,10 +298,10 @@
         <span>← → Space</span>
       </div>
       <div class="suite-hud-settings title-difficulty-wrap" id="suite-difficulty-mount"></div>
-      <button id="btnStart">START FLUSHING</button>
+      <button id="btnStart" disabled>Loading game…</button>
       <div class="menu-secondary">
-        <button id="btnBoss" type="button">Boss Flush</button>
-        <button id="btnHowTo">How To Play</button>
+        <button id="btnBoss" type="button" disabled>Boss Flush</button>
+        <button id="btnHowTo" disabled>How To Play</button>
         <button id="btnHub" onclick="location.href='./'">Game Hub</button>
       </div>
       <p class="quip" id="titleQuip"></p>
@@ -3641,6 +3641,8 @@ pickTitleQuip();
 updateSideStats();
 lastTime = performance.now();
 requestAnimationFrame(loop);
+$('btnStart').textContent = 'START FLUSHING';
+for (const id of ['btnStart', 'btnBoss', 'btnHowTo']) $(id).disabled = false;
 
 let lastTouch = 0;
 document.addEventListener('touchend', e=>{

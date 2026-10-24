@@ -75,6 +75,15 @@ try {
       .replace(/<meta\b[^>]*\bhttp-equiv=["']Content-Security-Policy["'][^>]*>\s*/gi, '');
     html = html.replace(/<head\b[^>]*>/i, `$&\n<meta name="robots" content="noindex,nofollow">\n<meta http-equiv="Content-Security-Policy" content="${CSP}">`);
     html = html.replace('</head>', '<link rel="stylesheet" href="assets/raddad-arcade.css">\n</head>');
+    if (file === 'TurdAnoid.html') {
+      // A hosted first visit can paint the menu while the parser is still waiting
+      // for game scripts. Don't accept a tap before the game has bound its actions.
+      html = replaceRequired(html, '<button id="btnStart">START FLUSHING</button>', '<button id="btnStart" disabled>Loading game…</button>', 'Turdanoid loading action');
+      html = replaceRequired(html, '<button id="btnBoss" type="button">', '<button id="btnBoss" type="button" disabled>', 'Boss loading action');
+      html = replaceRequired(html, '<button id="btnHowTo">', '<button id="btnHowTo" disabled>', 'Help loading action');
+      html = replaceRequired(html, 'lastTime = performance.now();\nrequestAnimationFrame(loop);',
+        "lastTime = performance.now();\nrequestAnimationFrame(loop);\n$('btnStart').textContent = 'START FLUSHING';\nfor (const id of ['btnStart', 'btnBoss', 'btnHowTo']) $(id).disabled = false;", 'Turdanoid ready action');
+    }
     if (file === 'index.html') {
       html = html.replaceAll('Stalemate Arcade', 'Rad Dad Arcade')
         .replace('Punk rock. Bathroom humor. One more round.', 'Loud guitars. Silly games. One more round.')

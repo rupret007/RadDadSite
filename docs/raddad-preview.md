@@ -20,4 +20,6 @@ Evidence lives in `../release-evidence/raddad-preview/`, outside the deployable 
 
 The separate preview omits five unused legacy PNG poster/social exports after checking that the rendered pages/styles do not reference them. They remain in the verified source artifact and repository; this only reduces preview upload size.
 
+The public-host check exposed early taps on Turdanoid's painted menu before its parser-blocking scripts finished. The Rad Dad importer now shows “Loading game…” and disables menu actions until the game boot completes; a stalled-script browser regression covers this. The separate demo is hosted at https://rad-dad-design-preview.jeffstory007.chatgpt.site/ using its own project ID, never the established Rad Dad project.
+
 Next: commit this feature branch, build the exact committed source, check the isolated preview locally, deploy only `preview-dist/` via the Vercel preview workflow, and record the returned preview URL in `../RADDAD-PREVIEW-HANDOFF.md`. Never push main or merge this branch.
