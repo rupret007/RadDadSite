@@ -1,27 +1,41 @@
-# Rad Dad design preview — October 24, 2026
+# Rad Dad design preview
 
-User scope: bring Stalemate's punk flyer design, homework invitation, and arcade to Rad Dad, preserving Rad Dad's colors, existing videos, cover credits, and contacts. Do not call out a lack of upcoming shows. Keep main and raddadband.com untouched. Deliver a separate link for Travis.
+Review URL: https://rad-dad-design-preview.jeffstory007.chatgpt.site/
 
-Checkout: `/Users/jeffstory/Documents/ChatGPT/Stalemate Website/RadDadSite`.
-Branch: `codex/raddad-arcade-preview`, based on main `704ec6b95878cf071ad1fe0d857f9a0ee3070974`.
-Existing `.openai/hosting.json` identifies the established site and must not be used to publish this preview. Vercel preview workflow selected instead; only the verified static artifact will be uploaded.
+This is the blue/lime Rad Dad design, with the five original live clips, homework invitation and seven games. It preserves cover credits, contacts, members, recording links, historical shows, printed `/tap/` and legacy `/nfc/` routes. It does not display an empty upcoming-shows notice.
 
-Arcade source: Turdanoid main `01e72b614189894c41994d2a54a94433977fc9b3`. Repeatable importer: `node scripts/sync-arcade.cjs [--source local-checkout] [ref]`. Rad Dad adaptation retains game sound effects and APIs, removes Stalemate recordings/music controls, rebrands result cards, and includes no private band-lab code. Seven games; no daily challenge, accounts, multiplayer, or invented activity.
+The established site at raddadband.com and RadDadSite main are outside this release. The existing source `.openai/hosting.json` identifies that established site; never copy or deploy it for this review. The demo has its own project, `appgprj_6adc6437250c81919a5aee09cb9d91a5`, and separate hosting checkout `../RadDadDesignPreview/`. Its provider `main` branch is not RadDadSite main. Reuse this project and URL rather than creating another site or changing domains/access.
 
-Implemented: blue/lime punk flyer homepage with the existing The Middle video featured; “Do your homework” retains all five clips and their original destinations; arcade with three game previews and all seven playable games; preserved members, recording credits, booking and route aliases; show history without empty upcoming messaging. Preview build labels the review, sets noindex and shares its own origin. The established Sites config, private band lab and live host are untouched.
+## Repeatable build and snapshot
 
-Validation on Node 24.22.1: 232 unit checks, 4 documentation checks, and 144 browser checks pass; shell lint passes. Browser checks use pinned Chromium headless shell 1208, including 390px/1280px game starts, 320px homepage layout, video recovery, no-JS routes, QR aliases, result branding and storage-denied public arcade. Earlier attempts caught and fixed a 320px card overflow and a test worker-proxy teardown race; failed runs are retained separately. An initial unsupported browser run also showed legacy private-hub timing sensitivity; the final pinned-browser suite passed without changing private code.
+Use the tested Node 24 runtime for RadDadSite. Commit the reviewed source before building the release snapshot. The importer defaults to the full revision pinned in `scripts/sync-arcade.cjs`; for a local committed upstream checkout:
 
-Importer reproduced byte-for-byte across 155 files (153 public files plus client inventory/server helper). Exact artifact verification passed. All 109 server deployment/rollback checks passed, including a dry run of the real clean artifact. The server helper still enforces explicit paths, now including the public arcade, and production deployment gates remain unchanged.
+```sh
+node scripts/sync-arcade.cjs --source ../Turdanoid-raddad-polish
+git diff --exit-code -- play scripts/arcade/client-paths.json scripts/deploy/server-deploy.sh
+npm test
+npm run lint:deploy
+npm run build:preview
+RAD_DAD_REVIEW_SHA=$(git rev-parse HEAD)
+npm run verify:production -- --expected-sha "$RAD_DAD_REVIEW_SHA"
+npm run verify:preview -- --expected-sha "$RAD_DAD_REVIEW_SHA"
+```
 
-Final visual review corrected the hub's inherited flex layout after adding band navigation, kept the keyboard skip link outside the viewport until focused, and moved the decorative logo away from the featured clip's caption. The 144-browser suite passed again after the hub/caption changes; focused arcade checks cover the last spacing adjustment.
+The preview builder starts from the verified explicit public inventory. It retains sound effects, excludes Stalemate recordings and private band tools, adds the preview label/share mode and noindex, and uses this demo's URLs for social metadata. Five unused legacy print/social PNG exports are omitted only from the preview, after checking they are unreferenced. Source and normal clean artifacts retain them.
 
-Evidence lives in `../release-evidence/raddad-preview/`, outside the deployable site. Desktop and phone rendered screenshots have been inspected; final preview screenshots and publication URL follow the final source commit. External media is stubbed in automated browser tests, so those checks do not establish provider playback availability or physical-phone acceptance.
+After confirming the separate checkout's config still names the independent project, copy only public bytes and verify them again:
 
-The separate preview omits five unused legacy PNG poster/social exports after checking that the rendered pages/styles do not reference them. They remain in the verified source artifact and repository; this only reduces preview upload size.
+```sh
+rsync -a --delete preview-dist/ ../RadDadDesignPreview/dist/client/
+npm run verify:preview -- --artifact-dir ../RadDadDesignPreview/dist/client --expected-sha "$RAD_DAD_REVIEW_SHA"
+```
 
-The public-host check exposed early taps on Turdanoid's painted menu before its parser-blocking scripts finished. The Rad Dad importer now shows “Loading game…” and disables menu actions until the game boot completes; a stalled-script browser regression covers this. The separate demo is hosted at https://rad-dad-design-preview.jeffstory007.chatgpt.site/ using its own project ID, never the established Rad Dad project.
+Do not copy this repository or its established hosting config wholesale. Commit the exact independent snapshot with its source SHA recorded in its README. Push only the review feature branch and that separate provider snapshot. Archive the committed snapshot's `.openai/hosting.json` and `dist/client/`, save a new version on the same independent project and deploy that version through Sites. Vercel is not part of this workflow. Never merge/push RadDadSite main or change production gates as a side effect.
 
-Sites serves clean game URLs without `.html`. The importer normalizes those URLs to the suite's existing page identities, preserving the back button, local records and continue lookup. A browser regression serves all seven pages at their clean URLs and checks canonical records and return navigation.
+## Verification and evidence
 
-Next: commit this feature branch, build the exact committed source, check the isolated preview locally, deploy only `preview-dist/` via the Vercel preview workflow, and record the returned preview URL in `../RADDAD-PREVIEW-HANDOFF.md`. Never push main or merge this branch.
+The preview verifier rejects mismatched source versions, unexpected files, symlinks, changed bytes, missing review identity and indexing-policy drift. Its manifest stays outside the public tree. Clean artifact verification remains independent of preview verification; preview transforms intentionally change HTML bytes.
+
+After publication, verify anonymously: source version, review/noindex labels, homepage and QR sharing of the review origin, preserved route aliases, all seven game starts, clean game URLs, saved-table continuation, result links and recovery controls. Inspect actual rendered desktop and phone screenshots, and distinguish provider mocks, real playback, emulated devices and physical-device checks.
+
+Initial design evidence: `../release-evidence/raddad-preview/`. The new audit is in `../release-evidence/raddad-deep-audit-2026-10-24/`; ongoing polish checks are in `../release-evidence/raddad-polish/` and [the progress record](raddad-polish.md). The parent workspace's `RADDAD-PREVIEW-HANDOFF.md` records exact published versions and deployment status.

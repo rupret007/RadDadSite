@@ -1,6 +1,7 @@
 node_modules/
 dist/
 preview-dist/
+preview-artifact.json
 playwright-report/
 test-results/
 npm-debug.log*

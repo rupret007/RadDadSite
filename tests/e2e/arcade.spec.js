@@ -86,12 +86,15 @@ for (const width of [390, 1280]) {
             if (file === 'TurdAnoid.html') { await expect(page.locator('canvas#game')).toBeVisible(); await page.keyboard.press('Space'); }
             if (file === 'turdtris.html') await expect(page.locator('canvas#game')).toBeVisible();
             if (file === 'turdomania.html') await expect(page.locator('#board')).toBeVisible();
-            await expect(page.locator('#suite-music-toggle, #suite-listen-manic, #suite-music-status')).toHaveCount(0);
+            await expect(page.locator('#suite-music-toggle, #suite-listen-manic, #suite-music-status, #musicToggle')).toHaveCount(0);
             expect(await page.evaluate(async () => ({ player: await Suite.music(), enabled: Suite.isMusicEnabled() }))).toEqual({ player: null, enabled: false });
             expect(music).toEqual([]);
             const back = page.locator('.suite-back-pill');
             await expect(back).toBeVisible();
-            await back.click();
+            if (width === 1280) {
+                await back.focus();
+                await page.keyboard.press('Enter');
+            } else await back.click();
             await expect(page.locator('h1')).toHaveText('Rad Dad Arcade');
             expect(errors).toEqual([]);
             expect(missing).toEqual([]);

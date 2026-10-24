@@ -743,8 +743,8 @@
 </head>
 <body class="suite-ambient suite-no-zoom arcade" data-arcade-game="hub">
 <nav class="rad-arcade-nav" aria-label="Rad Dad"><a href="../"><img src="../RadDad_Logo.jpg" width="40" height="40" alt="">Rad Dad</a><a href="../#watch">Do your homework ↗</a></nav>
-  <div class="shell">
-    <header class="masthead">
+  <div class="shell" role="main">
+    <div class="masthead">
       <p class="arcade-kicker">Loud guitars. Silly games. One more round.</p>
       <h1>Rad Dad Arcade</h1>
       <p class="subtitle">Seven games. Pick your next round.</p>
@@ -752,11 +752,11 @@
         <p class="hero-badge">No sign-in • works on phone and desktop</p>
         <button type="button" class="suite-hub-mute" id="suite-hub-mute" aria-pressed="false" aria-label="Sound on, tap to mute suite sounds">🔊 Sound on</button>
       </div>
-    </header>
+    </div>
 
     <div class="arcade-grid-heading"><h2>Pick a game. Beat your best.</h2><p>Your records stay on this device.</p></div>
     <p class="arcade-mode-shortcut"><a href="turdtris.html?mode=ultra">Turdtris · 2-minute Ultra →</a></p>
-    <main class="games" id="hub-games" aria-label="Choose a game">
+    <section class="games" id="hub-games" aria-label="Choose a game">
       <a href="TurdAnoid.html" class="game-card" data-vibe="Bricks. Busted. Flushed." style="--c:#9effc8;--c2:#7ae6ff">
         <div class="cover" aria-hidden="true">
           <svg viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice">
@@ -1039,7 +1039,7 @@
           <span class="play">Play <i>→</i></span>
         </div>
       </a>
-    </main>
+    </section>
     <p class="footer-note">Seven free games. Sound effects optional. No sign-in. — <a href="#hub-games">back to the grid</a></p>
   </div>
   <script type="module">

@@ -122,6 +122,7 @@
     if (!toastEl) {
       toastEl = document.createElement('div');
       toastEl.className = 'suite-toast';
+      toastEl.setAttribute('role', 'status');
       document.body.appendChild(toastEl);
     }
     toastEl.textContent = msg;
@@ -138,6 +139,9 @@
     if (!hypeEl) {
       hypeEl = document.createElement('div');
       hypeEl.className = 'suite-hype';
+      // The game announces the actual result/score. These short decorative
+      // cheers should not interrupt it or repeat every combo to a reader.
+      hypeEl.setAttribute('aria-hidden', 'true');
       document.body.appendChild(hypeEl);
     }
     hypeEl.textContent = msg;
@@ -301,7 +305,11 @@
       a.innerHTML = '<span class="arrow" aria-hidden="true">←</span><span class="suite-back-pill-label"> Hub</span>';
       a.setAttribute('aria-label', 'Back to game hub');
       a.title = 'Back to game hub';
-      document.body.appendChild(a);
+      const nav = document.createElement('nav');
+      nav.className = 'suite-back-nav';
+      nav.setAttribute('aria-label', 'Arcade navigation');
+      nav.appendChild(a);
+      document.body.appendChild(nav);
     } catch (e) {}
   }
 

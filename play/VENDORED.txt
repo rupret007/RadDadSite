@@ -1,4 +1,4 @@
-Rad Dad Arcade: github.com/rupret007/Turdanoid@01e72b614189894c41994d2a54a94433977fc9b3
+Rad Dad Arcade: github.com/rupret007/Turdanoid@410cf3f9a96a2afcf05ad82f286d0e166785708d
 Same owner as RadDadSite; no separate license file upstream.
-Generated with node scripts/sync-arcade.cjs 01e72b614189894c41994d2a54a94433977fc9b3. Edit the importer and scripts/arcade/, not play/.
+Generated with node scripts/sync-arcade.cjs 410cf3f9a96a2afcf05ad82f286d0e166785708d. Edit the importer and scripts/arcade/, not play/.
 No Stalemate recordings or private band-lab files are included.

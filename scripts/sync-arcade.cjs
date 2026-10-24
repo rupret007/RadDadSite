@@ -6,7 +6,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..');
-const PIN = '01e72b614189894c41994d2a54a94433977fc9b3';
+const PIN = '410cf3f9a96a2afcf05ad82f286d0e166785708d';
 const FILES = ['index.html', 'hub.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
   'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html',
   'neon-arkanoid.html', 'game.js', 'favicon.svg', 'assets', 'games'];
@@ -77,14 +77,11 @@ try {
       .replace(/<meta\b[^>]*\bhttp-equiv=["']Content-Security-Policy["'][^>]*>\s*/gi, '');
     html = html.replace(/<head\b[^>]*>/i, `$&\n<meta name="robots" content="noindex,nofollow">\n<meta http-equiv="Content-Security-Policy" content="${CSP}">`);
     html = html.replace('</head>', '<link rel="stylesheet" href="assets/raddad-arcade.css">\n</head>');
-    if (file === 'TurdAnoid.html') {
-      // A hosted first visit can paint the menu while the parser is still waiting
-      // for game scripts. Don't accept a tap before the game has bound its actions.
-      html = replaceRequired(html, '<button id="btnStart">START FLUSHING</button>', '<button id="btnStart" disabled>Loading game…</button>', 'Turdanoid loading action');
-      html = replaceRequired(html, '<button id="btnBoss" type="button">', '<button id="btnBoss" type="button" disabled>', 'Boss loading action');
-      html = replaceRequired(html, '<button id="btnHowTo">', '<button id="btnHowTo" disabled>', 'Help loading action');
-      html = replaceRequired(html, 'lastTime = performance.now();\nrequestAnimationFrame(loop);',
-        "lastTime = performance.now();\nrequestAnimationFrame(loop);\n$('btnStart').textContent = 'START FLUSHING';\nfor (const id of ['btnStart', 'btnBoss', 'btnHowTo']) $(id).disabled = false;", 'Turdanoid ready action');
+    if (file === 'turdtris.html') {
+      // This review uses game effects, with approved performances on the band
+      // pages. Don't expose a game-specific switch for the disabled playlist.
+      html = replaceRequired(html, '          <button class="btn subtle" id="musicToggle" type="button" onclick="toggleMusic()">♫ Music on</button>\n', '', 'Turdtris music control');
+      html = replaceRequired(html, 'movement tuning and music.', 'movement tuning and sound effects.', 'Turdtris audio help');
     }
     if (file === 'index.html') {
       html = html.replaceAll('Stalemate Arcade', 'Rad Dad Arcade')

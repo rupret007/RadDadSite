@@ -484,6 +484,7 @@ CURRENT_PRODUCTION_FILES = {
     "play/assets/suite-fx.js",
     "play/assets/suite-hub-attract.js",
     "play/assets/suite-hub-stats.js",
+    "play/assets/suite-loading.js",
     "play/assets/suite-share.js",
     "play/assets/suite-touch.js",
     "play/assets/turdomania-tiles.svg",

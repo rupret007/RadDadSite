@@ -121,6 +121,7 @@
     .arcade-footnote > span { flex-basis:100%; }
 }
 @media (max-width:540px) {
+    .home-page .site-nav { gap:3px; }
     .home-page .video-grid { grid-template-columns:1fr; }
     .home-page .hero-performance__caption { grid-template-columns:1fr; }
     .home-page .hero-performance__caption .hero-performance__action { grid-column:1; grid-row:3; padding:0; border:0; margin-top:6px; font-size:.75rem; }
