@@ -20,6 +20,9 @@ test('homework, hero video and arcade art work from the homepage', async ({ page
     await page.locator('.arcade-ticket a').click();
     await expect(page.locator('h1')).toHaveText('Rad Dad Arcade');
     await expect(page.locator('.game-card')).toHaveCount(7);
+    expect((await page.locator('.shell').boundingBox()).width).toBeGreaterThanOrEqual(272);
+    expect((await page.locator('.game-card').first().boundingBox()).width).toBeGreaterThan(110);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });
 
 const games = [
@@ -68,6 +71,10 @@ test('arcade hub works with denied storage and keeps its band return link', asyn
     page.on('pageerror', error => errors.push(error.message));
     await page.goto('/play/');
     await expect(page.locator('.game-card')).toHaveCount(7);
+    await expect(page.locator('.suite-skip-link')).not.toBeInViewport();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('.suite-skip-link')).toBeFocused();
+    await expect(page.locator('.suite-skip-link')).toBeInViewport();
     await expect(page.locator('.rad-arcade-nav a').first()).toHaveAttribute('href', '../');
     await page.locator('.game-card[href="turdomania.html"]').click();
     await expect(page.locator('#board')).toBeVisible();

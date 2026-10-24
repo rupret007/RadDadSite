@@ -12,7 +12,9 @@ Implemented: blue/lime punk flyer homepage with the existing The Middle video fe
 
 Validation on Node 24.22.1: 232 unit checks, 4 documentation checks, and 144 browser checks pass; shell lint passes. Browser checks use pinned Chromium headless shell 1208, including 390px/1280px game starts, 320px homepage layout, video recovery, no-JS routes, QR aliases, result branding and storage-denied public arcade. Earlier attempts caught and fixed a 320px card overflow and a test worker-proxy teardown race; failed runs are retained separately. An initial unsupported browser run also showed legacy private-hub timing sensitivity; the final pinned-browser suite passed without changing private code.
 
-Importer reproduced byte-for-byte across 155 files (153 public files plus client inventory/server helper). Exact artifact verification passed. The server helper still enforces explicit paths, now including the public arcade, and production deployment gates remain unchanged. Full shell deployment regression result will be recorded in the external handoff after completion.
+Importer reproduced byte-for-byte across 155 files (153 public files plus client inventory/server helper). Exact artifact verification passed. All 109 server deployment/rollback checks passed, including a dry run of the real clean artifact. The server helper still enforces explicit paths, now including the public arcade, and production deployment gates remain unchanged.
+
+Final visual review corrected the hub's inherited flex layout after adding band navigation, kept the keyboard skip link outside the viewport until focused, and moved the decorative logo away from the featured clip's caption. The 144-browser suite passed again after the hub/caption changes; focused arcade checks cover the last spacing adjustment.
 
 Evidence lives in `../release-evidence/raddad-preview/`, outside the deployable site. Desktop and phone rendered screenshots have been inspected; final preview screenshots and publication URL follow the final source commit. External media is stubbed in automated browser tests, so those checks do not establish provider playback availability or physical-phone acceptance.
 

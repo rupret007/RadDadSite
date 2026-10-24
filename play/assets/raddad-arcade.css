@@ -1,9 +1,12 @@
 /* Rad Dad integration only. Gameplay and accessible controls stay upstream. */
 :root { --arc-ink:#09111a; --arc-paper:#f3f2ee; --arc-blue:#20baff; --arc-lime:#b5dc08; }
 body.arcade { background-color:#09111a; }
+body.arcade[data-arcade-game="hub"] { display:block; padding:16px 16px 24px; }
+body.arcade[data-arcade-game="hub"] .shell { width:min(1120px,100%); margin-inline:auto; }
 .rad-arcade-nav { display:flex; flex-wrap:wrap; gap:8px 24px; align-items:center; justify-content:space-between; width:min(1120px,calc(100% - 32px)); margin:16px auto 0; position:relative; z-index:2; font:700 15px system-ui,sans-serif; }
 .rad-arcade-nav a { display:inline-flex; align-items:center; gap:10px; min-height:44px; color:#f3f2ee; text-underline-offset:5px; }
 .rad-arcade-nav img { border-radius:50%; }
+.rad-arcade-nav { width:min(1120px,100%); margin:0 auto; }
 .rad-arcade-nav a:focus-visible { outline:3px solid #b5dc08; outline-offset:4px; }
 body.arcade[data-arcade-game="hub"] .masthead h1 { color:#20baff; }
 body.arcade[data-arcade-game="hub"] .arcade-kicker { color:#b5dc08; }
