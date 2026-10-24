@@ -232,6 +232,10 @@ ARTIFACT_SYMLINK=$TEST_TMP/artifact-symlink.tar.gz
 ARTIFACT_UNEXPECTED=$TEST_TMP/artifact-unexpected.tar.gz
 ARTIFACT_EXTRA_ASSET=$TEST_TMP/artifact-extra-allowed-asset.tar.gz
 REQUIRED_PRODUCTION_PATHS=(
+    "raddad.css"
+    "play/index.html"
+    "play/TurdAnoid.html"
+    "play/assets/turdsuite.js"
     "RadDad_Logo.jpg"
     "SHA256SUMS"
     "artifact-manifest.json"
@@ -266,7 +270,7 @@ MISSING_ARTIFACTS=()
 
 create_artifact() {
     local output=$1 sha=$2 variant=${3:-valid}
-    python3 - "$output" "$sha" "$variant" <<'PY'
+    python3 - "$output" "$sha" "$variant" "$PROJECT_ROOT/scripts/arcade/client-paths.json" <<'PY'
 import hashlib
 import io
 import json
@@ -309,6 +313,7 @@ with tempfile.TemporaryDirectory() as temporary:
         "styles.css",
         "tap/index.html",
     ]
+    source_paths += json.loads(Path(os.sys.argv[4]).read_text()) + ["raddad.css"]
     for relative_path in source_paths:
         path = root / relative_path
         path.parent.mkdir(parents=True, exist_ok=True)

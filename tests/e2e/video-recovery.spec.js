@@ -32,7 +32,7 @@ for (const path of ['/', '/qr/']) {
         await page.setViewportSize({ width: 390, height: 720 });
         await page.goto(path);
         const controls = player(page);
-        const card = page.locator('[data-inline-video]').first();
+        const card = page.locator('.video-grid [data-inline-video]').first();
         await card.click();
         await expect(controls.retry).toBeEnabled();
         const before = await controls.frame.getAttribute('src');
@@ -63,7 +63,7 @@ for (const path of ['/', '/qr/']) {
             try {
                 await page.goto(path);
                 const controls = player(page);
-                await page.locator('[data-inline-video]').first().click();
+                await page.locator('.video-grid [data-inline-video]').first().click();
                 await expect.poll(() => attempts.length).toBe(1);
                 if (state === 'loaded') await expect(controls.retry).toBeEnabled();
 
@@ -94,7 +94,7 @@ for (const path of ['/', '/qr/']) {
                 await expect(page.locator('html')).not.toHaveClass(/has-video-dialog/);
                 expect(attempts).toHaveLength(1);
 
-                const nextCard = page.locator('[data-inline-video]').nth(1);
+                const nextCard = page.locator('.video-grid [data-inline-video]').nth(1);
                 await nextCard.click();
                 await expect(controls.dialog).toBeVisible();
                 await expect(controls.frame).toHaveAttribute('src', /\/embed\/GCy4nHIqV5k\?/);
@@ -116,7 +116,7 @@ for (const path of ['/', '/qr/']) {
             const controls = player(page);
             expect(attempts).toHaveLength(0);
             await expect(controls.frame).not.toHaveAttribute('src', /.+/);
-            await page.locator('[data-inline-video]').first().click();
+            await page.locator('.video-grid [data-inline-video]').first().click();
             await expect.poll(() => attempts.length).toBe(1);
             await expect(controls.retry).toBeDisabled();
             await expect(controls.status).toContainText('Opening');
@@ -147,7 +147,7 @@ for (const path of ['/', '/qr/']) {
             await page.clock.fastForward(30_000);
             expect(attempts).toHaveLength(2);
             await expect(controls.status).toHaveText('');
-            await expect(page.locator('[data-inline-video]').first()).toBeFocused();
+            await expect(page.locator('.video-grid [data-inline-video]').first()).toBeFocused();
         } finally {
             await stopPending(attempts);
         }
@@ -161,7 +161,7 @@ for (const path of ['/', '/qr/']) {
         });
         await page.goto(path);
         const controls = player(page);
-        await page.locator('[data-inline-video]').first().click();
+        await page.locator('.video-grid [data-inline-video]').first().click();
         await expect(controls.retry).toBeEnabled();
         await expect(controls.status).toContainText('controls');
         await expect(controls.status).not.toHaveText(/^(Playing|Playback started|Video ready|Successfully loaded)/i);
@@ -193,7 +193,7 @@ for (const path of ['/', '/qr/']) {
         expect(await page.evaluate(() => window.__handoffUrl)).toBe(`https://www.youtube.com/watch?v=${FIRST_VIDEO}`);
         await expect(controls.dialog).toBeHidden();
         await expect(controls.frame).not.toHaveAttribute('src', /.+/);
-        await expect(page.locator('[data-inline-video]').first()).toBeFocused();
+        await expect(page.locator('.video-grid [data-inline-video]').first()).toBeFocused();
         expect(count).toBe(1);
     });
 
@@ -204,7 +204,7 @@ for (const path of ['/', '/qr/']) {
                 await page.setViewportSize({ width, height: 844 });
                 await page.goto(path);
                 const controls = player(page);
-                const card = page.locator('[data-inline-video]').first();
+                const card = page.locator('.video-grid [data-inline-video]').first();
                 await card.click();
                 await controls.frame.evaluate(frame => frame.dispatchEvent(new Event('error')));
                 await expect(controls.retry).toBeEnabled();

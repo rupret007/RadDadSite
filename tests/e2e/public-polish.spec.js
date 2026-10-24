@@ -133,7 +133,7 @@ for (const path of ['/', '/qr/']) {
     test(`${path} watch-card names match pointer and keyboard in-page activation`, async ({ page, context }) => {
         await page.goto(path);
         const originalUrl = page.url();
-        const cards = page.locator('[data-inline-video]');
+        const cards = page.locator('.video-grid [data-inline-video]');
         const dialog = page.getByRole('dialog');
         await expect(cards).toHaveCount(3);
         const openedPages = [];

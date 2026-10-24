@@ -391,7 +391,7 @@ describe('unlisted band lab', () => {
         expect(CLIENT_SOURCE_PATHS).not.toContain(BAND_LAB_PAGE);
         expect(CLIENT_SOURCE_PATHS).not.toContain(BAND_LAB_NEXT_PLAY);
         expect(CLIENT_SOURCE_PATHS).not.toContain(BAND_LAB_DOC);
-        expect(CLIENT_SOURCE_PATHS.some((path) => path.includes('turdanoid'))).toBe(false);
+        expect(CLIENT_SOURCE_PATHS.some((path) => path.includes('garage-rehearsal') || path.startsWith('private/'))).toBe(false);
         expect(CLIENT_SOURCE_PATHS.some((path) => path.includes('next-play'))).toBe(false);
     });
 });

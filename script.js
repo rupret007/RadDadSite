@@ -46,13 +46,19 @@
             });
         });
 
-        // Share a fixed public band URL, never a preview, query string or private fragment.
+        // The separate design-review build shares its own root, without query strings/fragments.
         const share = document.querySelector('[data-share-band]');
         const status = document.querySelector('[data-share-status]');
         const fallback = document.querySelector('[data-share-fallback]');
         const copy = document.querySelector('[data-copy-band]');
         if (!share || !status || !fallback || !copy) return;
-        const bandUrl = 'https://raddadband.com/';
+        const preview = document.body.hasAttribute('data-design-preview');
+        const bandUrl = preview ? new URL(document.body.classList.contains('qr-page') ? '../' : './', window.location.href).href : 'https://raddadband.com/';
+        if (preview) {
+            share.textContent = 'Share this preview';
+            const input = document.getElementById('band-share-url');
+            if (input) input.value = bandUrl;
+        }
         let busy = false;
         let generation = 0;
         share.hidden = false;

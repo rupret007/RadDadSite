@@ -9,7 +9,7 @@ test('homepage leads with a cover band, live videos and booking rather than an e
     await expect(page.locator('#home a[href="#watch"]')).toBeVisible();
     await expect(page.locator('#home a[href="#contact"]')).toBeVisible();
     const ids = await page.locator('main > section').evaluateAll(nodes => nodes.map(n => n.id));
-    expect(ids).toEqual(['home', 'watch', 'covers', 'band', '', 'shows', 'contact']);
+    expect(ids).toEqual(['home', 'watch', 'arcade', 'covers', 'band', '', 'shows', 'contact']);
     const metadata = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
     expect(metadata['@type']).toBe('MusicGroup');
     expect(metadata.name).toBe('Rad Dad');
@@ -77,7 +77,7 @@ for (const width of [320, 390, 768, 980, 981, 1440]) {
         for (const link of await nav.getByRole('link').all()) {
             expect((await link.boundingBox()).height).toBeGreaterThanOrEqual(44);
         }
-        await nav.getByRole('link', { name: 'Watch', exact: true }).click();
+        await nav.getByRole('link', { name: 'Homework', exact: true }).click();
         await expect.poll(async () => {
             const section = await page.locator('#watch').boundingBox();
             const heading = await page.locator('#watch-title').boundingBox();

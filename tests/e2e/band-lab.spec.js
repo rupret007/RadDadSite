@@ -183,7 +183,6 @@ test('keeps the band-lab URL off public homepage, QR, tap, and NFC surfaces', as
         await expect(page.locator('a[href*="garage-rehearsal-k7m2n9"]')).toHaveCount(0);
         await expect(page.locator('a[href*="/private/"]')).toHaveCount(0);
         await expect(page.locator('body')).not.toContainText('Band Lab');
-        await expect(page.locator('body')).not.toContainText('Turdanoid');
         await expect(page.locator('body')).not.toContainText('WebJam');
     }
 

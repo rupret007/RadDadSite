@@ -12,7 +12,8 @@ for (const path of ['/', '/qr/']) {
             await expect(page.locator('body')).not.toContainText('Live now');
             await page.evaluate(() => { window.dispatchEvent(new Event('pageshow')); document.dispatchEvent(new Event('visibilitychange')); });
             await expect(page.locator('html')).not.toHaveAttribute('data-show-phase');
-            await expect(page.locator('[data-upcoming-shows], #next-show')).toContainText('No upcoming dates posted yet');
+            await expect(page.locator('body')).not.toContainText(/no upcoming|no shows|no dates posted/i);
+            await expect(page.locator('[data-upcoming-shows]')).toHaveCount(0);
         });
     }
 }

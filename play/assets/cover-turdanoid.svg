@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="ta-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06141a"/><stop offset="1" stop-color="#15394a"/></linearGradient>
+              <linearGradient id="ta-b1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9effc8"/><stop offset="1" stop-color="#3aa97c"/></linearGradient>
+              <linearGradient id="ta-b2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd76a"/><stop offset="1" stop-color="#bf8a13"/></linearGradient>
+              <linearGradient id="ta-b3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7ab6"/><stop offset="1" stop-color="#a3306e"/></linearGradient>
+              <linearGradient id="ta-b4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b290ff"/><stop offset="1" stop-color="#5b3eb8"/></linearGradient>
+              <radialGradient id="ta-ball" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#c89466"/><stop offset="0.5" stop-color="#8a5a30"/><stop offset="1" stop-color="#2e1a0c"/></radialGradient>
+              <linearGradient id="ta-seat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="0.7" stop-color="#dcefe6"/><stop offset="1" stop-color="#85b3a1"/></linearGradient>
+            </defs>
+            <rect width="320" height="150" fill="url(#ta-bg)"/>
+            <g opacity="0.16" fill="#2a5c4c"><rect x="30" y="60" width="90" height="10" rx="5"/><rect x="220" y="86" width="70" height="9" rx="4"/><rect x="150" y="40" width="9" height="70" rx="4"/></g>
+            <g class="art-bubble" fill="rgba(158,255,200,.35)"><circle cx="60" cy="120" r="3"/></g>
+            <g class="art-bubble" fill="rgba(158,255,200,.35)"><circle cx="250" cy="130" r="4"/></g>
+            <g class="art-bubble" fill="rgba(158,255,200,.35)"><circle cx="190" cy="115" r="2.5"/></g>
+            <g>
+              <g fill="url(#ta-b1)"><rect x="20" y="14" width="42" height="12" rx="3"/><rect x="66" y="14" width="42" height="12" rx="3"/><rect x="112" y="14" width="42" height="12" rx="3"/><rect x="158" y="14" width="42" height="12" rx="3"/><rect x="204" y="14" width="42" height="12" rx="3"/><rect x="250" y="14" width="42" height="12" rx="3"/></g>
+              <g fill="url(#ta-b2)"><rect x="20" y="30" width="42" height="12" rx="3"/><rect x="66" y="30" width="42" height="12" rx="3"/><rect x="158" y="30" width="42" height="12" rx="3"/><rect x="204" y="30" width="42" height="12" rx="3"/><rect x="250" y="30" width="42" height="12" rx="3"/></g>
+              <g fill="url(#ta-b3)"><rect x="20" y="46" width="42" height="12" rx="3"/><rect x="112" y="46" width="42" height="12" rx="3"/><rect x="158" y="46" width="42" height="12" rx="3"/><rect x="250" y="46" width="42" height="12" rx="3"/></g>
+              <g fill="url(#ta-b4)"><rect x="66" y="62" width="42" height="12" rx="3"/><rect x="112" y="62" width="42" height="12" rx="3"/><rect x="204" y="62" width="42" height="12" rx="3"/></g>
+              <g fill="#fff" opacity="0.35"><rect x="22" y="15" width="38" height="4" rx="2"/><rect x="68" y="15" width="38" height="4" rx="2"/><rect x="114" y="15" width="38" height="4" rx="2"/><rect x="160" y="15" width="38" height="4" rx="2"/><rect x="206" y="15" width="38" height="4" rx="2"/><rect x="252" y="15" width="38" height="4" rx="2"/></g>
+            </g>
+            <g opacity="0.9"><path d="M133 28l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#ffd76a"/><g fill="#ffd76a" opacity="0.8"><circle cx="118" cy="42" r="1.6"/><circle cx="147" cy="31" r="1.4"/><circle cx="144" cy="44" r="1.2"/><circle cx="120" cy="29" r="1.2"/></g></g>
+            <g class="art-ball">
+              <ellipse cx="160" cy="112" rx="5" ry="16" fill="rgba(155,195,177,.25)"/>
+              <circle cx="160" cy="98" r="11" fill="url(#ta-ball)"/>
+              <circle cx="158" cy="90" r="5" fill="#b58050"/>
+              <circle cx="156.5" cy="88" r="1.6" fill="#fff" opacity="0.7"/>
+              <circle cx="156" cy="97" r="2.6" fill="#fff"/><circle cx="164" cy="97" r="2.6" fill="#fff"/>
+              <circle cx="156.6" cy="96.6" r="1.2"/><circle cx="164.6" cy="96.6" r="1.2"/>
+            </g>
+            <g class="art-paddle">
+              <rect x="118" y="134" width="84" height="12" rx="6" fill="#000" opacity="0.4" transform="translate(2 3)"/>
+              <rect x="118" y="130" width="84" height="12" rx="6" fill="url(#ta-seat)"/>
+              <rect x="124" y="131" width="72" height="4" rx="2" fill="#fff" opacity="0.7"/>
+              <rect x="152" y="126" width="16" height="4" fill="#bbb"/>
+            </g>
+          </svg>
