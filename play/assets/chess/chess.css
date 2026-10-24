@@ -49,3 +49,6 @@ body.chess-page #board .square.hinted{box-shadow:inset 0 0 0 4px #4c0955}
 .suite-colorblind body.chess-page #board .square:focus-visible{outline:3px solid #fff6dc;outline-offset:-3px;box-shadow:inset 0 0 0 6px #101923}
 
 .chess-setup button:disabled{cursor:wait}
+/* Auto block margins can vertically center the board beside a taller console
+   in Firefox. Keep it anchored while results/history/options grow. */
+body.chess-page .chess-table{align-self:start;margin-block:0}

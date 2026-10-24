@@ -226,7 +226,7 @@ function enterGame() {
   opened = true; suspended = false; failure = false; selected = null; hintMove = null; reviewing = null; feedback = '';
   $('setup').hidden = true; $('game').hidden = false;
   focused = game.flipped ? 'e7' : 'e2';
-  persist(); render(); focusBoard();
+  persist(); render(); globalThis.scrollTo(0, 0); focusBoard();
   void queueComputer();
 }
 function openSetup() {

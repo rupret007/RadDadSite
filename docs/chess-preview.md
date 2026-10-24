@@ -1,6 +1,6 @@
 # Royal Flush Chess — release candidate
 
-Reusable source: Turdanoid `cf9a1388278e645a76a192de4b0c2ece2edb4169`, draft PR [103](https://github.com/rupret007/Turdanoid/pull/103), stacked on PR 102. Receiving branch: `codex/chess-preview`, draft PR [66](https://github.com/rupret007/RadDadSite/pull/66), stacked on PR 65. Preserve the existing PRs/status and all unrelated work. Exact final site/hosting versions and CI/deployment receipts are recorded in the workspace CHESS-PREVIEW-HANDOFF.md and release-evidence/chess/. Publication is gated by final exact-head CI and anonymous verification; the handoff and PR record the final status.
+Reusable source: Turdanoid `3b26c41fd5a9656280e8c49d529b2f91af055d52`, draft PR [103](https://github.com/rupret007/Turdanoid/pull/103), stacked on PR 102. Receiving branch: `codex/chess-preview`, draft PR [66](https://github.com/rupret007/RadDadSite/pull/66), stacked on PR 65. Preserve the existing PRs/status and all unrelated work. Exact final site/hosting versions and CI/deployment receipts are recorded in the workspace CHESS-PREVIEW-HANDOFF.md and release-evidence/chess/. Publication is gated by final exact-head CI and anonymous verification; the handoff and PR record the final status.
 
 ## Final behavior
 
@@ -33,3 +33,5 @@ Older CI twice exposed uncaught denied-storage errors after keyboard navigation 
 ## Publication boundary
 
 Only update the existing independent public demo, https://rad-dad-design-preview.jeffstory007.chatgpt.site/, after gates pass. Rebuild/verify/copy from the exact final committed site SHA; save/deploy an archive from the exact pushed independent hosting commit. Reuse its project/config/audience. Never push/merge RadDadSite main, deploy established Rad Dad/Stalemate, change domains/hosting/DNS/production gates, or message/invite anyone. Before marking complete, verify the actual hosted source bytes (allowing only the documented host HTML insertion), clean URLs, chess/old-game flows, worker/CSP, exports/continue/recovery/mute, QR aliases and private 404s.
+
+Firefox result/entry correction: the board is explicitly top aligned beside the console, and enter/continue/rematch reset setup scroll before focus. A native mate leaves the whole board visible at568×320 and667×375. Expanded matrix assertions check both board edges. Earlier failure screenshots are retained.

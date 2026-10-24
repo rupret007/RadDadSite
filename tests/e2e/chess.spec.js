@@ -63,7 +63,10 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 844, height: 390 }
         await start(page, 'local');
         const board = await page.locator('#board').boundingBox();
         expect(Math.abs(board.height - board.width)).toBeLessThan(1);
-        if (viewport.width > viewport.height) expect(board.y + board.height).toBeLessThanOrEqual(viewport.height);
+        if (viewport.width > viewport.height) {
+            expect(board.y).toBeGreaterThanOrEqual(0);
+            expect(board.y + board.height).toBeLessThanOrEqual(viewport.height);
+        }
         const square = await page.locator('[data-square=e2]').boundingBox();
         expect(Math.abs(square.height - square.width)).toBeLessThan(1);
         await page.locator('[data-square=e2]').focus();
