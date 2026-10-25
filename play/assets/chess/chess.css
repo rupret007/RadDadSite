@@ -52,3 +52,41 @@ body.chess-page #board .square.hinted{box-shadow:inset 0 0 0 4px #4c0955}
 /* Auto block margins can vertically center the board beside a taller console
    in Firefox. Keep it anchored while results/history/options grow. */
 body.chess-page .chess-table{align-self:start;margin-block:0}
+
+/* Optional visual reference shares the actual board silhouettes. Keep the
+   dismissal reachable and the first instructions visible in short dialogs. */
+.guide-header{display:flex;align-items:start;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:1;background:#1a2532;padding-bottom:12px}
+.chess-page .guide-header h2{margin:0;align-self:center}
+.chess-page #guide details{border-top:1px solid #415466}
+.chess-page #guide summary{cursor:pointer;font-weight:750;min-height:44px;padding-block:11px}
+.chess-page #guide summary::marker{color:var(--ch-accent)}
+.piece-reference{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:6px 0 12px}
+.piece-reference>div{min-width:0;background:#233244;border:1px solid #66798b;border-radius:10px;padding:10px}
+.piece-reference dt{display:flex;flex-direction:column;gap:5px;font-weight:800}
+.piece-reference dd{margin:5px 0 0;font-size:14px;line-height:1.4}
+.piece-pair{display:flex;gap:4px}.piece-pair svg{width:30px;height:30px}
+.chess-page #guide #close-guide{margin-top:12px}
+.promotion-choices button{display:flex;align-items:center;justify-content:center;gap:8px}
+@media(max-width:360px){.chess-page #guide{padding:16px}.guide-header{gap:8px}.chess-page .guide-header h2{font-size:25px}.piece-reference>div{padding:8px}}
+
+/* Both match types are visible before starting; the whole card is a native
+   radio label, with a large target and a color-independent checked circle. */
+.chess-page .mode-picker{border:0;padding:0;margin:0 0 16px;min-width:0}
+.mode-picker legend{font-weight:750;margin-bottom:8px;padding:0}
+.mode-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.chess-page .mode-choice{position:relative;display:flex;flex-direction:column;align-items:start;gap:3px;min-height:112px;margin:0;padding:12px;border:2px solid #66798b;border-radius:12px;background:#15212e;cursor:pointer;line-height:1.25}
+.mode-choice input{position:absolute;top:12px;right:10px;width:18px;height:18px;margin:0;accent-color:var(--ch-accent)}
+.mode-choice:has(input:checked){border-color:var(--ch-accent);background:linear-gradient(140deg,#2d402b,#1b2f3a);box-shadow:inset 0 0 0 1px #b5dc0838}
+.mode-choice:has(input:focus-visible){outline:3px solid #ffd166;outline-offset:3px}
+.mode-choice strong{font-size:19px}.mode-caption{font-size:13px;font-weight:500;color:#d6e1e9}
+.mode-art{display:flex;height:32px;margin-bottom:3px}.mode-art svg{width:30px;height:30px}
+.setup-art{width:190px;margin:0 0 24px;transform:rotate(-5deg)}
+.setup-mini-board{display:grid;grid-template-columns:repeat(4,1fr);aspect-ratio:1;border:7px solid #40586a;border-radius:14px;overflow:hidden;box-shadow:8px 10px 0 #56c9ff20,0 12px 26px #0004}
+.setup-mini-board span{display:flex;align-items:center;justify-content:center;background:#dce7c7}
+.setup-mini-board span:nth-child(8n+2),.setup-mini-board span:nth-child(8n+4),.setup-mini-board span:nth-child(8n+5),.setup-mini-board span:nth-child(8n+7){background:#64838b}
+.setup-mini-board svg{width:92%;height:92%;overflow:visible;filter:drop-shadow(0 2px 1px #0005)}
+.chess-board{border-color:#40586a;box-shadow:0 0 0 1px #90b6cc55,0 16px 36px #0006}
+.player-strip>span:first-child:before{content:'';display:inline-block;vertical-align:-1px;width:11px;height:11px;border-radius:50%;background:#fff6dc;border:2px solid #192638;box-shadow:0 0 0 1px #9ab0bf;margin-right:7px}
+.player-strip>span[data-color=b]:before{background:#192638;border-color:#fff6dc}
+@media(max-width:740px){.setup-art{display:none}.mode-choices{gap:8px}.chess-page .mode-choice{padding:10px;min-height:105px}.mode-choice input{top:10px;right:8px}.mode-choice strong{font-size:18px}.chess-setup .setup-copy>p:not(.chess-kicker):not(#saved-description){font-size:14px}.chess-setup{padding:20px}.setup-copy h2{font-size:32px;margin:6px 0 10px}}
+@media(min-width:520px) and (max-height:520px) and (orientation:landscape){.setup-art{display:none}.chess-page .mode-choice{min-height:100px}}

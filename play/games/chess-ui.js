@@ -2,7 +2,7 @@
 import { Chess, createGame, playMove, claimDraw, claimReason, intendedClaims, undoTurn, resign,
   loadGame, saveGame, recordResult, readResults, exportPgn, LEVELS, colorName, pieceName } from './chess-core.js';
 import { ChessEngine } from './chess-engine.js';
-import { pieceSvg } from './chess-pieces.js';
+import { pieceSvg, PIECE_GUIDE } from './chess-pieces.js';
 
 const $ = id => document.getElementById(id);
 const suite = globalThis.Suite;
@@ -57,6 +57,7 @@ function currentFocus(square) {
   for (const [name, button] of squares) { button.tabIndex = name === focused ? 0 : -1; }
 }
 function focusBoard(square = focused) { currentFocus(square); squares.get(square)?.focus(); }
+function chosenMode() { return document.querySelector('input[name="mode"]:checked').value; }
 
 function renderBoard() {
   if (!game) { return; }
@@ -99,6 +100,8 @@ function renderBoard() {
   const label = color => game.mode === 'local' ? `${colorName(color)} pieces` : color === game.side ? `You · ${colorName(color)}` : `Computer · ${LEVELS[game.level].label} · ${colorName(color)}`;
   $('top-player').textContent = label(topColor);
   $('bottom-player').textContent = label(topColor === 'w' ? 'b' : 'w');
+  $('top-player').dataset.color = topColor;
+  $('bottom-player').dataset.color = topColor === 'w' ? 'b' : 'w';
   const until = reviewing ?? history.length;
   for (const [id, color] of [['top-captured', topColor], ['bottom-captured', topColor === 'w' ? 'b' : 'w']]) {
     const captured = history.slice(0, until).filter(move => move.color === color && move.captured).map(move => pieceName(move.captured));
@@ -109,7 +112,10 @@ function renderBoard() {
     }).filter(Boolean);
     $(id).textContent = counts.length ? `Captured: ${counts.join(', ')}` : 'No captures yet';
   }
-  $('board').setAttribute('aria-label', `Chessboard. ${game.flipped ? 'Black' : 'White'} at bottom. ${reviewing === null ? `${colorName(chess.turn())} to move.` : `Reviewing after ${reviewing} half-moves.`} Arrow keys move focus. Enter selects or moves. Escape clears selection.`);
+  const boardState = reviewing !== null ? `Reviewing after ${reviewing} half-moves.` : game.result
+    ? `${game.result.winner ? `${colorName(game.result.winner)} wins` : 'Draw'}. ${game.result.reason}. Game finished.`
+    : `${colorName(chess.turn())} to move.`;
+  $('board').setAttribute('aria-label', `Chessboard. ${game.flipped ? 'Black' : 'White'} at bottom. ${boardState} Arrow keys move focus. Enter selects or moves. Escape clears selection.`);
 }
 function renderHistory() {
   const activePly = document.activeElement?.dataset?.ply;
@@ -134,6 +140,7 @@ function renderHistory() {
   $('previous').disabled = (reviewing ?? history.length) <= 0;
   $('next').disabled = reviewing === null || reviewing >= history.length;
   $('live').disabled = reviewing === null;
+  $('live').textContent = game.result ? 'Final board' : 'Live board';
   if (reviewing === null) { list.scrollTop = list.scrollHeight; }
 }
 function render() {
@@ -144,7 +151,7 @@ function render() {
   $('game-label').textContent = local ? 'PASS & PLAY · UNTIMED' : `${LEVELS[game.level].label} · COMPUTER PRACTICE`;
   $('turn').textContent = reviewing !== null ? 'Reviewing moves' : ended ? ended.winner ? `${colorName(ended.winner)} wins!` : 'A well-fought draw' : `${colorName(game.chess.turn())} to move${game.chess.isCheck() ? ' · CHECK' : ''}`;
   let status = feedback;
-  if (reviewing !== null) { status = `After ${reviewing} half-moves. Return to Live board to play.`; }
+  if (reviewing !== null) { status = `After ${reviewing} half-moves. ${ended ? 'Return to Final board to see the result.' : 'Return to Live board to play.'}`; }
   else if (ended) { status = ended.reason + (ended.intended ? ` · intended move ${ended.intended}` : ''); }
   else if (suspended) { status = 'Game paused. Press Continue playing when you’re ready.'; }
   else if (busy) { status = humanTurn() ? 'Looking for a hint… You can still make your move.' : 'Computer thinking…'; }
@@ -214,7 +221,7 @@ async function queueComputer(hint = false) {
     if (hint) {
       hintMove = move; selected = null; game.hints++;
       const choice = game.chess.moves({ verbose: true }).find(item => item.lan === move);
-      feedback = `Try ${pieceName(choice.piece)} ${choice.from} → ${choice.to}${choice.promotion ? `, promote to ${pieceName(choice.promotion)}` : ''}. ${choice.san.includes('#') ? 'This is checkmate.' : choice.san.includes('+') ? 'This gives check.' : choice.flags.includes('k') || choice.flags.includes('q') ? 'Castling brings your rook into play and moves your king.' : choice.captured ? `This captures a ${pieceName(choice.captured)}.` : 'A bounded engine suggestion; compare it with your own plan.'}`;
+      feedback = `Try ${pieceName(choice.piece)} ${choice.from} → ${choice.to}${choice.promotion ? `, promote to ${pieceName(choice.promotion)}` : ''}. ${choice.san.includes('#') ? 'This is checkmate.' : choice.san.includes('+') ? 'This gives check.' : choice.flags.includes('k') || choice.flags.includes('q') ? 'Castling moves your king and rook together.' : choice.flags.includes('e') ? `This captures the pawn on ${choice.to[0]}${choice.from[1]} en passant.` : choice.captured ? `This captures a ${pieceName(choice.captured)}.` : `${PIECE_GUIDE[choice.piece].reminder} A bounded suggestion; compare it with your plan.`}`;
       persist(); render();
     } else { afterMove(playMove(game, move)); }
   } catch (error) {
@@ -235,7 +242,7 @@ function openSetup() {
   $('continue').hidden = !game;
   $('continue').textContent = game?.result ? 'Review last game' : 'Continue game';
   $('saved-description').textContent = game && !game.result ? `${game.mode === 'local' ? 'Two players' : LEVELS[game.level].label + ' computer'} · ${game.chess.history().length} half-moves saved on this device.` : game?.result ? `Last game: ${game.result.reason}. Your completed result is saved.` : 'Choose an opponent and you’re ready.';
-  $('mode').focus();
+  document.querySelector('input[name="mode"]:checked').focus();
 }
 function activate(square) {
   currentFocus(square);
@@ -246,6 +253,10 @@ function activate(square) {
   if (options.length) {
     if (options.some(move => move.promotion)) {
       promotionMove = { from: selected, to: square };
+      $('promotion-title').textContent = `${colorName(game.chess.turn())} pawn promotion`;
+      for (const button of $('promotion').querySelectorAll('[data-promote]')) {
+        button.innerHTML = `${pieceSvg(button.dataset.promote, game.chess.turn())}<span>${PIECE_GUIDE[button.dataset.promote].name}</span>`;
+      }
       $('promotion').showModal(); return;
     }
     cancelSearch(true); failure = false;
@@ -255,7 +266,9 @@ function activate(square) {
     selected = square; hintMove = null;
     const count = new Set(game.chess.moves({ square, verbose: true }).map(move => move.to)).size;
     feedback = `${colorName(piece.color)} ${pieceName(piece.type)} at ${square}. ${count ? `${count} legal ${count === 1 ? 'destination' : 'destinations'} marked.` : 'No legal moves for this piece.'}`;
-  } else { feedback = selected ? 'That move is not legal. Choose a marked square or another piece.' : 'Select one of the pieces whose turn it is.'; }
+  } else {
+    feedback = selected ? `That move is not legal. ${game.chess.isCheck() ? 'Your king is in check; choose a marked move that gets it safe.' : PIECE_GUIDE[game.chess.get(selected).type].reminder + ' Choose a marked square.'}` : `Select a ${colorName(game.chess.turn())} piece. It is ${colorName(game.chess.turn())}’s turn.`;
+  }
   render();
 }
 function review(ply) {
@@ -270,9 +283,10 @@ function ask(title, text, action) {
   $('confirm').showModal(); render();
 }
 function settings() {
-  const local = $('mode').value === 'local';
+  const local = chosenMode() === 'local';
   $('computer-options').hidden = local; $('local-description').hidden = !local;
   $('level-description').textContent = LEVELS[$('level').value].description;
+  $('new-game').querySelector('button[type=submit]').textContent = local ? 'Play 2-player chess →' : 'Play computer →';
 }
 $('board').addEventListener('click', event => {
   const square = event.target.closest('[data-square]')?.dataset.square;
@@ -294,8 +308,8 @@ $('new-game').addEventListener('submit', event => {
   event.preventDefault();
   const start = () => {
     cancelSearch();
-    const side = $('side').value === 'random' ? Math.random() < 0.5 ? 'w' : 'b' : $('side').value;
-    game = createGame({ mode: $('mode').value, side, level: $('level').value });
+    const side = chosenMode() === 'local' ? 'w' : $('side').value === 'random' ? Math.random() < 0.5 ? 'w' : 'b' : $('side').value;
+    game = createGame({ mode: chosenMode(), side, level: $('level').value });
     enterGame();
   };
   if (game && !game.result && game.chess.history().length) { ask('Start a new game?', 'This replaces the unfinished chess game saved on this device.', start); }
@@ -319,7 +333,7 @@ $('moves').addEventListener('click', event => { const ply = event.target.closest
 $('new').addEventListener('click', openSetup);
 $('resign').addEventListener('click', () => ask('Resign this game?', `${colorName(game.mode === 'computer' ? game.side : game.chess.turn())} concedes. The result will be recorded.`, () => { resign(game); persist(); render(); }));
 $('rematch').addEventListener('click', () => {
-  cancelSearch(); game = createGame({ mode: game.mode, side: game.side === 'w' ? 'b' : 'w', level: game.level }); enterGame();
+  cancelSearch(); game = createGame({ mode: game.mode, side: game.mode === 'local' ? 'w' : game.side === 'w' ? 'b' : 'w', level: game.level }); enterGame();
 });
 $('retry').addEventListener('click', () => { failure = false; feedback = ''; render(); void queueComputer(humanTurn()); });
 $('switch-local').addEventListener('click', () => ask('Continue with a friend?', 'This becomes a local two-player game. Its result will be recorded as local play.', () => {
@@ -328,24 +342,27 @@ $('switch-local').addEventListener('click', () => ask('Continue with a friend?',
 function resolveConfirmation(accepted) {
   const action = confirmAction; confirmAction = null;
   $('confirm').close();
-  if (accepted) { action?.(); } else { render(); }
+  if (accepted) { action?.(); } else if (!opened && game) { enterGame(); } else { render(); }
   void queueComputer();
 }
 $('confirm-no').addEventListener('click', () => resolveConfirmation(false));
 $('confirm-yes').addEventListener('click', () => resolveConfirmation(true));
 $('confirm').addEventListener('cancel', event => { event.preventDefault(); resolveConfirmation(false); });
 $('promotion').querySelectorAll('[data-promote]').forEach(button => {
-  button.innerHTML = pieceSvg(button.dataset.promote, 'w') + button.textContent;
   button.addEventListener('click', () => {
+    if (!promotionMove || !canMove() || document.hidden) { return; }
     const move = { ...promotionMove, promotion: button.dataset.promote };
     promotionMove = null; $('promotion').close(); cancelSearch(true); afterMove(playMove(game, move)); focusBoard(move.to);
   });
 });
 $('cancel-promotion').addEventListener('click', () => $('promotion').close());
-$('promotion').addEventListener('close', () => { promotionMove = null; focusBoard(); });
-function help() { cancelSearch(); $('guide').showModal(); render(); }
+$('promotion').addEventListener('close', () => { promotionMove = null; if (canMove()) { focusBoard(); } });
+function help() {
+  cancelSearch(); $('guide').showModal(); $('guide-title').focus({ preventScroll: true }); $('guide').scrollTop = 0; render();
+}
 $('help').addEventListener('click', help); $('how-to').addEventListener('click', help);
 $('close-guide').addEventListener('click', () => $('guide').close());
+$('dismiss-guide').addEventListener('click', () => $('guide').close());
 $('guide').addEventListener('close', () => { render(); void queueComputer(); });
 $('claim').addEventListener('click', () => {
   if (claimReason(game.chess)) { claimDraw(game); cancelSearch(); persist(); render(); return; }
@@ -371,16 +388,26 @@ $('export').addEventListener('click', () => {
 const resume = document.createElement('button'); resume.id = 'resume-playing'; resume.type = 'button'; resume.textContent = 'Continue playing'; resume.hidden = true;
 $('status').after(resume);
 resume.addEventListener('click', () => { suspended = false; feedback = ''; render(); void queueComputer(); });
+function suspendGame() {
+  cancelSearch(); suspended = true; selected = null; hintMove = null; promotionMove = null; confirmAction = null;
+  for (const dialog of document.querySelectorAll('dialog[open]')) { dialog.close(); }
+  persist();
+}
 document.addEventListener('visibilitychange', () => {
   if (!opened) { return; }
-  if (document.hidden) { cancelSearch(); suspended = true; persist(); }
+  if (document.hidden) { suspendGame(); }
   render();
+  if (!document.hidden && suspended && !game.result) { resume.focus({ preventScroll: true }); }
 });
-globalThis.addEventListener('pagehide', () => { cancelSearch(); persist(); suspended = true; });
+globalThis.addEventListener('pagehide', suspendGame);
 globalThis.addEventListener('pageshow', event => { if (event.persisted) { render(); } });
+$('piece-reference').innerHTML = Object.entries(PIECE_GUIDE).map(([type, info]) => `<div><dt><span class="piece-pair">${pieceSvg(type, 'w')}${pieceSvg(type, 'b')}</span>${info.name}</dt><dd>${info.detail}</dd></div>`).join('');
+$('setup-art').innerHTML = `<div class="setup-mini-board">${Array.from({ length: 16 }, (_, index) => `<span>${index === 5 ? pieceSvg('n', 'w') : index === 10 ? pieceSvg('k', 'b') : ''}</span>`).join('')}</div>`;
+document.querySelector('[data-mode-art="computer"]').innerHTML = pieceSvg('n', 'w');
+document.querySelector('[data-mode-art="local"]').innerHTML = pieceSvg('k', 'w') + pieceSvg('k', 'b');
 settings(); syncMute(); openSetup();
 const playButton = $('new-game').querySelector('button[type=submit]');
-playButton.disabled = false; playButton.textContent = 'Play chess →';
+playButton.disabled = false;
 $('how-to').disabled = false;
 suite?.setMusicGameBlocked?.(() => !opened || !!game?.result || suspended || !!document.querySelector('dialog[open]'));
 globalThis.SuiteLoading?.ready();

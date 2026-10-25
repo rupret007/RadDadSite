@@ -5,7 +5,7 @@ export { Chess, DEFAULT_POSITION };
 export const SAVE_KEY = 'arcade_chess_save_v1';
 export const RESULTS_KEY = 'arcade_chess_results_v1';
 export const LEVELS = Object.freeze({
-  friendly: { label: 'Friendly', skill: 0, depth: 2, ms: 180, description: 'Short searches and frequent mistakes. A relaxed first opponent.' },
+  friendly: { label: 'Friendly', skill: 0, depth: 2, ms: 180, description: 'Our shortest searches and lowest skill setting. Start here; it can still spot tactics.' },
   casual: { label: 'Casual', skill: 4, depth: 5, ms: 350, description: 'Looks a few moves ahead. Take your time and try a plan.' },
   club: { label: 'Club', skill: 12, depth: 10, ms: 700, description: 'Deeper searches and fewer mistakes. Expect a challenge.' },
   sharp: { label: 'Sharp', skill: 20, depth: 18, ms: 1400, description: 'Our strongest setting. Still bounded for your device.' }

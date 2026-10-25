@@ -2,7 +2,7 @@ const { test, expect } = require('./fixtures');
 
 async function start(page, mode = 'computer') {
     await page.goto('/play/chess.html');
-    await page.locator('#mode').selectOption(mode);
+    await page.getByRole('radio', { name: mode === 'local' ? /2 players/ : /1 player/ }).check();
     await page.locator('#new-game button[type=submit]').click();
 }
 async function move(page, from, to) {
@@ -46,7 +46,7 @@ test('chess local checkmate, result review and PGN export work without a server 
     await page.reload();
     await expect(page.locator('#continue')).toHaveText('Review last game');
     await page.locator('#continue').click();
-    await page.locator('details').last().locator('summary').click();
+    await page.locator('#game-options > summary').click();
     const download = page.waitForEvent('download');
     await page.locator('#export').click();
     expect((await download).suggestedFilename()).toBe('royal-flush-chess.pgn');
@@ -55,6 +55,38 @@ test('chess local checkmate, result review and PGN export work without a server 
     await page.locator('.chess-hub').click();
     await expect(page.locator('.game-card[href="chess.html"] .play')).not.toContainText('Continue');
     await expect(page.locator('.game-card[href="chess.html"] .suite-hub-stat')).toContainText('1 completed');
+});
+
+test('phone visitors can select two players immediately without downloading the computer', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    const engine = [];
+    page.on('request', request => { if (/stockfish.*\.(js|wasm)/.test(request.url())) engine.push(request.url()); });
+    await page.goto('/play/chess.html');
+    await expect(page.getByRole('radio', { name: /1 player/ })).toBeVisible();
+    await page.getByRole('radio', { name: /2 players/ }).check();
+    await expect(page.locator('#computer-options')).toBeHidden();
+    const play = page.getByRole('button', { name: 'Play 2-player chess →' });
+    const box = await play.boundingBox();
+    expect(box.y).toBeGreaterThanOrEqual(0); expect(box.y + box.height).toBeLessThanOrEqual(568);
+    await play.click(); await move(page, 'e2', 'e4'); await move(page, 'e7', 'e5');
+    await expect(page.locator('#moves button')).toHaveCount(2);
+    await page.reload(); await page.locator('#continue').click();
+    await expect(page.locator('#game-label')).toContainText('PASS & PLAY');
+    await expect(page.locator('#moves button')).toHaveCount(2);
+    expect(engine).toEqual([]);
+});
+
+test('the optional visual guide starts at the heading and closes without changing the board', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await start(page, 'local'); await move(page, 'e2', 'e4');
+    await page.locator('#game-options > summary').click(); await page.locator('#help').click();
+    expect(await page.locator('#guide').evaluate(el => el.scrollTop)).toBe(0);
+    await page.locator('#piece-guide summary').click();
+    await expect(page.locator('#piece-reference dt')).toHaveCount(6);
+    await page.getByRole('button', { name: 'Close how to play' }).click();
+    await expect(page.locator('#guide')).not.toBeVisible();
+    await expect(page.locator('#moves button')).toHaveCount(1);
+    await move(page, 'e7', 'e5'); await expect(page.locator('#moves button')).toHaveCount(2);
 });
 
 for (const viewport of [{ width: 320, height: 568 }, { width: 844, height: 390 }, { width: 568, height: 320 }, { width: 667, height: 375 }]) {
@@ -75,7 +107,7 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 844, height: 390 }
         await page.keyboard.press('ArrowUp');
         await page.keyboard.press('Enter');
         await expect(page.locator('#moves button')).toHaveCount(1);
-        await page.locator('details').last().locator('summary').click();
+        await page.locator('#game-options > summary').click();
         await page.locator('#suite-arcade-a11y-toggle').click();
         await expect(page.locator('#suite-arcade-a11y-toggle')).toHaveText('Contrast on');
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -126,9 +158,9 @@ test('local play works offline and computer failure preserves the position for r
     await move(page, 'e2', 'e4');
     await expect(page.locator('#moves button')).toHaveCount(1);
     await page.context().setOffline(false);
-    await page.locator('details').last().locator('summary').click();
+    await page.locator('#game-options > summary').click();
     await page.locator('#new').click();
-    await page.locator('#mode').selectOption('computer');
+    await page.locator('input[name=mode][value=computer]').check();
     await page.locator('#new-game button[type=submit]').click();
     await page.locator('#confirm-yes').click();
     await page.context().setOffline(true);
