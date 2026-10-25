@@ -222,30 +222,36 @@
       .replace(/>/g, '&gt;');
   };
 
+  // Integration patch: browser policy can deny the storage property itself.
+  // Keep the pinned legacy game rules and saved-session format unchanged.
+  function suiteStorage() {
+    try { return localStorage; } catch (e) { return null; }
+  }
+
   Suite.table = {
     remember(page, snapshot) {
-      return !!(TableContinue && TableContinue.rememberContinue(localStorage, page, snapshot));
+      return !!(TableContinue && TableContinue.rememberContinue(suiteStorage(), page, snapshot));
     },
     load(page) {
-      return TableContinue ? TableContinue.loadContinue(localStorage, page) : null;
+      return TableContinue ? TableContinue.loadContinue(suiteStorage(), page) : null;
     },
     clear(page) {
-      return !!(TableContinue && TableContinue.clearContinue(localStorage, page));
+      return !!(TableContinue && TableContinue.clearContinue(suiteStorage(), page));
     },
     has(page) {
-      return !!(TableContinue && TableContinue.hasLiveContinue(localStorage, page));
+      return !!(TableContinue && TableContinue.hasLiveContinue(suiteStorage(), page));
     },
     list() {
-      return TableContinue ? TableContinue.listLiveContinuePages(localStorage) : [];
+      return TableContinue ? TableContinue.listLiveContinuePages(suiteStorage()) : [];
     }
   };
 
   Suite.guide = {
     hasSeen(page) {
-      return !!(TableContinue && TableContinue.hasSeenGuide(localStorage, page));
+      return !!(TableContinue && TableContinue.hasSeenGuide(suiteStorage(), page));
     },
     mark(page) {
-      return !!(TableContinue && TableContinue.markGuideSeen(localStorage, page));
+      return !!(TableContinue && TableContinue.markGuideSeen(suiteStorage(), page));
     }
   };
 

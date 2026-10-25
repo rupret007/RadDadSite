@@ -35,8 +35,8 @@
 
             if (!isYouTube || !/^[A-Za-z0-9_-]{11}$/.test(videoId || '')) return null;
 
-            const title = card.querySelector('figcaption strong')?.textContent?.trim();
-            const context = card.querySelector('figcaption > span')?.textContent?.trim();
+            const title = card.querySelector('figcaption strong, .hero-performance__caption strong')?.textContent?.trim();
+            const context = card.querySelector('figcaption > span, .hero-performance__caption > span')?.textContent?.trim();
             if (!title || !context) return null;
 
             return {

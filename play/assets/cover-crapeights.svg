@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="ce-felt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#174e3b"/><stop offset="1" stop-color="#0b3226"/></linearGradient>
+              <radialGradient id="ce-spot" cx="0.5" cy="0" r="0.8"><stop offset="0" stop-color="#fff" stop-opacity="0.18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+              <linearGradient id="ce-paper" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e2e9e4"/></linearGradient>
+              <linearGradient id="ce-wild" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7ab6"/><stop offset="0.35" stop-color="#ffd76a"/><stop offset="0.7" stop-color="#7ae6ff"/><stop offset="1" stop-color="#b290ff"/></linearGradient>
+            </defs>
+            <rect width="320" height="150" fill="url(#ce-felt)"/>
+            <rect width="320" height="150" fill="url(#ce-spot)"/>
+            <g class="art-spin" fill="none" stroke="#9effc8" stroke-opacity="0.5" stroke-width="3">
+              <path d="M160 24a52 52 0 0 1 52 52" /><path d="M160 128a52 52 0 0 1-52-52"/>
+              <path d="M208 66l6 12-14 0z" fill="#9effc8" stroke="none" opacity="0.8"/><path d="M112 86l-6-12 14 0z" fill="#9effc8" stroke="none" opacity="0.8"/>
+            </g>
+            <g transform="translate(134 40)">
+              <rect x="-3" y="3" width="52" height="72" rx="6" fill="#000" opacity="0.4"/>
+              <rect width="52" height="72" rx="6" fill="url(#ce-paper)"/>
+              <rect x="3" y="3" width="46" height="66" rx="4" fill="none" stroke="url(#ce-wild)" stroke-width="2.5"/>
+              <text x="26" y="48" text-anchor="middle" font-family="Trebuchet MS, sans-serif" font-size="34" font-weight="900" fill="url(#ce-wild)">8</text>
+              <text x="6" y="14" font-size="8" fill="#c8252c">♥</text><text x="40" y="14" font-size="8" fill="#1f2528">♠</text><text x="6" y="68" font-size="8" fill="#1f2528">♣</text><text x="40" y="68" font-size="8" fill="#c8252c">♦</text>
+            </g>
+            <g transform="translate(30 90) rotate(-14)"><g class="art-lift">
+              <rect x="-2" y="2" width="40" height="56" rx="5" fill="#000" opacity="0.35"/><rect width="40" height="56" rx="5" fill="url(#ce-paper)"/>
+              <text x="5" y="14" font-family="Trebuchet MS, sans-serif" font-size="11" font-weight="800" fill="#c8252c">2</text><text x="20" y="38" text-anchor="middle" font-size="18" fill="#c8252c">♦</text>
+            </g></g>
+            <g transform="translate(64 96) rotate(-5)"><g class="art-lift">
+              <rect x="-2" y="2" width="40" height="56" rx="5" fill="#000" opacity="0.35"/><rect width="40" height="56" rx="5" fill="url(#ce-paper)"/>
+              <text x="5" y="14" font-family="Trebuchet MS, sans-serif" font-size="11" font-weight="800" fill="#1f2528">J</text><text x="20" y="38" text-anchor="middle" font-size="16">🃏</text>
+            </g></g>
+            <g transform="translate(230 90) rotate(8)"><g class="art-lift">
+              <rect x="-2" y="2" width="40" height="56" rx="5" fill="#000" opacity="0.35"/><rect width="40" height="56" rx="5" fill="url(#ce-paper)"/>
+              <text x="5" y="14" font-family="Trebuchet MS, sans-serif" font-size="11" font-weight="800" fill="#1f2528">Q</text><text x="20" y="38" text-anchor="middle" font-size="16">👸</text>
+            </g></g>
+            <g transform="translate(266 92) rotate(18)">
+              <rect x="-2" y="2" width="40" height="56" rx="5" fill="#000" opacity="0.35"/><rect width="40" height="56" rx="5" fill="#0f3f31" stroke="#f4f1e6" stroke-width="2.5"/><text x="20" y="34" text-anchor="middle" font-size="14">💩</text>
+            </g>
+            <g class="art-glow"><rect x="120" y="120" width="80" height="20" rx="10" fill="#ff7ab6"/><text x="160" y="134" text-anchor="middle" font-family="Trebuchet MS, sans-serif" font-size="10" font-weight="900" fill="#fff" letter-spacing="2">WILD!</text></g>
+          </svg>

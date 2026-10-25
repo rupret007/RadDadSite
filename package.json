@@ -5,6 +5,8 @@
   "description": "Static site for the Rad Dad band homepage.",
   "scripts": {
     "build:production": "node scripts/build-sites.mjs --client-only",
+    "build:preview": "npm run build:production && node scripts/build-preview.mjs",
+    "verify:preview": "node scripts/verify-preview.mjs",
     "build:sites": "node scripts/build-sites.mjs",
     "lint:deploy": "shellcheck scripts/deploy/server-deploy.sh tests/deploy/server-deploy.test.sh",
     "serve:test": "node scripts/serve-test.cjs",
@@ -21,6 +23,6 @@
     "@playwright/test": "^1.58.2",
     "http-server": "^14.1.1",
     "jsdom": "^29.0.1",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.12"
   }
 }

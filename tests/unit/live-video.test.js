@@ -93,10 +93,10 @@ describe('shared inline live-video player', () => {
             if (reason === 'unsupported dialog') window.document.querySelector('#live-video-dialog').showModal = undefined;
             if (reason === 'missing player') window.document.querySelector('[data-video-frame]').remove();
             if (reason === 'invalid video') {
-                for (const card of window.document.querySelectorAll('[data-inline-video]')) card.href = 'https://www.youtube.com/watch?v=invalid';
+                for (const card of window.document.querySelectorAll('.video-grid [data-inline-video]')) card.href = 'https://www.youtube.com/watch?v=invalid';
             }
         });
-        for (const card of page.document.querySelectorAll('[data-inline-video]')) {
+        for (const card of page.document.querySelectorAll('.video-grid [data-inline-video]')) {
             expect(card.getAttribute('aria-label')).toMatch(/on YouTube \(opens in a new tab\)$/);
             expect(card.hasAttribute('aria-haspopup')).toBe(false);
             expect(click(page.window, card).defaultPrevented).toBe(false);
@@ -107,7 +107,7 @@ describe('shared inline live-video player', () => {
 
     it.each(PAGES)('keeps %s dialog interior/edges open but closes for each outside edge', (_label, html, url) => {
         const page = loadPage(html, url);
-        const card = page.document.querySelector('[data-inline-video]');
+        const card = page.document.querySelector('.video-grid [data-inline-video]');
         vi.spyOn(page.dialog, 'getBoundingClientRect').mockReturnValue({ left: 20, top: 30, right: 320, bottom: 430 });
         click(page.window, card);
         const frame = page.frame();
@@ -144,7 +144,7 @@ describe('shared inline live-video player', () => {
         ['QR', 'qr/index.html', 'https://raddadband.com/qr/', 'All the Small Things — blink-182 cover', 'Wildflower 2026 · Live performance']
     ])('loads a validated YouTube video after an explicit plain click on %s', (label, html, url, title, context) => {
         const { dialog, document, window } = loadPage(html, url);
-        const card = document.querySelector('[data-inline-video]');
+        const card = document.querySelector('.video-grid [data-inline-video]');
         const originalFrame = dialog.querySelector('[data-video-frame]');
         const click = new window.MouseEvent('click', { bubbles: true, button: 0, cancelable: true });
 
@@ -171,7 +171,7 @@ describe('shared inline live-video player', () => {
         ['QR', 'qr/index.html', 'https://raddadband.com/qr/']
     ])('clears playback and restores focus when the fan closes the %s dialog', (_label, html, url) => {
         const { dialog, document, window } = loadPage(html, url);
-        const card = document.querySelector('[data-inline-video]');
+        const card = document.querySelector('.video-grid [data-inline-video]');
         card.dispatchEvent(new window.MouseEvent('click', { bubbles: true, button: 0, cancelable: true }));
         const frame = dialog.querySelector('[data-video-frame]');
         dialog.querySelector('[data-video-close]').click();
@@ -187,7 +187,7 @@ describe('shared inline live-video player', () => {
         ['QR', 'qr/index.html', 'https://raddadband.com/qr/']
     ])('does not intercept a %s card when its YouTube receipt is invalid', (_label, html, url) => {
         const { dialog, document, window } = loadPage(html, url);
-        const card = document.querySelector('[data-inline-video]');
+        const card = document.querySelector('.video-grid [data-inline-video]');
         card.href = 'https://example.com/watch?v=4ReFoSZHL7o';
         const click = new window.MouseEvent('click', { bubbles: true, button: 0, cancelable: true });
 
@@ -212,7 +212,7 @@ describe('shared inline live-video player', () => {
 
     it.each(PAGES)('keeps %s loading bounded and provides only an explicit retry after a stall', (_label, html, url) => {
         const page = loadPage(html, url);
-        const card = page.document.querySelector('[data-inline-video]');
+        const card = page.document.querySelector('.video-grid [data-inline-video]');
         expect(page.status()).toBe('');
         click(page.window, card);
         const firstFrame = page.frame();
@@ -244,7 +244,7 @@ describe('shared inline live-video player', () => {
 
     it.each(PAGES)('does not mistake a %s frame load for verified playback', (_label, html, url) => {
         const page = loadPage(html, url);
-        click(page.window, page.document.querySelector('[data-inline-video]'));
+        click(page.window, page.document.querySelector('.video-grid [data-inline-video]'));
         const loadedFrame = page.frame();
         loadedFrame.dispatchEvent(new page.window.Event('load'));
 
@@ -265,7 +265,7 @@ describe('shared inline live-video player', () => {
 
     it.each(PAGES)('offers %s manual recovery after a frame error and ignores retired frame events', (_label, html, url) => {
         const page = loadPage(html, url);
-        click(page.window, page.document.querySelector('[data-inline-video]'));
+        click(page.window, page.document.querySelector('.video-grid [data-inline-video]'));
         const failedFrame = page.frame();
         failedFrame.dispatchEvent(new page.window.Event('error'));
 
@@ -292,7 +292,7 @@ describe('shared inline live-video player', () => {
 
     it.each(PAGES)('retires %s playback and status when closed, including a close then another card', (_label, html, url) => {
         const page = loadPage(html, url);
-        const cards = [...page.document.querySelectorAll('[data-inline-video]')];
+        const cards = [...page.document.querySelectorAll('.video-grid [data-inline-video]')];
         click(page.window, cards[0]);
         const firstFrame = page.frame();
         const retiredTimeout = [...page.timers.values()][0].callback;
@@ -328,7 +328,7 @@ describe('shared inline live-video player', () => {
 
     it.each(PAGES)('stops %s inline audio when the fan normally follows the exact YouTube fallback', (_label, html, url) => {
         const page = loadPage(html, url);
-        const card = page.document.querySelector('[data-inline-video]');
+        const card = page.document.querySelector('.video-grid [data-inline-video]');
         click(page.window, card);
         const frame = page.frame();
         const fallback = page.dialog.querySelector('[data-video-youtube]');
@@ -347,7 +347,7 @@ describe('shared inline live-video player', () => {
 
     it.each(PAGES)('preserves %s modifier-click behavior on both original cards and fallback links', (_label, html, url) => {
         const page = loadPage(html, url);
-        const card = page.document.querySelector('[data-inline-video]');
+        const card = page.document.querySelector('.video-grid [data-inline-video]');
         for (const modifier of [{ metaKey: true }, { ctrlKey: true }, { shiftKey: true }, { altKey: true }, { button: 1 }]) {
             expect(click(page.window, card, modifier).defaultPrevented).toBe(false);
         }
@@ -370,7 +370,7 @@ describe('shared inline live-video player', () => {
         ['opening', 'loaded'].map(state => ({ label, html, url, persisted, state }))
     )))('retires $label video on page exit (persisted=$persisted, state=$state)', ({ html, url, persisted, state }) => {
         const page = loadPage(html, url);
-        const cards = [...page.document.querySelectorAll('[data-inline-video]')];
+        const cards = [...page.document.querySelectorAll('.video-grid [data-inline-video]')];
         click(page.window, cards[0]);
         const retiredFrame = page.frame();
         const retiredTimeout = [...page.timers.values()][0].callback;
@@ -418,7 +418,7 @@ describe('shared inline live-video player', () => {
     it('does not start an embed when native modal opening fails', () => {
         const page = loadPage('index.html', 'https://raddadband.com/');
         page.dialog.showModal = vi.fn(() => { throw new Error('Synthetic unavailable dialog'); });
-        const card = page.document.querySelector('[data-inline-video]');
+        const card = page.document.querySelector('.video-grid [data-inline-video]');
 
         expect(click(page.window, card).defaultPrevented).toBe(false);
         expect(page.frame().hasAttribute('src')).toBe(false);

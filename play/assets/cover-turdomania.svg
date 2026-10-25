@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="tm-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2717"/><stop offset="1" stop-color="#1a120c"/></linearGradient>
+            </defs>
+            <rect width="320" height="150" fill="url(#tm-bg)"/>
+            <g font-size="22" text-anchor="middle">
+              <g class="art-lift">
+                <rect x="70" y="96" width="30" height="30" rx="7" fill="#8a5a2b"/><text x="85" y="119">💩</text>
+                <rect x="100" y="96" width="30" height="30" rx="7" fill="#8a5a2b"/><text x="115" y="119">💩</text>
+                <rect x="100" y="66" width="30" height="30" rx="7" fill="#8a5a2b"/><text x="115" y="89">💩</text>
+              </g>
+              <rect x="130" y="96" width="30" height="30" rx="7" fill="#e8c64a"/><text x="145" y="119">🌽</text>
+              <rect x="160" y="96" width="30" height="30" rx="7" fill="#58c46b"/><text x="175" y="119">🟢</text>
+              <rect x="160" y="66" width="30" height="30" rx="7" fill="#e8c64a"/><text x="175" y="89">🌽</text>
+              <rect x="190" y="96" width="30" height="30" rx="7" fill="#e9e4d8"/><text x="205" y="119">🧻</text>
+              <rect x="190" y="66" width="30" height="30" rx="7" fill="#58c46b"/><text x="205" y="89">🟢</text>
+              <rect x="220" y="96" width="30" height="30" rx="7" fill="#e9e4d8"/><text x="235" y="119">🧻</text>
+              <rect x="130" y="66" width="30" height="30" rx="7" fill="#58c46b"/><text x="145" y="89">🟢</text>
+              <rect x="130" y="36" width="30" height="30" rx="7" fill="#e9e4d8"/><text x="145" y="59">🧻</text>
+            </g>
+            <g class="art-glow"><rect x="14" y="16" width="72" height="20" rx="10" fill="#ffcb87"/><text x="50" y="30" text-anchor="middle" font-family="Trebuchet MS, sans-serif" font-size="10" font-weight="900" fill="#2a1a0e" letter-spacing="2">+16 PLOP</text></g>
+          </svg>

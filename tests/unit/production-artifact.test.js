@@ -108,6 +108,10 @@ describe('production artifact identity', () => {
 });
 
 describe('production artifact generation', () => {
+    it('keeps every public source file tracked for reproducible clean-clone builds', () => {
+        expect(() => execFileSync('git', ['ls-files', '--error-unmatch', ...CLIENT_SOURCE_PATHS], { cwd: repoRoot, stdio: 'pipe' })).not.toThrow();
+    });
+
     it('creates deterministic metadata, a JSON manifest, and complete checksums', async () => {
         const firstRoot = await createValidArtifact();
         const secondRoot = await createValidArtifact();
@@ -325,6 +329,13 @@ describe('production artifact verification', () => {
                     await writeFile(join(root, 'notes.txt'), 'not deployable\n', 'utf8');
                 },
                 pattern: /Unexpected file/
+            },
+            {
+                name: 'unapproved source archive',
+                mutate: async (root) => {
+                    await writeFile(join(root, 'play/assets/chess/private-source.tar.gz'), 'not public');
+                },
+                pattern: /Forbidden repository, archive, log, or credential file/
             },
             {
                 name: 'development file',

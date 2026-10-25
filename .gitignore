@@ -1,5 +1,7 @@
-node_modules/
+node_modules
 dist/
+preview-dist/
+preview-artifact.json
 playwright-report/
 test-results/
 npm-debug.log*
@@ -33,3 +35,6 @@ secrets*
 !secrets.example*
 *.tar.gz
 *.zip
+
+# Public GPL corresponding source for the bundled chess engine only.
+!play/assets/chess/stockfish-19.0.1-source.tar.gz

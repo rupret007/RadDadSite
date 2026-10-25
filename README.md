@@ -1,11 +1,12 @@
 # Rad Dad band website
 
 Rad Dad is a Dallas–Fort Worth **cover band**, playing pop-punk, punk and alternative favorites.
-The public site is evergreen as of October 2, 2026. The September 19 show is a dated past-show entry, not the site's identity or an upcoming invitation.
+This branch is the October 24 design preview for Travis. Keep it off main and the established live site until Jeff requests publication. The September 19 show remains a dated history entry.
 
 ## Current public surfaces
 
-- `/`: band introduction, live covers, covered artists, band members, a Taylor Swift cover recording, upcoming-show placeholder, dated history, direct booking and header links to Instagram/Facebook/YouTube.
+- `/`: band introduction and featured live cover, “Do your homework” videos, arcade, covered artists, band members, a Taylor Swift cover recording, dated history, direct booking and social links.
+- `/play/`: Rad Dad Arcade, with seven games, local records, optional sound effects and a route back to the band. No Stalemate recordings are included.
 - `/qr/`: music-first landing page with accurate cover credits, the same five live-video destinations, follow links and a path back to the main booking section.
 - `/tap/`: permanent printed-QR URL, still redirects to `/qr/`. Never remove or repurpose it.
 - `/nfc/`: legacy compatibility alias for `/qr/`; the current physical items use printed QR codes rather than NFC hardware.
@@ -17,13 +18,19 @@ The public site is evergreen as of October 2, 2026. The September 19 show is a d
 
 **The Story Of Us is a Taylor Swift song.** The streaming recording linked on the site is released under Jeff Story. Do not call it a Rad Dad original, "our only original," or a song written inside the band. Do not conflate Rad Dad with Jeff's original-music projects.
 
-No upcoming dates have been provided for this update. The site says **No upcoming dates posted yet**, rather than inventing a booking or claiming the band has none. Previously supplied show facts remain in dated history. No new fees, set lengths, reviews, awards, sponsors or venue endorsements are asserted.
+The design intentionally omits an empty upcoming-shows notice. Previously supplied show facts remain in dated history. Add dates only when confirmed. No new fees, set lengths, reviews, awards, sponsors or venue endorsements are asserted.
 
 ## Shared behavior and styling
 
-Both current pages load `styles.css` followed by **`qr/styles.css`**, which now contains shared evergreen overrides. Keeping that existing supplemental URL avoids changing the exact production artifact inventory or requiring a new server deployment helper for one new CSS filename.
+Both pages load `styles.css` followed by `qr/styles.css`. The homepage additionally loads `raddad.css` for the blue-and-lime design. The explicit client and server artifact allowlists include that stylesheet and the imported public arcade files.
 
-`script.js` is shared by both pages. It handles logo fallback, sticky-header measurements, optional Apple Music previews and sharing a fixed canonical band URL. Navigation, booking and streaming destinations work without JavaScript. Apple Music loads only after an explicit preview click; YouTube inline frames load only after a card click. Images and Google Fonts remain external where already configured; this is not a claim of zero third-party requests.
+`script.js` is shared by both pages. It handles logo fallback, header measurements, optional Apple Music previews and band sharing. The separate review build shares its own root URL; the normal build uses the canonical band URL. Navigation, booking and streaming destinations work without JavaScript. Media players load after an explicit click. Images and Google Fonts remain external where already configured.
+
+## Arcade source and isolated review build
+
+Run `node scripts/sync-arcade.cjs` to reproduce the pinned import from Turdanoid. For a local source checkout, use `node scripts/sync-arcade.cjs --source ../Turdanoid`. Integration changes belong in that importer or `scripts/arcade/`, rather than generated `play/` files. The importer updates both exact artifact inventories. The private band lab stays excluded.
+
+`npm run build:preview` first verifies the clean client artifact, then creates `preview-dist/` for the existing independent Sites demo, with a review banner, preview sharing, noindex and absolute preview social metadata. The separate `preview-artifact.json` records its exact source identity and file hashes. Verify the copied snapshot with `npm run verify:preview -- --artifact-dir ../RadDadDesignPreview/dist/client --expected-sha YOUR_40_CHARACTER_GIT_SHA`. Do not use the established project ID in `.openai/hosting.json`, attach the live domain, or push main. See [the reproducible preview workflow](docs/raddad-preview.md) and [active polish evidence](docs/raddad-polish.md).
 
 `live-video.js` retains direct YouTube fallback, narrow sandboxing, explicit retry, a ten-second opening deadline, focus return and page-exit cleanup. The same five recorded performance destinations are retained. Existing direct-only cards are not changed to unverified embeds. Offline tests do not prove current third-party playback availability.
 

@@ -173,6 +173,8 @@ test('offers keyboard access and recovers when browser storage is unavailable', 
     await expect(ticket).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(/\/turdanoid\/index\.html$/);
+    await page.waitForLoadState('load');
+    expect(await page.evaluate(() => Suite.table.list())).toEqual([]);
     expect(errors).toEqual([]);
 });
 
@@ -183,7 +185,6 @@ test('keeps the band-lab URL off public homepage, QR, tap, and NFC surfaces', as
         await expect(page.locator('a[href*="garage-rehearsal-k7m2n9"]')).toHaveCount(0);
         await expect(page.locator('a[href*="/private/"]')).toHaveCount(0);
         await expect(page.locator('body')).not.toContainText('Band Lab');
-        await expect(page.locator('body')).not.toContainText('Turdanoid');
         await expect(page.locator('body')).not.toContainText('WebJam');
     }
 

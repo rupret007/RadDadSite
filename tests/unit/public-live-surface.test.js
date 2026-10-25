@@ -59,7 +59,7 @@ describe('evergreen public band surfaces', () => {
     });
     it('puts live performances before the covers wall and booking within the first section', async () => {
         const { doc } = await page();
-        expect([...doc.querySelectorAll('main > section')].map(node => node.id)).toEqual(['home','watch','covers','band','','shows','contact']);
+        expect([...doc.querySelectorAll('main > section')].map(node => node.id)).toEqual(['home','watch','arcade','covers','band','','shows','contact']);
         expect(doc.querySelector('#home a[href="#watch"]')).not.toBeNull();
         expect(doc.querySelector('#home a[href="#contact"]')).not.toBeNull();
         expect(doc.querySelectorAll('.artist-wall > li')).toHaveLength(14);
@@ -70,8 +70,8 @@ describe('evergreen public band surfaces', () => {
         expect(doc.querySelector('#home').textContent).not.toContain('September');
         expect(doc.querySelector('#show .show-status').textContent).toBe('Past show');
         expect(doc.querySelector('#show time').dateTime).toBe('2026-09-19');
-        expect(doc.querySelectorAll('[data-upcoming-shows] time')).toHaveLength(0);
-        expect(doc.querySelector('[data-upcoming-shows]').textContent).toContain('No upcoming dates posted yet');
+        expect(doc.querySelector('[data-upcoming-shows]')).toBeNull();
+        expect(doc.body.textContent).not.toMatch(/no upcoming|no shows|no dates posted/i);
         expect(doc.querySelectorAll('.show-card--featured')).toHaveLength(0);
     });
     it('keeps a space in the hero lede so phones do not glue alternative.The together', async () => {
@@ -83,17 +83,15 @@ describe('evergreen public band surfaces', () => {
     it('does not imply a next show when no upcoming dates are in the markup', async () => {
         const home = await page();
         const qr = await page('qr/index.html');
-        const emptySentence = 'No upcoming dates posted yet. Follow Rad Dad for show announcements.';
         const nextShowClaim = /catch|come to the next|next one|next show/i;
 
         expect(home.doc.querySelector('#shows-title').textContent).not.toMatch(nextShowClaim);
         expect(qr.doc.querySelector('#qr-shows-title').textContent).not.toMatch(nextShowClaim);
-        expect(home.doc.querySelector('[data-upcoming-shows]').textContent).toContain(emptySentence);
-        expect(qr.doc.querySelector('#next-show').textContent).toContain(emptySentence);
-        expect(home.doc.querySelector('[data-upcoming-shows] a[href*="instagram.com/rad.dad.band"]')).not.toBeNull();
-        expect(home.doc.querySelector('[data-upcoming-shows] a[href="#contact"]')).not.toBeNull();
+        expect(home.doc.body.textContent).not.toMatch(/no upcoming|no shows|no dates posted/i);
+        expect(qr.doc.body.textContent).not.toMatch(/no upcoming|no shows|no dates posted/i);
+        expect(home.doc.querySelector('#arcade a[href="play/"]')).not.toBeNull();
+        expect(qr.doc.querySelector('#next-show a[href="../play/"]')).not.toBeNull();
         expect(home.doc.querySelectorAll('.show-card--past')).toHaveLength(3);
-        expect(qr.doc.querySelector('#next-show a[href="../#shows"]').textContent).toContain('Show updates & past shows');
     });
     it.each(paths)('%s has a valid local destination for every same-page hash', async path => {
         const { doc } = await page(path);

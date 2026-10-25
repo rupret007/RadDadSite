@@ -82,6 +82,8 @@ const test = base.extend({
         try {
             await use();
         } finally {
+            // Let local worker-proxy requests finish before the context/API client closes.
+            await context.unrouteAll({ behavior: 'wait' });
             for (const [method, original] of originals) api[method] = original;
             expect(unexpected, 'No unexpected external network requests').toEqual([]);
         }

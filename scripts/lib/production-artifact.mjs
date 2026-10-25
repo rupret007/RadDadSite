@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import {
     copyFile,
     lstat,
@@ -16,6 +17,7 @@ export const MANIFEST_FILENAME = 'artifact-manifest.json';
 export const CHECKSUM_FILENAME = 'SHA256SUMS';
 
 export const CLIENT_SOURCE_PATHS = Object.freeze([
+    ...JSON.parse(readFileSync(new URL('../arcade/client-paths.json', import.meta.url), 'utf8')),
     'RadDad_Logo.jpg',
     'assets/rad-dad-friends-guitars-growlers-2026-1122.webp',
     'assets/rad-dad-friends-guitars-growlers-2026-561.webp',
@@ -38,6 +40,7 @@ export const CLIENT_SOURCE_PATHS = Object.freeze([
     'qr/index.html',
     'qr/script.js',
     'qr/styles.css',
+    'raddad.css',
     'script.js',
     'show-state.js',
     'styles.css',
@@ -208,7 +211,11 @@ function prohibitedReason(path) {
     if (
         PROHIBITED_FILENAMES.has(filename)
         || /^\.env(?:\.|$)/i.test(filename)
-        || /\.(?:zip|tar|tgz|gz|log|key|pem|p12|pfx)$/i.test(filename)
+        // Only these explicitly inventoried GPL corresponding-source downloads are public.
+        // All unrelated archives and repository snapshots remain forbidden.
+        || (/\.(?:zip|tar|tgz|gz|log|key|pem|p12|pfx)$/i.test(filename)
+            && !['play/assets/chess/stockfish-19.0.1-source.tar.gz',
+                'play/assets/chess/chessground-10.5.0-source.tar.gz'].includes(path))
     ) {
         return 'repository, archive, log, or credential file';
     }

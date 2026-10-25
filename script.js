@@ -33,26 +33,83 @@
         document.querySelectorAll('[data-load-preview]').forEach((button) => {
             const host = button.parentElement;
             const template = host.querySelector('template[data-preview-template]');
-            if (!template) return;
+            const source = template?.content.querySelector('iframe');
+            if (!source) return;
+            const initialLabel = button.textContent;
+            const status = document.createElement('p');
+            status.id = `music-preview-status-${[...document.querySelectorAll('[data-load-preview]')].indexOf(button)}`;
+            status.setAttribute('role', 'status');
+            status.hidden = true;
+            button.after(status);
+            button.setAttribute('aria-describedby', status.id);
+            let frame = null;
+            let attempt = null;
+            function retire() {
+                if (!attempt) return;
+                clearTimeout(attempt.timer);
+                attempt.frame.removeEventListener('load', attempt.onLoad);
+                attempt.frame.removeEventListener('error', attempt.onError);
+                attempt = null;
+            }
             button.hidden = false;
             button.addEventListener('click', () => {
-                if (host.querySelector('iframe')) return;
-                host.append(template.content.cloneNode(true));
-                button.hidden = true;
+                if (attempt) return;
+                frame?.remove();
+                frame = source.cloneNode(false);
+                frame.removeAttribute('src');
+                frame.loading = 'eager';
+                const current = { frame, timer: null, onLoad: null, onError: null };
+                attempt = current;
+                function settle(message, stop = false) {
+                    if (attempt !== current) return;
+                    retire();
+                    if (stop) { frame.remove(); frame = null; }
+                    button.textContent = 'Reload player';
+                    button.removeAttribute('aria-disabled');
+                    host.removeAttribute('aria-busy');
+                    status.textContent = message;
+                }
+                // A cross-origin iframe load cannot establish playable media.
+                current.onLoad = () => settle('If the player does not play, reload it or use the streaming links.');
+                current.onError = () => settle('The embedded player could not be opened. Reload it or use the streaming links.', true);
+                frame.addEventListener('load', current.onLoad);
+                frame.addEventListener('error', current.onError);
+                current.timer = setTimeout(() => settle('The embedded player is taking longer than expected. Reload it or use the streaming links.', true), 10000);
+                status.hidden = false;
+                status.textContent = 'Opening the player. You can also use the streaming links.';
+                host.setAttribute('aria-busy', 'true');
+                // Retain keyboard focus without allowing overlapping requests.
+                button.textContent = 'Opening…';
+                button.setAttribute('aria-disabled', 'true');
+                frame.src = source.getAttribute('src');
+                host.append(frame);
             });
             window.addEventListener('pagehide', () => {
-                host.querySelectorAll('iframe').forEach((frame) => frame.remove());
+                retire();
+                frame?.remove();
+                frame = null;
+                status.hidden = true;
+                status.textContent = '';
+                button.textContent = initialLabel;
+                button.removeAttribute('aria-disabled');
+                host.removeAttribute('aria-busy');
                 button.hidden = false;
             });
         });
 
-        // Share a fixed public band URL, never a preview, query string or private fragment.
+        // The separate design-review build shares its own root, without query strings/fragments.
         const share = document.querySelector('[data-share-band]');
         const status = document.querySelector('[data-share-status]');
         const fallback = document.querySelector('[data-share-fallback]');
         const copy = document.querySelector('[data-copy-band]');
         if (!share || !status || !fallback || !copy) return;
-        const bandUrl = 'https://raddadband.com/';
+        const preview = document.body.hasAttribute('data-design-preview');
+        const bandUrl = preview ? new URL(document.body.classList.contains('qr-page') ? '../' : './', window.location.href).href : 'https://raddadband.com/';
+        if (preview) {
+            share.textContent = 'Share this preview';
+            const input = document.getElementById('band-share-url');
+            if (input) input.value = bandUrl;
+        }
         let busy = false;
         let generation = 0;
         share.hidden = false;

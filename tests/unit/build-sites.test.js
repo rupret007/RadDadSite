@@ -16,7 +16,7 @@ async function fixture() {
     temporaryDirectories.push(root);
     const projectRoot = join(root, 'checkout');
     for (const path of [...CLIENT_SOURCE_PATHS, 'scripts/build-sites.mjs',
-        'scripts/lib/production-artifact.mjs', 'worker/index.js']) {
+        'scripts/lib/production-artifact.mjs', 'scripts/arcade/client-paths.json', 'worker/index.js']) {
         const destination = join(projectRoot, path);
         await mkdir(dirname(destination), { recursive: true });
         await cp(join(repoRoot, path), destination);
