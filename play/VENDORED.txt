@@ -1,4 +1,4 @@
-Rad Dad Arcade: github.com/rupret007/Turdanoid@e07511d991ea8cd40b313e45f7b6826b48ac27be
+Rad Dad Arcade: github.com/rupret007/Turdanoid@a1791ad8bba5951b1fa8b2403b68d55905e1bd86
 Original arcade material: same owner as RadDadSite. New chess modules/page and Chessground10.5.0: GPL-3.0-or-later. Spatial piece artwork by Maurizio Monge: MIT. chess.js 1.4.0: BSD-2-Clause. Stockfish.js 19.0.1: GPL-3.0. See assets/chess/credits.html, included licenses and corresponding-source archive.
-Generated with node scripts/sync-arcade.cjs e07511d991ea8cd40b313e45f7b6826b48ac27be. Edit the importer and scripts/arcade/, not play/.
+Generated with node scripts/sync-arcade.cjs a1791ad8bba5951b1fa8b2403b68d55905e1bd86. Edit the importer and scripts/arcade/, not play/.
 No Stalemate recordings or private band-lab files are included.

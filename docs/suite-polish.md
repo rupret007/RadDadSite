@@ -1,6 +1,6 @@
 # Accepted redesign and arcade polish
 
-Shared Turdanoid source pin: `e07511d991ea8cd40b313e45f7b6826b48ac27be`.
+Shared Turdanoid source pin: `a1791ad8bba5951b1fa8b2403b68d55905e1bd86`.
 
 The owner confirmed that the accepted Rad Dad preview, based on Stalemate's template with Rad Dad's colors and existing content, should replace the current live design. Preserve its navigation, section order, five existing performances, homework treatment, members, covers, recording and contact destinations. No absent-upcoming-shows notice is added. This authorization supersedes historical preview-only instructions in earlier milestone documents.
 
