@@ -1,12 +1,14 @@
 # Accepted redesign and arcade polish
 
-Shared Turdanoid source pin: `e73e8026925f7aca7a89f7dd0a78686cbc078f2d`.
+Shared Turdanoid source pin: `e07511d991ea8cd40b313e45f7b6826b48ac27be`.
 
 The owner confirmed that the accepted Rad Dad preview, based on Stalemate's template with Rad Dad's colors and existing content, should replace the current live design. Preserve its navigation, section order, five existing performances, homework treatment, members, covers, recording and contact destinations. No absent-upcoming-shows notice is added. This authorization supersedes historical preview-only instructions in earlier milestone documents.
 
 This pass refines the accepted design and existing games. Streaming previews retain an accessible manual Reload after a stalled or failed frame, retire earlier attempts and clean up on navigation. A cross-origin frame load cannot prove media playback; original streaming links remain. QR accurately describes the eight existing games.
 
 Both sites import the same committed Turdanoid source. Shared corrections cover focused native controls, denied-storage recovery, card-dialog/paging behavior, field/control visibility, responsive canvas transitions, Spades' existing client bridge and Continue history, and portable delivery of the unchanged local chess engine. Rad Dad retains its intentional game-effects-only adapter and does not acquire Stalemate recordings or an empty music-strip gap. Edit source/importer inputs, then regenerate `play/` and the explicit production inventory.
+
+The canonical Rad Dad arcade stylesheet reserves separate desktop space for Rummy's existing Hub link, colour setting and draw actions. This accounts for Rad Dad's music-free footer configuration while preserving phone placement. Shared chess music gating remains harmless under Rad Dad's effects-only adapter.
 
 The existing docs, unit, deployment-helper, browser, shell lint and clean-artifact gates remain required. Acceptance also needs reproducible imports, inspected receiving screenshots and native representative gameplay. Emulated devices and controlled rare-position/network fixtures are labeled separately from natural sessions. No physical-device, speaker, every-position/campaign, enjoyment or retention claim is implied.
 
