@@ -96,7 +96,7 @@
     }
   };
   root.addEventListener('error', event => {
-    if (event.target === root || event.target?.matches?.('script[data-game-required]')) fail();
+    if (event.target === root || event.target?.matches?.('script[data-game-required],link[data-game-required]')) fail();
   }, true);
   root.addEventListener('pagehide', clearDeadline);
   root.addEventListener('pageshow', startDeadline);

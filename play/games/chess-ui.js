@@ -2,7 +2,17 @@
 import { Chess, createGame, playMove, claimDraw, claimReason, intendedClaims, undoTurn, resign,
   loadGame, saveGame, recordResult, readResults, exportPgn, LEVELS, colorName, pieceName } from './chess-core.js';
 import { ChessEngine } from './chess-engine.js';
-import { pieceSvg, PIECE_GUIDE } from './chess-pieces.js';
+import { pieceSvg, PIECE_GUIDE, loadPieceArtwork } from './chess-pieces.js';
+import { ChessBoard } from './chess-board.js';
+
+// The game is not ready with missing pieces or board styling. Keep the existing
+// deliberate loading/retry UI and saved position until every visual asset loads.
+const hasBoardStyle = link => !!link.sheet?.cssRules?.length;
+await Promise.all([loadPieceArtwork(), ...[...document.querySelectorAll('link[data-game-required]')].map(link => hasBoardStyle(link) ? Promise.resolve() : new Promise((resolve, reject) => {
+  if (globalThis.SuiteLoading?.state === 'failed') { reject(new Error('The chessboard style could not load.')); return; }
+  link.addEventListener('load', () => hasBoardStyle(link) ? resolve() : reject(new Error('The chessboard style could not load.')), { once: true });
+  link.addEventListener('error', () => reject(new Error('The chessboard style could not load.')), { once: true });
+}))]);
 
 const $ = id => document.getElementById(id);
 const suite = globalThis.Suite;
@@ -26,8 +36,10 @@ let claimChoices = [];
 let statsSaved = true;
 let opened = false;
 const squares = new Map();
+let boardView;
 
 function cancelSearch(keepWarm = false) {
+  if (!keepWarm) { boardView?.cancel(); }
   generation++;
   if (!keepWarm || busy) { engine.cancel(); }
   busy = false;
@@ -46,7 +58,8 @@ function syncMute() {
 }
 function humanTurn() { return game && (game.mode === 'local' || game.chess.turn() === game.side); }
 function livePosition() { return reviewing === null; }
-function canMove() { return opened && game && !game.result && humanTurn() && livePosition() && !suspended; }
+function playablePosition() { return opened && game && !game.result && humanTurn() && livePosition() && !suspended; }
+function canMove() { return playablePosition() && !document.querySelector('dialog[open]'); }
 function shownChess() {
   if (reviewing === null) { return game.chess; }
   const moves = game.chess.history({ verbose: true });
@@ -62,6 +75,13 @@ function chosenMode() { return document.querySelector('input[name="mode"]:checke
 function renderBoard() {
   if (!game) { return; }
   const chess = shownChess();
+  if (!boardView) {
+    boardView = new ChessBoard($('board'), {
+      select: activate,
+      move: (from, to) => { if (canMove()) { selected = from; activate(to); } },
+      cancel: () => { selected = null; feedback = 'Move cancelled. Select a piece to try again.'; render(); }
+    });
+  }
   const history = game.chess.history({ verbose: true });
   const last = history[(reviewing ?? history.length) - 1];
   const legal = selected && canMove() ? chess.moves({ square: selected, verbose: true }) : [];
@@ -86,7 +106,7 @@ function renderBoard() {
       button.className = ['square', (file.charCodeAt(0) + rank) % 2 ? '' : 'dark',
         square === selected ? 'selected' : '', target ? 'legal' : '', target?.captured ? 'capture' : '',
         lastSquare ? 'last' : '', checked ? 'checked' : '', hintMove && [hintMove.slice(0, 2), hintMove.slice(2, 4)].includes(square) ? 'hinted' : ''].filter(Boolean).join(' ');
-      button.innerHTML = `${piece ? pieceSvg(piece.type, piece.color) : ''}${file === files[0] ? `<span class="coord rank" aria-hidden="true">${rank}</span>` : ''}${rank === ranks[7] ? `<span class="coord file" aria-hidden="true">${file}</span>` : ''}${checked ? '<span class="check-label" aria-hidden="true">CHECK</span>' : ''}`;
+      button.innerHTML = `${file === files[0] ? `<span class="coord rank" aria-hidden="true">${rank}</span>` : ''}${rank === ranks[7] ? `<span class="coord file" aria-hidden="true">${file}</span>` : ''}${checked ? '<span class="check-label" aria-hidden="true">CHECK</span>' : ''}`;
       button.setAttribute('aria-label', `${square}, ${piece ? `${colorName(piece.color)} ${pieceName(piece.type)}` : 'empty'}${checked ? ', in check' : ''}${target ? target.captured ? ', legal capture' : ', legal move' : ''}${lastSquare ? ', last move' : ''}${hintMove && [hintMove.slice(0, 2), hintMove.slice(2, 4)].includes(square) ? ', hint' : ''}`);
       button.setAttribute('aria-pressed', String(selected === square));
       button.tabIndex = square === focused ? 0 : -1;
@@ -94,7 +114,9 @@ function renderBoard() {
     }
   }
   // Moving existing buttons retains listeners, but reinsertion can lose focus.
-  $('board').replaceChildren(frag);
+  boardView.update({ chess, id: game.id, view: reviewing ?? 'live', flipped: game.flipped,
+    selected, hint: hintMove, last, allowed: canMove(), local: game.mode === 'local' });
+  boardView.grid.replaceChildren(frag);
   if (active) { focusBoard(active); }
   const topColor = game.flipped ? 'w' : 'b';
   const label = color => game.mode === 'local' ? `${colorName(color)} pieces` : color === game.side ? `You · ${colorName(color)}` : `Computer<span class="player-level"> · ${LEVELS[game.level].label}</span> · ${colorName(color)}`;
@@ -158,7 +180,7 @@ function render() {
   else if (ended) { status = ended.reason + (ended.intended ? ` · intended move ${ended.intended}` : ''); }
   else if (suspended) { status = 'Game paused. Press Continue playing when you’re ready.'; }
   else if (busy) { status = humanTurn() ? 'Looking for a hint… You can still make your move.' : 'Computer thinking…'; }
-  else if (!status) { status = game.chess.isCheck() ? 'Your king is under attack. Move out of check.' : local ? 'Pass the device after your move. Tap a piece to see its moves.' : humanTurn() ? 'Your move. Tap a piece, then a marked square.' : 'Preparing the computer…'; }
+  else if (!status) { status = game.chess.isCheck() ? 'Your king is under attack. Move out of check.' : local ? 'Drag or tap to move. Pass the device after your move.' : humanTurn() ? 'Your move. Drag a piece, or tap it and a marked square.' : 'Preparing the computer…'; }
   $('status').textContent = status;
   $('save-status').classList.toggle('storage-problem', !saveOk || !statsSaved);
   $('save-status').textContent = saveOk && statsSaved ? 'Saved on this device only.' : 'Storage is unavailable. Keep this page open; download PGN to keep your moves.';
@@ -187,26 +209,7 @@ function afterMove(move) {
   } else if (game.result) { suite?.ding?.(); }
   else { suite?.beep?.(move.captured ? 330 : 520, 0.045, 'triangle', 0.035); }
   render();
-  animateMove(move);
   void queueComputer();
-}
-function animateMove(move) {
-  if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { return; }
-  function slide(from, to) {
-    const button = squares.get(to);
-    const svg = button?.querySelector('svg');
-    if (!svg?.animate) { return; }
-    const size = button.getBoundingClientRect().width;
-    const sign = game.flipped ? -1 : 1;
-    const dx = (from.charCodeAt(0) - to.charCodeAt(0)) * size * sign;
-    const dy = (Number(to[1]) - Number(from[1])) * size * sign;
-    button.style.zIndex = '5';
-    const animation = svg.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'translate(0,0)' }], { duration: 140, easing: 'ease-out' });
-    animation.finished.then(() => button.style.removeProperty('z-index')).catch(() => button.style.removeProperty('z-index'));
-  }
-  slide(move.from, move.to);
-  if (move.flags.includes('k')) { slide(`h${move.from[1]}`, `f${move.from[1]}`); }
-  if (move.flags.includes('q')) { slide(`a${move.from[1]}`, `d${move.from[1]}`); }
 }
 async function queueComputer(hint = false) {
   if (!opened || !game || game.result || busy || !livePosition() || suspended || document.hidden || document.querySelector('dialog[open]') || (hint ? !humanTurn() : humanTurn())) { return; }
@@ -260,7 +263,7 @@ function activate(square) {
       for (const button of $('promotion').querySelectorAll('[data-promote]')) {
         button.innerHTML = `${pieceSvg(button.dataset.promote, game.chess.turn())}<span>${PIECE_GUIDE[button.dataset.promote].name}</span>`;
       }
-      $('promotion').showModal(); return;
+      $('promotion').showModal(); render(); return;
     }
     cancelSearch(true); failure = false;
     afterMove(playMove(game, { from: selected, to: square })); return;
@@ -293,11 +296,13 @@ function settings() {
 }
 $('board').addEventListener('click', event => {
   const square = event.target.closest('[data-square]')?.dataset.square;
-  if (square) { activate(square); }
+  // Pointer input belongs to Chessground. Keyboard and assistive clicks use
+  // these real buttons and the same rules adapter without a second move path.
+  if (square && event.detail === 0) { activate(square); }
 });
 $('board').addEventListener('focusin', event => { if (event.target.dataset.square) { currentFocus(event.target.dataset.square); } });
 $('board').addEventListener('keydown', event => {
-  if (event.key === 'Escape') { selected = null; hintMove = null; feedback = 'Selection cleared.'; render(); event.preventDefault(); return; }
+  if (event.key === 'Escape') { boardView?.cancel(); selected = null; hintMove = null; feedback = 'Selection cleared.'; render(); event.preventDefault(); return; }
   const directions = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] };
   if (!directions[event.key]) { return; }
   event.preventDefault();
@@ -353,19 +358,23 @@ $('confirm-yes').addEventListener('click', () => resolveConfirmation(true));
 $('confirm').addEventListener('cancel', event => { event.preventDefault(); resolveConfirmation(false); });
 $('promotion').querySelectorAll('[data-promote]').forEach(button => {
   button.addEventListener('click', () => {
-    if (!promotionMove || !canMove() || document.hidden) { return; }
+    if (!promotionMove || !playablePosition() || !$('promotion').open || document.hidden) { return; }
     const move = { ...promotionMove, promotion: button.dataset.promote };
     promotionMove = null; $('promotion').close(); cancelSearch(true); afterMove(playMove(game, move)); focusBoard(move.to);
   });
 });
-$('cancel-promotion').addEventListener('click', () => $('promotion').close());
-$('promotion').addEventListener('close', () => { promotionMove = null; if (canMove()) { focusBoard(); } });
+function closePromotion() { promotionMove = null; $('promotion').close(); render(); if (canMove()) { focusBoard(); } }
+$('cancel-promotion').addEventListener('click', closePromotion);
+$('promotion').addEventListener('cancel', event => { event.preventDefault(); closePromotion(); });
+$('promotion').addEventListener('close', () => { promotionMove = null; render(); if (canMove()) { focusBoard(); } });
 function help() {
   cancelSearch(); $('guide').showModal(); $('guide-title').focus({ preventScroll: true }); $('guide').scrollTop = 0; render();
 }
 $('help').addEventListener('click', help); $('how-to').addEventListener('click', help);
-$('close-guide').addEventListener('click', () => $('guide').close());
-$('dismiss-guide').addEventListener('click', () => $('guide').close());
+function closeGuide() { $('guide').close(); render(); void queueComputer(); }
+$('close-guide').addEventListener('click', closeGuide);
+$('dismiss-guide').addEventListener('click', closeGuide);
+$('guide').addEventListener('cancel', event => { event.preventDefault(); closeGuide(); });
 $('guide').addEventListener('close', () => { render(); void queueComputer(); });
 $('claim').addEventListener('click', () => {
   if (claimReason(game.chess)) { claimDraw(game); cancelSearch(); persist(); render(); return; }

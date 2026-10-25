@@ -6,7 +6,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..');
-const PIN = '279f95c4577e01a254683adb7e58b86f6de041ca';
+const PIN = '10a0e6e201946247ddf4a7ca06f3786a93e69805';
 const FILES = ['index.html', 'hub.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
   'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html',
   'neon-arkanoid.html', 'game.js', 'favicon.svg', 'assets', 'games'];
@@ -94,7 +94,7 @@ try {
     }
     fs.writeFileSync(path.join(stage, file), html);
   }
-  fs.writeFileSync(path.join(stage, 'VENDORED.txt'), `Rad Dad Arcade: github.com/rupret007/Turdanoid@${sha}\nOriginal arcade material: same owner as RadDadSite. New chess modules/page/art: GPL-3.0-or-later. chess.js 1.4.0: BSD-2-Clause. Stockfish.js 19.0.1: GPL-3.0. See assets/chess/credits.html, included licenses and corresponding-source archive.\nGenerated with node scripts/sync-arcade.cjs ${sha}. Edit the importer and scripts/arcade/, not play/.\nNo Stalemate recordings or private band-lab files are included.\n`);
+  fs.writeFileSync(path.join(stage, 'VENDORED.txt'), `Rad Dad Arcade: github.com/rupret007/Turdanoid@${sha}\nOriginal arcade material: same owner as RadDadSite. New chess modules/page and Chessground10.5.0: GPL-3.0-or-later. Spatial piece artwork by Maurizio Monge: MIT. chess.js 1.4.0: BSD-2-Clause. Stockfish.js 19.0.1: GPL-3.0. See assets/chess/credits.html, included licenses and corresponding-source archive.\nGenerated with node scripts/sync-arcade.cjs ${sha}. Edit the importer and scripts/arcade/, not play/.\nNo Stalemate recordings or private band-lab files are included.\n`);
   const inventory = walk(stage).map(file => `play/${path.relative(stage, file).split(path.sep).join('/')}`).sort();
   const dest = path.join(ROOT, 'play');
   const backup = `${stage}-previous`;

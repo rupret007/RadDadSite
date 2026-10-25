@@ -211,10 +211,11 @@ function prohibitedReason(path) {
     if (
         PROHIBITED_FILENAMES.has(filename)
         || /^\.env(?:\.|$)/i.test(filename)
-        // Only this explicitly inventoried GPL corresponding-source download is public.
+        // Only these explicitly inventoried GPL corresponding-source downloads are public.
         // All unrelated archives and repository snapshots remain forbidden.
         || (/\.(?:zip|tar|tgz|gz|log|key|pem|p12|pfx)$/i.test(filename)
-            && path !== 'play/assets/chess/stockfish-19.0.1-source.tar.gz')
+            && !['play/assets/chess/stockfish-19.0.1-source.tar.gz',
+                'play/assets/chess/chessground-10.5.0-source.tar.gz'].includes(path))
     ) {
         return 'repository, archive, log, or credential file';
     }

@@ -10,6 +10,43 @@ async function move(page, from, to) {
     await page.locator(`[data-square=${to}]`).click();
 }
 
+test('the replacement board drags under Rad Dad CSP, serves licensed art and resumes the same game', async ({ page }) => {
+    const errors = [], failed = [];
+    page.on('pageerror', error => errors.push(error.message));
+    page.on('response', response => { if (response.status() >= 400) failed.push(response.url()); });
+    await start(page, 'local');
+    await expect(page.locator('#board')).toHaveAttribute('data-renderer', 'chessground');
+    const from = await page.locator('[data-square=e2]').boundingBox(), to = await page.locator('[data-square=e4]').boundingBox();
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2); await page.mouse.down();
+    await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 10 });
+    await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+    await page.mouse.up(); await expect(page.locator('#moves button')).toHaveCount(1);
+    await expect.poll(() => page.locator('cg-board piece.pawn.white').evaluateAll(pieces => pieces.some(p => p.cgKey === 'e4'))).toBe(true);
+    const piece = page.locator('cg-board piece.pawn.white').first();
+    expect(await piece.evaluate(el => getComputedStyle(el).backgroundImage)).toContain('spatial-wp.svg');
+    const license = await page.request.get('/play/assets/chess/Spatial-LICENSE.txt');
+    expect(license.status()).toBe(200); expect(await license.text()).toContain('Maurizio Monge');
+    const source = await page.request.get('/play/assets/chess/chessground-10.5.0-source.tar.gz'); expect(source.status()).toBe(200);
+    await page.reload(); await page.locator('#continue').click();
+    await expect(page.locator('#moves button')).toHaveCount(1); await move(page, 'e7', 'e5');
+    await expect(page.locator('#moves button')).toHaveCount(2);
+    expect(errors).toEqual([]); expect(failed).toEqual([]);
+});
+
+for (const asset of ['pieces/spatial-wk.svg', 'chessground.js']) {
+    test(`missing ${asset} keeps saved play safe and recovers deliberately`, async ({ page }) => {
+        await start(page, 'local'); await move(page, 'e2', 'e4'); await expect(page.locator('#moves button')).toHaveCount(1);
+        const saved = await page.evaluate(() => localStorage.getItem('arcade_chess_save_v1'));
+        await page.route(`**/assets/chess/${asset}`, route => route.abort()); await page.reload();
+        await expect(page.locator('#suite-load-state')).toBeVisible();
+        await expect(page.locator('#new-game button[type=submit]')).toBeDisabled();
+        expect(await page.evaluate(() => localStorage.getItem('arcade_chess_save_v1'))).toBe(saved);
+        await page.unroute(`**/assets/chess/${asset}`); await page.getByRole('button', { name: 'Try again', exact: true }).click();
+        await page.locator('#continue').click(); await expect(page.locator('#moves button')).toHaveCount(1);
+        await move(page, 'e7', 'e5'); await expect(page.locator('#moves button')).toHaveCount(2);
+    });
+}
+
 test('chess runs the self-hosted computer under Rad Dad CSP and keeps its own save', async ({ page }) => {
     const errors = [], music = [];
     page.on('pageerror', error => errors.push(error.message));
