@@ -18,4 +18,6 @@ body.arcade[data-arcade-game="hub"] .shell { padding-top:24px; }
 @media (min-width:981px) {
   body.arcade[data-arcade-game="turdrummy"] .action-dock:has(> .suite-a11y-rummy-dock-slot) { padding-left:calc(158px + env(safe-area-inset-left, 0px)); }
   body.arcade[data-arcade-game="turdrummy"] .suite-a11y-rummy-dock-slot { left:calc(92px + env(safe-area-inset-left, 0px)); }
+  /* The centered1100px Spades table needs Hub space only near the left edge. */
+  body.arcade[data-arcade-game="turdspades"] .dock-grid { padding-left:calc(clamp(0px, calc(640px - 50vw), 82px) + env(safe-area-inset-left, 0px)); }
 }
