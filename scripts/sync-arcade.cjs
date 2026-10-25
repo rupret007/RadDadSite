@@ -6,7 +6,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..');
-const PIN = '58b187cbc8e6f4f3f39989ece47857fb54c91a3a';
+const PIN = '1a8a6edaf679ca3eaec37347d80ef885650a97ca';
 const FILES = ['index.html', 'hub.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
   'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html',
   'neon-arkanoid.html', 'game.js', 'favicon.svg', 'assets', 'games'];
