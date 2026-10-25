@@ -98,6 +98,9 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 844, height: 390 }
         if (viewport.width > viewport.height) {
             expect(board.y).toBeGreaterThanOrEqual(0);
             expect(board.y + board.height).toBeLessThanOrEqual(viewport.height);
+            const table = await page.locator('.chess-table').boundingBox();
+            expect(table.y).toBeGreaterThanOrEqual(0);
+            expect(table.y + table.height).toBeLessThanOrEqual(viewport.height);
         }
         const square = await page.locator('[data-square=e2]').boundingBox();
         expect(Math.abs(square.height - square.width)).toBeLessThan(1);
@@ -113,6 +116,19 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 844, height: 390 }
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     });
 }
+
+test('computer play keeps both player strips and board visible through rotation and flipping', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await start(page); await move(page, 'e2', 'e4'); await expect(page.locator('#moves button')).toHaveCount(2);
+    for (const viewport of [{ width: 568, height: 320 }, { width: 667, height: 375 }, { width: 844, height: 390 }]) {
+        await page.setViewportSize(viewport);
+        for (const flip of [false, true]) {
+            if (flip) await page.locator('#flip').click();
+            const table = await page.locator('.chess-table').boundingBox();
+            expect(table.y).toBeGreaterThanOrEqual(0); expect(table.y + table.height).toBeLessThanOrEqual(viewport.height);
+        }
+    }
+});
 
 test('chess exposes intentional retry when its computer request fails', async ({ page }) => {
     let blocked = 0;

@@ -97,9 +97,9 @@ function renderBoard() {
   $('board').replaceChildren(frag);
   if (active) { focusBoard(active); }
   const topColor = game.flipped ? 'w' : 'b';
-  const label = color => game.mode === 'local' ? `${colorName(color)} pieces` : color === game.side ? `You · ${colorName(color)}` : `Computer · ${LEVELS[game.level].label} · ${colorName(color)}`;
-  $('top-player').textContent = label(topColor);
-  $('bottom-player').textContent = label(topColor === 'w' ? 'b' : 'w');
+  const label = color => game.mode === 'local' ? `${colorName(color)} pieces` : color === game.side ? `You · ${colorName(color)}` : `Computer<span class="player-level"> · ${LEVELS[game.level].label}</span> · ${colorName(color)}`;
+  $('top-player').innerHTML = label(topColor);
+  $('bottom-player').innerHTML = label(topColor === 'w' ? 'b' : 'w');
   $('top-player').dataset.color = topColor;
   $('bottom-player').dataset.color = topColor === 'w' ? 'b' : 'w';
   const until = reviewing ?? history.length;
@@ -110,7 +110,10 @@ function renderBoard() {
       const count = captured.filter(name => name === pieceName(type)).length;
       return count ? `${count} ${pieceName(type)}${count > 1 ? 's' : ''}` : '';
     }).filter(Boolean);
-    $(id).textContent = counts.length ? `Captured: ${counts.join(', ')}` : 'No captures yet';
+    const detail = counts.length ? `Captured: ${counts.join(', ')}` : 'No captures yet';
+    $(id).innerHTML = `<span class="capture-detail">${detail}</span><span class="capture-short" aria-hidden="true">${captured.length} captured</span>`;
+    $(id).title = detail;
+    $(`${colorName(color).toLowerCase()}-captured-review`).textContent = `${colorName(color)} · ${detail}`;
   }
   const boardState = reviewing !== null ? `Reviewing after ${reviewing} half-moves.` : game.result
     ? `${game.result.winner ? `${colorName(game.result.winner)} wins` : 'Draw'}. ${game.result.reason}. Game finished.`
@@ -325,7 +328,7 @@ $('undo').addEventListener('click', () => {
   feedback = `Took back ${count} ${count === 1 ? 'move' : 'moves'}. Your turn to try another plan.`;
   persist(); render(); void queueComputer();
 });
-$('flip').addEventListener('click', () => { game.flipped = !game.flipped; persist(); render(); });
+$('flip').addEventListener('click', () => { game.flipped = !game.flipped; persist(); render(); globalThis.scrollTo(0, 0); focusBoard(); });
 $('previous').addEventListener('click', () => review((reviewing ?? game.chess.history().length) - 1));
 $('next').addEventListener('click', () => review((reviewing ?? game.chess.history().length) + 1));
 $('live').addEventListener('click', () => review(game.chess.history().length));
