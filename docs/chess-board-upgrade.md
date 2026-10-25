@@ -1,5 +1,7 @@
 # Rad Dad replacement chessboard
 
+Historical board milestone. The current accepted redesign/polish and publication authorization are recorded in [suite-polish.md](suite-polish.md); those later instructions supersede this milestone's preview-only branch restrictions.
+
 The actual playing board now uses Chessground10.5.0 with configured Spatial artwork by Maurizio Monge. This is a receiving integration of Turdanoid 10a0e6e201946247ddf4a7ca06f3786a93e69805, source draft PR105, stacked on ready PR104. New site work is stacked on ready PR67. Preserve all parent PR heads/states and main.
 
 The source comparison/acceptance record is docs/chess-board-upgrade.md in Turdanoid. Native drag/tap input, professional ivory/navy pieces, a readable slate/sage board, move/capture/check cues and short animations use the mature library. Existing keyboard square buttons continue to control the same chess.js state. Stockfish, all difficulty choices, saves/mute, one/two-player setup, promotion/cancel, special moves, hints/undo/review/PGN and the other seven games remain.
