@@ -83,7 +83,11 @@ function isRecoverablePagePath(pathname) {
     if (!/^\/[a-z0-9_-]+(?:\/[a-z0-9_-]+)*(?:\.html|\/)?$/i.test(pathname)) return false;
     const first = pathname.split('/')[1].toLowerCase();
     return !new Set([
-        'index.html', 'qr', 'tap', 'nfc', 'assets', 'api', 'worker', 'scripts', 'tests', 'private'
+        'index.html', 'qr', 'tap', 'nfc', 'assets', 'api', 'worker', 'scripts', 'tests', 'private',
+        // These source/build directories are excluded from the public artifact.
+        // Their missing HTML pages must retain 404 instead of looking public.
+        'gpt', 'backup_restore_point', 'node_modules', 'test-results',
+        'playwright-report', 'docs', 'pr-assets', 'dist', 'preview-dist'
     ]).has(first);
 }
 

@@ -49,6 +49,36 @@ describe('working canonical recovery from an old public page link', () => {
         expect(response.headers.get('location')).toBeNull();
     });
 
+    it.each([
+        '/GPT/', '/GPT/index.html', '/gPt/nested/old.html',
+        '/backup_restore_point/', '/backup_restore_point/index.html',
+        '/node_modules/index.html', '/test-results/', '/test-results/index.html',
+        '/playwright-report/index.html', '/docs/index.html', '/pr-assets/review/',
+        '/dist/client/index.html', '/preview-dist/index.html'
+    ])('keeps excluded source/build page %s as the original 404', async (path) => {
+        const { response, result, assetFetch, input } = await request(`${path}?source=old-link`);
+        expect(response).toBe(result);
+        expect(response.status).toBe(404);
+        expect(response.headers.get('location')).toBeNull();
+        expect(await response.text()).toBe('missing');
+        expect(assetFetch).toHaveBeenCalledExactlyOnceWith(input);
+    });
+
+    it.each(['/gpt-night/', '/docs-show/recap.html', '/backup_restore_points/'])('still recovers ordinary public name %s without reserving a prefix', async (path) => {
+        const { response } = await request(`${path}?source=old-link`);
+        expect(response.status).toBe(302);
+        expect(response.headers.get('location')).toBe(`${ORIGIN}/#`);
+    });
+
+    it.each(['GET', 'HEAD'])('preserves canonical QR aliases for %s with their query', async (method) => {
+        for (const alias of ['/qr', '/qr/index.html', '/tap', '/tap/', '/tap/index.html', '/nfc', '/nfc/', '/nfc/index.html']) {
+            const { response, assetFetch } = await request(`${alias}?utm_source=fixture`, { method });
+            expect(response.status, alias).toBe(301);
+            expect(response.headers.get('location'), alias).toBe(`${ORIGIN}/qr/?utm_source=fixture`);
+            expect(assetFetch, alias).not.toHaveBeenCalled();
+        }
+    });
+
     it.each(['POST', 'PUT', 'DELETE', 'HEAD'])('never converts %s to a homepage navigation', async (method) => {
         const { response, result } = await request('/past-show/details/', { method });
         expect(response).toBe(result);

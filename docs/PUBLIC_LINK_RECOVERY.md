@@ -29,6 +29,14 @@ The recovery destination contains no stale path, query or inherited fragment.
 controls do not erase the original URL from browser history or server logs.
 Known QR aliases intentionally retain their existing query behavior.
 
+Missing source and build directories also retain their original 404 for HTML
+navigation: `GPT`, `backup_restore_point`, `node_modules`, `test-results`,
+`playwright-report`, `docs`, `pr-assets`, `dist` and `preview-dist`. These paths
+are absent from the explicit public artifact. Matching uses the complete first
+path segment without regard to case; ordinary names such as `gpt-night` still
+use public-page recovery. This preserves the deployment's private-path status
+contract without changing asset delivery or the existing recovery destination.
+
 No client HTML, visual styling, flyer assets, show facts, song IDs, booking
 actions, send paths, dependencies or deployment workflow changed. Travis books;
 never auto-pitch or post. Owner controls do not become a public recovery target.
@@ -44,7 +52,7 @@ cutover decisions.
   synthetic nested URL; its stylesheet resolved to a nonexistent nested path.
 - `tests/unit/worker-recovery.test.js` covers recovery destination/status,
   privacy headers, positive HTML negotiation, loop prevention, error/method/
-  resource boundaries and existing owner holds.
+  resource boundaries, excluded source/build pages and existing owner holds.
 - `tests/e2e/worker-recovery.spec.js` imports the real worker and uses a strictly
   same-origin synthetic ASSETS adapter. It exercises Chromium at phone widths,
   stylesheet and `script.js` loading, a direct calendar-resource request,

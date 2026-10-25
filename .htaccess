@@ -1,0 +1,6 @@
+# Legacy Apache repository-root mirror only. The clean dist/client artifact
+# excludes this file and all source/build paths; its hosting rules are separate.
+# Requires mod_alias and AllowOverride FileInfo. Preserve public URL behavior.
+RedirectMatch 404 "(?i)^/(?:\.git|\.github|\.openai|gpt|backup_restore_point|private|scripts|tests|worker|node_modules|test-results|playwright-report|docs|pr-assets|dist|preview-dist)(?:/|$)"
+RedirectMatch 404 "(?i)^/(?:\.env(?:\.[^/]*)?|\.gitattributes|\.gitignore|\.htaccess|README(?:\.md)?|AGENTS\.md|package(?:-lock)?\.json|playwright(?:\.live)?\.config\.js|vitest\.config\.js|npm-debug\.log|preview-artifact\.json|raddad-festival-poster\.jpg|wildflower-poster\.jpg)(?:/|$)"
+RedirectMatch 404 "(?i)^/(?:RadDad_OnePage_Site(?:_v[234])?|RadDad_Website)\.zip(?:/|$)"
