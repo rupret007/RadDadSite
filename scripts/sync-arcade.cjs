@@ -6,7 +6,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..');
-const PIN = '1a8a6edaf679ca3eaec37347d80ef885650a97ca';
+const PIN = 'cd2dfda364465a72592f640b21acf4785c0a73b4';
 const FILES = ['index.html', 'hub.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
   'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html',
   'neon-arkanoid.html', 'game.js', 'favicon.svg', 'assets', 'games'];
@@ -62,7 +62,9 @@ try {
   fs.writeFileSync(suiteFile, suite);
   fs.rmSync(path.join(stage, 'assets/suite-music.js'));
   const shareFile = path.join(stage, 'assets/suite-share.js');
-  fs.writeFileSync(shareFile, fs.readFileSync(shareFile, 'utf8').replaceAll('Stalemate Arcade', 'Rad Dad Arcade').replaceAll('STALEMATE ARCADE', 'RAD DAD ARCADE'));
+  let share = fs.readFileSync(shareFile, 'utf8').replaceAll('Stalemate Arcade', 'Rad Dad Arcade').replaceAll('STALEMATE ARCADE', 'RAD DAD ARCADE');
+  share = replaceRequired(share, "const SHARE_ACCENT = '#ed2765';", "const SHARE_ACCENT = '#20baff';", 'result card palette');
+  fs.writeFileSync(shareFile, share);
 
   // Reuse the game's actual cover art on the band homepage.
   const originalHub = fs.readFileSync(path.join(stage, 'index.html'), 'utf8');
