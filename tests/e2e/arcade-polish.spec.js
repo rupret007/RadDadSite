@@ -36,15 +36,20 @@ for (const [width, height] of [[320, 568], [375, 667], [390, 844], [844, 390]]) 
 
 for (const [game, action] of games) {
     test(`${game} explains a stalled startup and recovers when the download completes`, async ({ page }) => {
-        let release;
+        let release, intercepted = false;
         const held = new Promise(resolve => { release = resolve; });
-        await page.route('**/play/assets/turdsuite.js', async route => { await held; await route.continue(); });
+        await page.route(/\/play\/assets\/turdsuite\.js(?:\?.*)?$/, async route => {
+            intercepted = true;
+            await held;
+            await route.continue();
+        });
         try {
             await page.clock.install();
             await page.goto('/play/' + game + '.html', { waitUntil: 'commit' });
             // A head download can block the first render frame. Poll from the
             // test driver instead of waiting on the page's virtualized rAF.
             await expect.poll(() => page.evaluate(() => !!window.SuiteLoading)).toBe(true);
+            await expect.poll(() => intercepted).toBe(true);
             await page.clock.fastForward(13000);
             await expect(page.locator('#suite-load-state')).toBeVisible();
             await expect(page.locator('#suite-load-state button')).toBeFocused();

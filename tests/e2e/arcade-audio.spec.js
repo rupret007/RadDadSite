@@ -48,6 +48,8 @@ for (const game of games) {
         await enter(page, game);
         await (await audioButton(page)).click();
         await expect(page.locator('#suite-audio-settings')).toBeVisible();
+        const pausesGame = ['TurdAnoid', 'turdtris', 'chess'].includes(game);
+        if (pausesGame) expect(await page.evaluate(() => Suite.getSoundState().paused)).toBe(true);
         const before = await page.evaluate(() => Suite.getSoundState().accepted);
         await page.locator('#suite-effects-preview').click();
         await expect.poll(() => page.evaluate(() => Suite.getSoundState().accepted)).toBeGreaterThan(before);
@@ -62,7 +64,17 @@ for (const game of games) {
         await expect.poll(() => page.evaluate(() => Suite.getSoundState().activeVoices)).toBe(0);
         await page.locator('#suite-effects-close').click();
         await expect.poll(() => page.evaluate(() => Suite.getSoundState().settingsOpen)).toBe(false);
+        if (pausesGame) {
+            expect(await page.evaluate(() => Suite.getSoundState().paused)).toBe(true);
+            await page.keyboard.press('Enter');
+            await expect.poll(() => page.evaluate(() => Suite.getSoundState().paused)).toBe(false);
+        }
         expect(await page.evaluate(() => localStorage.getItem('suite.effects.volume.v1'))).toBe('0.55');
+        await page.reload();
+        await page.waitForFunction(() => window.Suite?.getSoundState?.().ready);
+        expect(await page.evaluate(() => Suite.getSoundState().volume)).toBe(.55);
+        expect(await page.evaluate(() => Suite.getSoundState().armed)).toBe(false);
+        expect(await page.evaluate(() => Suite.getSoundState().accepted)).toBe(0);
         expect(errors).toEqual([]);
     });
 }
@@ -76,5 +88,8 @@ for (const [game, selector] of [['turdjack', '[data-sound-toggle]'], ['turdrummy
         expect(await page.evaluate(() => Suite.playSound('shared.win'))).toBe(false);
         expect(await page.evaluate(() => Suite.playSound('shared.fart'))).toBe(false);
         await expect.poll(() => page.evaluate(() => Suite.getSoundState().activeVoices)).toBe(0);
+        await page.reload();
+        await page.waitForFunction(() => window.Suite?.getSoundState?.().ready);
+        expect(await page.evaluate(() => Suite.getSoundState().localEnabled)).toBe(false);
     });
 }
