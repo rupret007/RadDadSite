@@ -7,10 +7,12 @@ const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const { versionArcadeAssets } = require('./lib/arcade-asset-versions.cjs');
 const ROOT = path.resolve(__dirname, '..');
-const PIN = 'cd2dfda364465a72592f640b21acf4785c0a73b4';
+const PIN = '20b032131d66edf7af7a4f9184fddc997e5ba703';
 const FILES = ['index.html', 'hub.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
   'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html',
   'neon-arkanoid.html', 'game.js', 'favicon.svg', 'assets', 'games'];
+const STUDIO_PAGES = new Set(['index.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
+  'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html']);
 const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'";
 const git = (args, cwd) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 function replaceRequired(text, before, after, label) {
@@ -52,6 +54,8 @@ try {
   // Rad Dad's approved recordings remain on the existing video and streaming destinations.
   const suiteFile = path.join(stage, 'assets/turdsuite.js');
   let suite = fs.readFileSync(suiteFile, 'utf8');
+  suite = replaceRequired(suite, "const AUDIO_PROFILE = 'classic';",
+    "const AUDIO_PROFILE = document.documentElement.dataset.arcadeAudio === 'studio' ? 'studio' : 'classic';", 'effects palette');
   suite = replaceRequired(suite, "const STALEMATE_MUSIC_KEY = 'stalemate.music';", "const STALEMATE_MUSIC_KEY = 'raddad.music';", 'music preference');
   suite = replaceRequired(suite, 'isMusicEnabled() { return musicEnabled; }', 'isMusicEnabled() { return false; }', 'music contract');
   suite = replaceRequired(suite, "    return (location.pathname || '').split('/').pop() || '';",
@@ -76,6 +80,10 @@ try {
   fs.copyFileSync(path.join(ROOT, 'scripts/arcade/raddad-arcade.css'), path.join(stage, 'assets/raddad-arcade.css'));
   for (const file of walk(stage).filter(file => file.endsWith('.html')).map(file => path.relative(stage, file))) {
     let html = fs.readFileSync(path.join(stage, file), 'utf8');
+    // Keep the unpromoted legacy game on its existing audio path.
+    if (STUDIO_PAGES.has(file)) {
+      html = html.replace(/<html\b/i, '<html data-arcade-audio="studio"');
+    }
     html = html.replace(/<meta\b[^>]*\bname=["']robots["'][^>]*>\s*/gi, '')
       .replace(/<meta\b[^>]*\bhttp-equiv=["']Content-Security-Policy["'][^>]*>\s*/gi, '');
     html = html.replace(/<head\b[^>]*>/i, `$&\n<meta name="robots" content="noindex,nofollow">\n<meta http-equiv="Content-Security-Policy" content="${CSP}">`);

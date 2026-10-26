@@ -519,6 +519,7 @@ CURRENT_PRODUCTION_FILES = {
     "play/assets/suite-progress.css",
     "play/assets/suite-progress.js",
     "play/assets/suite-share.js",
+    "play/assets/suite-sound.js",
     "play/assets/suite-touch.js",
     "play/assets/turdomania-tiles.svg",
     "play/assets/turdsuite.css",
