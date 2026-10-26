@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-mobile-game="turdomania">
+<html data-arcade-audio="studio" lang="en" data-mobile-game="turdomania">
 <head>
 <meta name="robots" content="noindex,nofollow">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="assets/arcade.css">
 <link rel="stylesheet" href="assets/suite-progress.css?v=90d3f1fc3aa82512">
 <script src="games/table-continue-core.js?v=30dfab772a1ae911"></script>
-<script src="assets/turdsuite.js"></script>
+<script src="assets/turdsuite.js?v=5410dcb0fccbdb12"></script>
 <title>Turdomania</title>
 <style>
 :root {
@@ -274,6 +274,7 @@ function writePrefs(p) { try { safeStorage.setItem(Core.PREFS_KEY, JSON.stringif
 
 // Sound hooks: shared suite synth, which honours the suite mute toggle.
 function sfx(name) {
+  if (window.Suite?.isStudioAudio?.()) return Suite.playSound('mania.' + name);
   try { if (window.Suite && Suite.audio) Suite.audio().then((a) => a && a.playPreset(name)); } catch { /* no audio */ }
 }
 function announce(msg) {
@@ -309,6 +310,7 @@ function resetView() {
 }
 
 function start(levelKey, seed) {
+  window.Suite?.stopSounds?.();
   progressRunId = window.SuiteProgress?.newRunId('turdomania') || null;
   progressRunResult = null;
   progressStartedAt = Date.now();
