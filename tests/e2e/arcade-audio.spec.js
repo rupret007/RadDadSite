@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-const games = ['TurdAnoid', 'turdtris', 'turdjack', 'crapeights', 'turdrummy', 'turdspades', 'turdomania', 'chess'];
+const games = ['TurdAnoid', 'turdtris', 'turdjack', 'crapeights', 'turdrummy', 'turdspades', 'turdomania', 'chess', 'turdrush'];
 async function clickVisible(page, selector) {
     const control = page.locator(selector).first();
     if (await control.isVisible()) await control.click();
@@ -17,6 +17,7 @@ async function enter(page, game) {
         for (let step = 0; step < 5; step++) await clickVisible(page, '#coachNextBtn');
     }
     if (game === 'turdspades') await clickVisible(page, '#quickStart');
+    if (game === 'turdrush') await clickVisible(page, '#rush-start');
     if (game === 'chess') {
         await page.locator('input[name=mode][value=local]').check();
         await page.locator('#new-game button[type=submit]').click();
@@ -48,7 +49,7 @@ for (const game of games) {
         await enter(page, game);
         await (await audioButton(page)).click();
         await expect(page.locator('#suite-audio-settings')).toBeVisible();
-        const pausesGame = ['TurdAnoid', 'turdtris', 'chess'].includes(game);
+        const pausesGame = ['TurdAnoid', 'turdtris', 'chess', 'turdrush'].includes(game);
         if (pausesGame) expect(await page.evaluate(() => Suite.getSoundState().paused)).toBe(true);
         const before = await page.evaluate(() => Suite.getSoundState().accepted);
         await page.locator('#suite-effects-preview').click();
@@ -66,7 +67,8 @@ for (const game of games) {
         await expect.poll(() => page.evaluate(() => Suite.getSoundState().settingsOpen)).toBe(false);
         if (pausesGame) {
             expect(await page.evaluate(() => Suite.getSoundState().paused)).toBe(true);
-            await page.keyboard.press('Enter');
+            if (game === 'turdrush') await page.locator('#rush-resume').click();
+            else await page.keyboard.press('Enter');
             await expect.poll(() => page.evaluate(() => Suite.getSoundState().paused)).toBe(false);
         }
         expect(await page.evaluate(() => localStorage.getItem('suite.effects.volume.v1'))).toBe('0.55');

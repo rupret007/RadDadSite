@@ -70,7 +70,7 @@ test('chess runs the self-hosted computer under Rad Dad CSP and keeps its own sa
     expect(await page.evaluate(() => localStorage.getItem('turdtrisHighScore'))).toBe('321');
     await page.locator('.chess-hub').click();
     await expect(page.locator('.game-card[href="chess.html"] .play')).toContainText('Continue');
-    await expect(page.locator('.game-card')).toHaveCount(8);
+    await expect(page.locator('.game-card')).toHaveCount(9);
     expect(errors).toEqual([]);
     expect(music).toEqual([]);
 });

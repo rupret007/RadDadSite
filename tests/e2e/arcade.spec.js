@@ -1,7 +1,7 @@
 const { test, expect } = require('./fixtures');
 
 test('clean hosted game URLs keep canonical records and the return-to-arcade control', async ({ page }) => {
-    const files = ['TurdAnoid.html', 'turdtris.html', 'turdomania.html', 'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html'];
+    const files = ['TurdAnoid.html', 'turdtris.html', 'turdomania.html', 'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html', 'turdrush.html'];
     for (const file of files) {
         const clean = '/play/' + file.replace(/\.html$/, '');
         await page.route('**' + clean, async route => {
@@ -55,7 +55,7 @@ test('homework, hero video and arcade art work from the homepage', async ({ page
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
     await page.locator('.arcade-ticket a').click();
     await expect(page.locator('h1')).toHaveText('Rad Dad Arcade');
-    await expect(page.locator('.game-card')).toHaveCount(8);
+    await expect(page.locator('.game-card')).toHaveCount(9);
     expect((await page.locator('.shell').boundingBox()).width).toBeGreaterThanOrEqual(272);
     expect((await page.locator('.game-card').first().boundingBox()).width).toBeGreaterThan(110);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
@@ -69,7 +69,8 @@ const games = [
     ['crapeights.html', '#quickStartBtn', '#welcomeGuide'],
     ['turdrummy.html', '#startRoundBtn', '#guideOverlay'],
     ['turdspades.html', '#quickStart', '#guide'],
-    ['chess.html', '#new-game button[type=submit]', '#setup']
+    ['chess.html', '#new-game button[type=submit]', '#setup'],
+    ['turdrush.html', '#rush-start', '#rush-intro']
 ];
 
 for (const width of [390, 1280]) {
@@ -110,7 +111,7 @@ test('arcade hub works with denied storage and keeps its band return link', asyn
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto('/play/');
-    await expect(page.locator('.game-card')).toHaveCount(8);
+    await expect(page.locator('.game-card')).toHaveCount(9);
     await expect(page.locator('.suite-skip-link')).not.toBeInViewport();
     await page.keyboard.press('Tab');
     await expect(page.locator('.suite-skip-link')).toBeFocused();
