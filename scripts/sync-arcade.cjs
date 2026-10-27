@@ -7,7 +7,7 @@ const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const { versionArcadeAssets } = require('./lib/arcade-asset-versions.cjs');
 const ROOT = path.resolve(__dirname, '..');
-const PIN = 'aa17ccd0b82f839534ee8f5481137f83b79a87ca';
+const PIN = '0f9062307d6c6aaaa82bb1d8dd8bca4255aba0fb';
 const FILES = ['index.html', 'hub.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
   'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html',
   'neon-arkanoid.html', 'game.js', 'favicon.svg', 'assets', 'games'];
