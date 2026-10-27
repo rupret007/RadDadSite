@@ -3,8 +3,8 @@ import { readFileSync, existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 const read = file => readFileSync(new URL('../../' + file, import.meta.url), 'utf8');
 describe('canonical Rad Dad audio selection', () => {
-    it('opts in the hub and all eight games while keeping legacy Neon classic', () => {
-        for (const game of ['index', 'TurdAnoid', 'turdtris', 'turdjack', 'crapeights', 'turdrummy', 'turdspades', 'turdomania', 'chess']) {
+    it('opts in the hub and all nine games while keeping legacy Neon classic', () => {
+        for (const game of ['index', 'TurdAnoid', 'turdtris', 'turdjack', 'crapeights', 'turdrummy', 'turdspades', 'turdomania', 'chess', 'turdrush']) {
             expect(read(`play/${game}.html`)).toContain('data-arcade-audio="studio"');
         }
         expect(read('play/neon-arkanoid.html')).not.toContain('data-arcade-audio="studio"');

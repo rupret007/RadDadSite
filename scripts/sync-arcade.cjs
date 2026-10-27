@@ -7,12 +7,12 @@ const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const { versionArcadeAssets } = require('./lib/arcade-asset-versions.cjs');
 const ROOT = path.resolve(__dirname, '..');
-const PIN = '01be21c06320550a57a41cdb299dac744890e3c0';
+const PIN = '8b20ebeb2bef0f18009b7ce4877af2f683f7927b';
 const FILES = ['index.html', 'hub.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
-  'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html',
+  'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html', 'turdrush.html',
   'neon-arkanoid.html', 'game.js', 'favicon.svg', 'assets', 'games'];
 const STUDIO_PAGES = new Set(['index.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
-  'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html']);
+  'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html', 'turdrush.html']);
 const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'";
 const git = (args, cwd) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 function replaceRequired(text, before, after, label) {
@@ -98,8 +98,8 @@ try {
     if (file === 'index.html') {
       html = html.replaceAll('Stalemate Arcade', 'Rad Dad Arcade')
         .replace('Punk rock. Bathroom humor. One more round.', 'Loud guitars. Silly games. One more round.')
-        .replace('Eight games. Zero dignity.', 'Pick a game. Beat your best.')
-        .replace('Eight games • one sewer • Stalemate punk rock on every table', 'Eight free games. Sound effects optional. No sign-in.')
+        .replace('Nine games. Zero dignity.', 'Pick a game. Beat your best.')
+        .replace('Nine games • one sewer • Stalemate punk rock on every table', 'Nine free games. Sound effects optional. No sign-in.')
         .replace(/\s*<details class="changelog">[\s\S]*?<\/details>/, '');
       html = html.replace(/<body\b[^>]*>/, '$&\n<nav class="rad-arcade-nav" aria-label="Rad Dad"><a href="../"><img src="../RadDad_Logo.jpg" width="40" height="40" alt="">Rad Dad</a><a href="../#watch">Do your homework ↗</a></nav>');
     }
