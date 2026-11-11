@@ -413,6 +413,7 @@
       justify-content: space-between;
       gap: 8px;
       margin-bottom: 4px;
+      padding-right: calc(44px + 8px + env(safe-area-inset-right, 0px));
     }
 
     body.jack-table-first .topbar > div:first-child {
@@ -3262,6 +3263,9 @@
         );
       }
       if (document.body.classList.contains('jack-table-first')) syncJackStatMirrors();
+      if (window.SuiteArcadeA11y?.syncArcadeA11yMount) {
+        window.SuiteArcadeA11y.syncArcadeA11yMount(document);
+      }
     }
 
     function schedulePlayTableFocus() {

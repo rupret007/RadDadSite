@@ -7,7 +7,7 @@ const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const { versionArcadeAssets } = require('./lib/arcade-asset-versions.cjs');
 const ROOT = path.resolve(__dirname, '..');
-const PIN = 'f9604242ac9fd2cbd28e94a524570ddbc228bd5c';
+const PIN = 'd80e169b57704d4d25d16e0cce4e51bdb206ad82';
 const FILES = ['index.html', 'hub.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
   'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html', 'turdrush.html',
   'neon-arkanoid.html', 'game.js', 'favicon.svg', 'assets', 'games'];
@@ -28,7 +28,16 @@ function walk(dir) {
 const args = process.argv.slice(2);
 let source = 'https://github.com/rupret007/Turdanoid.git';
 if (args[0] === '--source' && args[1]) { source = fs.realpathSync(args[1]); args.splice(0, 2); }
-if (args.length > 1 || args.some(arg => arg.startsWith('-'))) throw new Error('Usage: node scripts/sync-arcade.cjs [--source local-repo] [ref]');
+let gameNight;
+if (args[0] === '--game-night') {
+  gameNight = new URL(args[1]);
+  const loopback = gameNight.protocol === 'http:' && gameNight.hostname === '127.0.0.1';
+  if (!(gameNight.protocol === 'https:' || loopback) || !/^[a-z0-9.-]+$/i.test(gameNight.hostname) || gameNight.username || gameNight.password ||
+      gameNight.pathname !== '/beta/' || gameNight.search || gameNight.hash) throw Error('Use the protected Game Night /beta/ URL.');
+  gameNight.searchParams.set('via', 'rad-dad');
+  args.splice(0, 2);
+}
+if (args.length > 1 || args.some(arg => arg.startsWith('-'))) throw new Error('Usage: node scripts/sync-arcade.cjs [--source local-repo] [--game-night URL] [ref]');
 const ref = args[0] || PIN;
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'raddad-arcade-'));
 const stage = fs.mkdtempSync(path.join(ROOT, '.arcade-stage-'));
@@ -101,6 +110,8 @@ try {
         .replace('Nine games. Zero dignity.', 'Pick a game. Beat your best.')
         .replace('Nine games • one sewer • Stalemate punk rock on every table', 'Nine free games. Sound effects optional. No sign-in.')
         .replace(/\s*<details class="changelog">[\s\S]*?<\/details>/, '');
+      if (gameNight) html = replaceRequired(html, '<section class="games"',
+        `<p class="arcade-mode-shortcut"><a href="${gameNight.href}">Play online with friends →</a></p>\n    <section class="games"`, 'online entry');
       html = html.replace(/<body\b[^>]*>/, '$&\n<nav class="rad-arcade-nav" aria-label="Rad Dad"><a href="../"><img src="../RadDad_Logo.jpg" width="40" height="40" alt="">Rad Dad</a><a href="../#watch">Do your homework ↗</a></nav>');
     }
     fs.writeFileSync(path.join(stage, file), html);
