@@ -646,6 +646,7 @@ CURRENT_PRODUCTION_FILES = {
     "play/games/turdspades-engine.js",
     "play/games/turdspades-fx.js",
     "play/games/turdspades-layout.js",
+    "play/games/turdspades-match.js",
     "play/games/turdspades-phone-hand.js",
     "play/games/turdspades-play-ai.js",
     "play/games/turdspades-round-ui.js",
