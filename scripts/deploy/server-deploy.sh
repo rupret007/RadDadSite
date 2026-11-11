@@ -616,6 +616,7 @@ CURRENT_PRODUCTION_FILES = {
     "play/games/turdjack-table-chips.js",
     "play/games/turdjack-totals.js",
     "play/games/turdomania-core.js",
+    "play/games/turdomania-duel.js",
     "play/games/turdrummy-ai-core.js",
     "play/games/turdrummy-ai.js",
     "play/games/turdrummy-audio-core.js",
