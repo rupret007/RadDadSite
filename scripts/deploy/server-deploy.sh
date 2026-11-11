@@ -606,6 +606,7 @@ CURRENT_PRODUCTION_FILES = {
     "play/games/turdjack-fx.js",
     "play/games/turdjack-hand-meter.js",
     "play/games/turdjack-layout.js",
+    "play/games/turdjack-match.js",
     "play/games/turdjack-moment-ui.js",
     "play/games/turdjack-moments.js",
     "play/games/turdjack-page-kit.js",
