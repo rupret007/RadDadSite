@@ -639,6 +639,7 @@ CURRENT_PRODUCTION_FILES = {
     "play/games/turdrummy-presentation.js",
     "play/games/turdrummy-rules.js",
     "play/games/turdrush-core.js",
+    "play/games/turdrush-race.js",
     "play/games/turdrush-renderer.js",
     "play/games/turdrush.js",
     "play/games/turdspades-ai.js",
