@@ -543,6 +543,68 @@
     font-size: 0.82rem;
 }
 
+.band-lab-hangout {
+    position: relative;
+    z-index: 2;
+    margin: 0 0 1.4rem;
+    padding: 0.95rem 1rem 1.05rem;
+    border: 2px solid rgba(181, 220, 8, 0.7);
+    background:
+        linear-gradient(135deg, rgba(181, 220, 8, 0.16), transparent 42%),
+        #07140c;
+    box-shadow: 8px 8px 0 rgba(0, 158, 232, 0.22);
+}
+
+.band-lab-hangout h2 {
+    margin: 0 0 0.45rem;
+    font-family: var(--display);
+    font-size: 1.5rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.band-lab-hangout > p {
+    max-width: 46rem;
+    margin: 0 0 0.85rem;
+    color: var(--muted);
+}
+
+.band-lab-hangout-ticket {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.7rem 1rem;
+    margin: 0 !important;
+}
+
+.band-lab-hangout-play {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.45rem 0.95rem;
+    background: var(--lime);
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.band-lab-hangout-play:hover,
+.band-lab-hangout-play:focus-visible {
+    background: var(--amber);
+    outline: 3px solid var(--lime);
+    outline-offset: 3px;
+}
+
+.band-lab-hangout-ticket span {
+    color: var(--poster-cream);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
 @media (max-width: 1100px) {
     .band-lab-setlist {
         grid-template-columns: repeat(3, minmax(0, 1fr));
