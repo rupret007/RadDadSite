@@ -59,6 +59,10 @@ test('homework, hero video and arcade art work from the homepage', async ({ page
     expect((await page.locator('.shell').boundingBox()).width).toBeGreaterThanOrEqual(272);
     expect((await page.locator('.game-card').first().boundingBox()).width).toBeGreaterThan(110);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+    await expect(page.locator('.subtitle')).toContainText('choose 2 players in Royal Flush Chess to share one device');
+    await page.getByRole('link', { name: /Royal Flush Chess/ }).click();
+    await expect(page.getByRole('radio', { name: /1 player/ })).toBeChecked();
+    await expect(page.getByRole('radio', { name: /2 players.*Share this device/ })).toBeVisible();
 });
 
 const games = [
