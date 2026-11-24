@@ -6,7 +6,8 @@ This branch is the October 24 design preview for Travis. Keep it off main and th
 ## Current public surfaces
 
 - `/`: band introduction and featured live cover, “Do your homework” videos, arcade, covered artists, band members, a Taylor Swift cover recording, dated history, direct booking and social links.
-- `/play/`: Rad Dad Arcade, with seven games, local records, optional sound effects and a route back to the band. No Stalemate recordings are included.
+- `/#hang-out`: an announcement and direct link to the shared Hang Out guest entrance. The staged link uses the standalone demo with `via=rad-dad`. Verify the shared app's Rad Dad return link, guest room invitations and advertised activities on the intended release before publishing.
+- `/play/`: Rad Dad Arcade, with nine games, local records, optional sound effects and a route back to the band. No Stalemate recordings are included.
 - `/qr/`: music-first landing page with accurate cover credits, the same five live-video destinations, follow links and a path back to the main booking section.
 - `/tap/`: permanent printed-QR URL, still redirects to `/qr/`. Never remove or repurpose it.
 - `/nfc/`: legacy compatibility alias for `/qr/`; the current physical items use printed QR codes rather than NFC hardware.

@@ -9,7 +9,7 @@ test('homepage leads with a cover band, live videos and booking rather than an e
     await expect(page.locator('#home a[href="#watch"]')).toBeVisible();
     await expect(page.locator('#home a[href="#contact"]')).toBeVisible();
     const ids = await page.locator('main > section').evaluateAll(nodes => nodes.map(n => n.id));
-    expect(ids).toEqual(['home', 'watch', 'arcade', 'covers', 'band', '', 'shows', 'contact']);
+    expect(ids).toEqual(['home', 'watch', 'hang-out', 'arcade', 'covers', 'band', '', 'shows', 'contact']);
     const metadata = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
     expect(metadata['@type']).toBe('MusicGroup');
     expect(metadata.name).toBe('Rad Dad');
@@ -69,13 +69,25 @@ for (const width of [320, 390, 768, 980, 981, 1440]) {
     test(`homepage remains usable without overlap at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
         await page.goto('/');
-        for (const section of ['#home', '#watch', '#covers', '#band', '#our-song', '#shows', '#contact']) {
+        for (const section of ['#home', '#watch', '#hang-out', '#arcade', '#covers', '#band', '#our-song', '#shows', '#contact']) {
             await page.locator(section).scrollIntoViewIfNeeded();
             expect(await page.evaluate(() => Math.max(document.body.scrollWidth, document.documentElement.scrollWidth) <= innerWidth + 1)).toBe(true);
         }
         const nav = page.getByRole('navigation', { name: 'Primary navigation', exact: true });
         for (const link of await nav.getByRole('link').all()) {
-            expect((await link.boundingBox()).height).toBeGreaterThanOrEqual(44);
+            const box = await link.boundingBox();
+            expect(box.height).toBeGreaterThanOrEqual(44);
+            expect(box.width).toBeGreaterThanOrEqual(44);
+            const titleFits = await link.evaluate(element => {
+                const text = document.createRange();
+                text.selectNodeContents(element);
+                const linkBounds = element.getBoundingClientRect();
+                const textBounds = text.getBoundingClientRect();
+                return text.getClientRects().length === 1
+                    && textBounds.left >= linkBounds.left - 1
+                    && textBounds.right <= linkBounds.right + 1;
+            });
+            expect(titleFits, await link.textContent()).toBe(true);
         }
         await nav.getByRole('link', { name: 'Homework', exact: true }).click();
         await expect.poll(async () => {
@@ -102,6 +114,31 @@ for (const width of [320, 390, 768, 980, 981, 1440]) {
 
 test.describe('homepage without JavaScript', () => {
     test.use({ javaScriptEnabled: false });
+
+    test('the Hang Out menu and announcement lead to guest entry, with separate arcade access', async ({ page }) => {
+        await page.setViewportSize({ width: 320, height: 800 });
+        const destination = 'https://stalemate-hangout-demo.jeffstory007.workers.dev/?via=rad-dad';
+        await page.route(url => url.href === destination, route => route.fulfill({
+            contentType: 'text/html',
+            body: '<!doctype html><html lang="en"><title>Hang Out</title><h1>Pick a nickname</h1></html>'
+        }));
+        await page.goto('/');
+        const nav = page.getByRole('navigation', { name: 'Primary navigation', exact: true });
+        await nav.getByRole('link', { name: 'Hang Out', exact: true }).click();
+        await expect(page).toHaveURL(/#hang-out$/);
+        const announcement = page.getByRole('region', { name: 'Hang Out', exact: true });
+        await expect(announcement).toContainText('New on the site');
+        const open = announcement.getByRole('link', { name: 'Open Hang Out', exact: true });
+        await expect(open).toBeInViewport();
+        const rect = await open.boundingBox();
+        expect(rect.height).toBeGreaterThanOrEqual(44);
+        expect(rect.x).toBeGreaterThanOrEqual(0);
+        expect(rect.x + rect.width).toBeLessThanOrEqual(320);
+        await expect(page.locator('#arcade').getByRole('link', { name: /Enter the arcade/ })).toHaveAttribute('href', 'play/');
+        await open.click();
+        await expect(page).toHaveURL(destination);
+        await expect(page.getByRole('heading', { name: 'Pick a nickname' })).toBeVisible();
+    });
     test('keeps cover credits, social links, booking and all five native video links', async ({ page }) => {
         await page.goto('/');
         await expect(page.locator('#home')).toContainText('Cover band');

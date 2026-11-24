@@ -54,7 +54,9 @@ for (const width of [320, 390, 768, 800, 801, 1440]) {
             expect(link.unobstructed).toBe(true);
         }
 
-        await expect(page.getByRole('navigation', { name: 'Primary navigation', exact: true }).getByRole('link')).toHaveCount(5);
+        await expect(page.getByRole('navigation', { name: 'Primary navigation', exact: true }).getByRole('link')).toHaveText([
+            'Homework', 'Hang Out', 'Arcade', 'Covers', 'Band', 'Book'
+        ]);
     });
 }
 

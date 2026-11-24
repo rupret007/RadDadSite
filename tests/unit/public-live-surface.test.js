@@ -59,7 +59,7 @@ describe('evergreen public band surfaces', () => {
     });
     it('puts live performances before the covers wall and booking within the first section', async () => {
         const { doc } = await page();
-        expect([...doc.querySelectorAll('main > section')].map(node => node.id)).toEqual(['home','watch','arcade','covers','band','','shows','contact']);
+        expect([...doc.querySelectorAll('main > section')].map(node => node.id)).toEqual(['home','watch','hang-out','arcade','covers','band','','shows','contact']);
         expect(doc.querySelector('#home a[href="#watch"]')).not.toBeNull();
         expect(doc.querySelector('#home a[href="#contact"]')).not.toBeNull();
         expect(doc.querySelectorAll('.artist-wall > li')).toHaveLength(14);

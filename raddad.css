@@ -2,7 +2,7 @@
 .home-page { --ink:#09111a; --ink-rgb:9,17,26; --ink-soft:#101f2c; --surface:#142535; --surface-raised:#1b3042; --cream:#f3f2ee; --muted:#bfccd6; --line:rgba(243,242,238,.36); --line-strong:rgba(243,242,238,.5); background:var(--ink); }
 .home-page .page-shell { width:min(1180px,calc(100% - 64px)); }
 .home-page .site-header { background:var(--ink); border-bottom:1px solid var(--line); }
-.home-page .site-nav a { font-weight:800; }
+.home-page .site-nav a { font-weight:800; white-space:nowrap; }
 .home-page .site-nav a[href="#arcade"] { color:var(--lime); }
 .home-page .header-socials__link { border-radius:0; background:transparent; }
 .home-page .section-kicker { color:var(--blue-bright); font-size:.75rem; letter-spacing:.13em; }
@@ -51,6 +51,21 @@
 .home-page .video-card__label { color:var(--lime); }
 .home-page .video-card__image .play-button { width:44px; height:44px; font-size:1rem; background:var(--lime); color:var(--ink); border:2px solid var(--ink); }
 .home-page .video-card figcaption > span:last-child { color:var(--blue-bright); }
+.hangout-section { padding-block:clamp(1.5rem,4vw,3.5rem); }
+.hangout-card {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:1.5rem clamp(1.75rem,5vw,4.5rem);
+    padding:clamp(1rem,4vw,2.5rem);
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:4px solid var(--blue-bright);
+}
+.hangout-card .section-kicker { margin:0 0 .25rem; }
+.hangout-card h2 { margin:0; font:700 clamp(2.4rem,6vw,4.4rem)/1.05 var(--display); text-transform:uppercase; }
+.hangout-card__copy > p:last-child { color:var(--muted); max-width:60ch; margin:.85rem 0 0; }
+.hangout-card .button { justify-self:start; min-height:44px; }
 .home-page .arcade-section { position:relative; background:var(--blue); color:var(--ink); border-block:3px solid var(--ink); padding-bottom:64px; }
 .arcade-heading { display:grid; grid-template-columns:1fr auto; align-items:center; gap:32px; margin-bottom:32px; }
 .home-page .arcade-section .section-kicker { color:var(--ink); }
@@ -106,6 +121,7 @@
     .home-page .watch-section .section-heading { padding-left:18px; }
     .home-page .homework-title { font-size:clamp(3.6rem,12vw,5rem); }
     .home-page .video-grid { gap:22px 16px; }
+    .hangout-card { grid-template-columns:1fr; }
     .arcade-heading { grid-template-columns:1fr; gap:24px; }
     .arcade-ticket { transform:rotate(-1deg); padding:20px; align-items:flex-start; }
     .arcade-ticket strong { font-size:1.9rem; }
@@ -129,6 +145,10 @@
     .home-page .hero-performance__label { font-size:.72rem; }
     .home-page .homework-check { margin-left:8px; }
     .arcade-pick__copy small { letter-spacing:.04em; font-size:.75rem; }
+}
+@media (max-width:480px) {
+    :root { --header-height:9.5rem; }
+    .home-page .site-nav { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
 }
 @media (prefers-reduced-motion:reduce) {
     .home-page :is(.button,.video-card,.arcade-pick):hover { transform:none; }
