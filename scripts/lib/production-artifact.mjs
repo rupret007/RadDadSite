@@ -43,6 +43,7 @@ export const CLIENT_SOURCE_PATHS = Object.freeze([
     'raddad.css',
     'script.js',
     'show-state.js',
+    'site-analytics.js',
     'styles.css',
     'tap/index.html'
 ]);

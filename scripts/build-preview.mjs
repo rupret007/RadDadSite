@@ -3,6 +3,7 @@ import { cp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { resolve, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { verifyProductionArtifact } from './lib/production-artifact.mjs';
+import { stripRadDadAnalytics } from './lib/site-analytics.mjs';
 
 // Only the approved, verified client artifact crosses into the separate preview deployment.
 export const PREVIEW_URL = 'https://rad-dad-design-preview.jeffstory007.chatgpt.site/';
@@ -25,7 +26,7 @@ export async function buildPreview({ projectRoot = resolve(import.meta.dirname, 
             const path = join(dir, entry.name);
             if (entry.isDirectory()) { await pages(path); continue; }
             if (!entry.name.endsWith('.html')) continue;
-            let html = await readFile(path, 'utf8');
+            let html = stripRadDadAnalytics(await readFile(path, 'utf8'));
             html = html.replace(/<meta\b[^>]*name=["']robots["'][^>]*>\s*/gi, '')
                 .replace(/<link\b[^>]*rel=["']canonical["'][^>]*>\s*/gi, '')
                 .replace(/<meta\b[^>]*property=["']og:url["'][^>]*>\s*/gi, '');

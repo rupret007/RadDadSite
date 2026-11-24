@@ -22,6 +22,7 @@ import {
     resolveBuildIdentity,
     verifyProductionArtifact
 } from '../../scripts/lib/production-artifact.mjs';
+import { addRadDadAnalytics, radDadAnalyticsOrigin } from '../../scripts/lib/site-analytics.mjs';
 
 const repoRoot = resolve(import.meta.dirname, '..', '..');
 const temporaryDirectories = [];
@@ -171,6 +172,29 @@ describe('production artifact generation', () => {
         await expect(readFile(join(artifactRoot, 'qr/styles.css'), 'utf8')).resolves.toBeTruthy();
         await expect(readFile(join(artifactRoot, 'show-state.js'), 'utf8')).resolves.toContain('RadDadShowState');
         await expect(readFile(join(artifactRoot, 'live-video.js'), 'utf8')).resolves.toContain('youtube-nocookie.com');
+        await expect(readFile(join(artifactRoot, 'index.html'), 'utf8')).resolves.not.toContain('data-rad-dad-analytics');
+    });
+
+    it('adds the configured Rad Dad collector only to public content pages', async () => {
+        const artifactRoot = await createTemporaryDirectory();
+        await copyProductionClient({ projectRoot: repoRoot, clientRoot: artifactRoot });
+        const origin = radDadAnalyticsOrigin('rad-dad-test');
+        await addRadDadAnalytics(artifactRoot, origin);
+        await finalizeProductionArtifact({ artifactRoot, commitSha: TEST_SHA, timestamp: TEST_TIMESTAMP });
+        await expect(verifyProductionArtifact({ artifactRoot, expectedSha: TEST_SHA })).resolves.toBeDefined();
+
+        for (const [file, page] of [['index.html', '/'], ['qr/index.html', '/qr/'], ['play/chess.html', '/play/chess.html'], ['play/hub.html', '/play/']]) {
+            const html = await readFile(join(artifactRoot, file), 'utf8');
+            expect(html).toContain(`data-rad-dad-analytics="${origin}/count" data-page="${page}"`);
+            if (file.startsWith('play/')) {
+                expect(html).toContain(`connect-src 'self' ${origin};`);
+                expect(html).not.toContain('*.goatcounter.com');
+            }
+        }
+        for (const file of ['tap/index.html', 'nfc/index.html', 'play/assets/chess/credits.html']) {
+            expect(await readFile(join(artifactRoot, file), 'utf8')).not.toContain(origin);
+        }
+        await expect(readFile(join(artifactRoot, 'private/index.html'))).rejects.toThrow();
     });
 
     it('ships project-site-safe tag and NFC redirects in the production artifact', async () => {

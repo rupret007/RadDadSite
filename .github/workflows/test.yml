@@ -52,6 +52,7 @@ jobs:
       - name: Build and verify clean production artifact
         env:
           DEPLOY_COMMIT_SHA: ${{ github.sha }}
+          RAD_DAD_GOATCOUNTER_SITE: ${{ github.ref == 'refs/heads/main' && vars.RAD_DAD_GOATCOUNTER_SITE || '' }}
         run: |
           BUILD_TIMESTAMP="$(git show -s --format=%cI "$DEPLOY_COMMIT_SHA")"
           export BUILD_TIMESTAMP

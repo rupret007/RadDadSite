@@ -39,6 +39,25 @@ All public pages keep a 44px-minimum tap target on phone-width interactive eleme
 
 `show-state.js` is a retained legacy controller and is **not loaded by either current public page**. Its unit regression contracts use `tests/fixtures/legacy-show.html`, outside the production artifact. Current browser tests prove that neither a clock change nor a history return can revive the retired event UI.
 
+## Traffic analytics
+
+Analytics are off until a separate Rad Dad [GoatCounter](https://www.goatcounter.com/)
+site is set up. To enable it in the regular production package, set the public site
+code as the GitHub repository variable `RAD_DAD_GOATCOUNTER_SITE`, or pass that
+environment variable to `npm run build:production` for a manual package. Leave
+it unset to build with analytics off. The script runs only at
+`https://raddadband.com` on the homepage, QR landing page and Arcade.
+
+GoatCounter shows traffic trends, visited pages, referring sites and estimated
+visitor countries. Rad Dad also sends fixed button-click counts for Hang Out,
+Arcade, music and booking. The engagement events count how many visits reached
+30 seconds, two minutes or five minutes of visible time on a page. They exclude
+time in hidden tabs and do not represent an average visit length. The site sends
+no query strings, URL fragments, full referrer paths, contact details or visitor
+identifiers. GoatCounter's [privacy policy](https://www.goatcounter.com/help/privacy)
+explains how it handles network addresses. Production origin access logs are
+managed separately through the server's existing operator workflow.
+
 ## Validation
 
 ```bash

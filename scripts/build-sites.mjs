@@ -8,6 +8,7 @@ import {
     resolveBuildIdentity,
     verifyProductionArtifact
 } from './lib/production-artifact.mjs';
+import { addRadDadAnalytics, radDadAnalyticsOrigin } from './lib/site-analytics.mjs';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const { values } = parseArgs({
@@ -26,11 +27,13 @@ const outputRoot = values['output-dir'] === undefined
 const clientRoot = resolve(outputRoot, 'client');
 const serverRoot = resolve(outputRoot, 'server');
 const clientOnly = values['client-only'];
+const analyticsOrigin = clientOnly ? radDadAnalyticsOrigin(process.env.RAD_DAD_GOATCOUNTER_SITE) : '';
 
 await rm(outputRoot, { force: true, recursive: true });
 await mkdir(clientRoot, { recursive: true });
 
 await copyProductionClient({ projectRoot, clientRoot });
+await addRadDadAnalytics(clientRoot, analyticsOrigin);
 
 const identity = resolveBuildIdentity({ projectRoot });
 await finalizeProductionArtifact({

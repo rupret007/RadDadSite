@@ -7,10 +7,11 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { buildPreview, PREVIEW_URL } from '../../scripts/build-preview.mjs';
 import { verifyPreviewArtifact } from '../../scripts/verify-preview.mjs';
 import { CLIENT_SOURCE_PATHS, finalizeProductionArtifact } from '../../scripts/lib/production-artifact.mjs';
+import { addRadDadAnalytics } from '../../scripts/lib/site-analytics.mjs';
 
 const roots = [];
 const SHA = '0123456789abcdef0123456789abcdef01234567';
-async function fixture() {
+async function fixture(analytics = false) {
     const root = await mkdtemp(join(tmpdir(), 'raddad-preview-'));
     roots.push(root);
     const artifactRoot = join(root, 'dist/client');
@@ -20,8 +21,11 @@ async function fixture() {
         const content = path.endsWith('.html')
             ? '<!doctype html><html><head><link rel="canonical" href="https://raddadband.com/"><meta property="og:url" content="https://raddadband.com/"><meta property="og:image" content="https://raddadband.com/RadDad_Logo.jpg"><meta name="twitter:image" content="https://raddadband.com/RadDad_Logo.jpg"></head><body>Review fixture</body></html>'
             : `fixture:${path}`;
-        await writeFile(file, content);
+        await writeFile(file, analytics && /^play\/[^/]+\.html$/.test(path)
+            ? content.replace('</head>', '<meta http-equiv="Content-Security-Policy" content="connect-src \'self\';"></head>')
+            : content);
     }
+    if (analytics) await addRadDadAnalytics(artifactRoot, 'https://rad-dad-test.goatcounter.com');
     await finalizeProductionArtifact({ artifactRoot, commitSha: SHA, timestamp: '2026-10-24T10:00:00Z' });
     return root;
 }
@@ -68,6 +72,17 @@ describe('independent Sites review artifact', () => {
         await expect(buildPreview({ projectRoot: root })).rejects.toThrow();
         expect(await readFile(join(root, 'preview-dist/previous.txt'), 'utf8')).toBe('previous verified review');
         await expect(readFile(join(root, 'preview-dist/private-config.json'))).rejects.toThrow();
+    });
+
+    it('removes the collector and its Arcade policy allowance when previewing a configured release', async () => {
+        const root = await fixture(true);
+        const { target } = await buildPreview({ projectRoot: root });
+        for (const file of ['index.html', 'qr/index.html', 'play/chess.html']) {
+            const html = await readFile(join(target, file), 'utf8');
+            expect(html).not.toContain('site-analytics.js');
+            expect(html).not.toContain('goatcounter.com');
+        }
+        expect(await readFile(join(target, 'play/chess.html'), 'utf8')).toContain("connect-src 'self';");
     });
 
     it('rejects stale, modified and over-copied snapshot contents', async () => {
