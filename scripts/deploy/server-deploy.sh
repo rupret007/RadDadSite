@@ -691,6 +691,7 @@ CURRENT_PRODUCTION_FILES = {
     "qr/styles.css",
     "script.js",
     "show-state.js",
+    "site-analytics.js",
     "styles.css",
     "tap/index.html",
     "version.json",

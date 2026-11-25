@@ -262,6 +262,7 @@ REQUIRED_PRODUCTION_PATHS=(
     "qr/styles.css"
     "script.js"
     "show-state.js"
+    "site-analytics.js"
     "styles.css"
     "tap/index.html"
     "version.json"
@@ -310,9 +311,12 @@ with tempfile.TemporaryDirectory() as temporary:
         "qr/styles.css",
         "script.js",
         "show-state.js",
+        "site-analytics.js",
         "styles.css",
         "tap/index.html",
     ]
+    if variant in {"legacy-inventory", "legacy-unsafe-path"}:
+        source_paths.remove("site-analytics.js")
     source_paths += json.loads(Path(os.sys.argv[4]).read_text()) + ["raddad.css"]
     for relative_path in source_paths:
         path = root / relative_path
@@ -663,6 +667,8 @@ chmod 0755 \
 chmod 0700 "$LEGACY_ROOT/.staging"
 tar -xzf "$ARTIFACT_LEGACY" -C "$LEGACY_ROOT/releases/$SHA_H"
 tar -xzf "$ARTIFACT_LEGACY_UNSAFE" -C "$LEGACY_ROOT/releases/$SHA_I"
+[[ ! -e $LEGACY_ROOT/releases/$SHA_H/site-analytics.js ]] ||
+    fail "retained historical fixture unexpectedly includes analytics"
 find "$LEGACY_ROOT/releases" -type d -exec chmod 0755 {} +
 find "$LEGACY_ROOT/releases" -type f -exec chmod 0644 {} +
 cat >"$LEGACY_CONFIG" <<EOF
@@ -1046,8 +1052,6 @@ pass "retention keeps healthy history and removes failed installed releases"
 
 ACTUAL_SHA=$(git -C "$PROJECT_ROOT" rev-parse --verify 'HEAD^{commit}')
 ACTUAL_TIMESTAMP=$(git -C "$PROJECT_ROOT" show -s --format=%cI "$ACTUAL_SHA")
-ACTUAL_ARTIFACT=$TEST_TMP/actual-production-artifact.tar.gz
-ACTUAL_BUILD_ROOT=$TEST_TMP/actual-build
 # Record entries and bytes, including the Worker output of an existing Sites build.
 # An absent dist must remain absent; do not create or clean it up for this test.
 snapshot_checkout_build() {
@@ -1074,15 +1078,30 @@ snapshot(root)
 PY
 }
 snapshot_checkout_build >"$TEST_TMP/checkout-build-before"
-DEPLOY_COMMIT_SHA=$ACTUAL_SHA BUILD_TIMESTAMP=$ACTUAL_TIMESTAMP \
-    npm --prefix "$PROJECT_ROOT" run build:production -- --output-dir "$ACTUAL_BUILD_ROOT" \
-    >"$TEST_TMP/actual-build.log"
-COPYFILE_DISABLE=1 tar -C "$ACTUAL_BUILD_ROOT/client" -czf "$ACTUAL_ARTIFACT" .
-"$DEPLOY_HELPER" check --sha "$ACTUAL_SHA" --artifact "$ACTUAL_ARTIFACT" \
-    --config "$CONFIG" >"$TEST_TMP/actual-check.log"
-grep -q "Dry run passed for $ACTUAL_SHA" "$TEST_TMP/actual-check.log" ||
-    fail "the workflow-shaped production tar did not pass the server verifier"
-pass "the real clean production client tar passes the server-side dry run"
+for analytics_mode in disabled enabled; do
+    analytics_site=""
+    if [[ $analytics_mode == enabled ]]; then
+        analytics_site=raddad-deploy-fixture
+    fi
+    actual_artifact=$TEST_TMP/actual-production-$analytics_mode.tar.gz
+    actual_build_root=$TEST_TMP/actual-build-$analytics_mode
+    DEPLOY_COMMIT_SHA=$ACTUAL_SHA BUILD_TIMESTAMP=$ACTUAL_TIMESTAMP \
+        RAD_DAD_GOATCOUNTER_SITE=$analytics_site \
+        npm --prefix "$PROJECT_ROOT" run build:production -- --output-dir "$actual_build_root" \
+        >"$TEST_TMP/actual-build-$analytics_mode.log"
+    if [[ $analytics_mode == enabled ]]; then
+        grep -Fq 'https://raddad-deploy-fixture.goatcounter.com/count' "$actual_build_root/client/index.html" ||
+            fail "the production fixture did not enable the configured analytics site"
+    elif grep -Fq 'data-rad-dad-analytics=' "$actual_build_root/client/index.html"; then
+        fail "the default production fixture unexpectedly enabled analytics"
+    fi
+    COPYFILE_DISABLE=1 tar -C "$actual_build_root/client" -czf "$actual_artifact" .
+    "$DEPLOY_HELPER" check --sha "$ACTUAL_SHA" --artifact "$actual_artifact" \
+        --config "$CONFIG" >"$TEST_TMP/actual-check-$analytics_mode.log"
+    grep -q "Dry run passed for $ACTUAL_SHA" "$TEST_TMP/actual-check-$analytics_mode.log" ||
+        fail "the workflow-shaped production tar with analytics $analytics_mode did not pass the server verifier"
+    pass "the real production client tar with analytics $analytics_mode passes the server-side dry run"
+done
 
 snapshot_checkout_build >"$TEST_TMP/checkout-build-after"
 cmp "$TEST_TMP/checkout-build-before" "$TEST_TMP/checkout-build-after" ||
