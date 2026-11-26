@@ -135,6 +135,15 @@ test.describe('homepage without JavaScript', () => {
         expect(rect.x).toBeGreaterThanOrEqual(0);
         expect(rect.x + rect.width).toBeLessThanOrEqual(320);
         await expect(page.locator('#arcade').getByRole('link', { name: /Enter the arcade/ })).toHaveAttribute('href', 'play/');
+        await open.click();
+        await expect(page).toHaveURL(destination);
+        await expect(page.getByRole('heading', { name: 'Pick a nickname' })).toBeVisible();
+    });
+
+    test('the solo Arcade returns to Hang Out without JavaScript', async ({ page }) => {
+        await page.setViewportSize({ width: 320, height: 800 });
+        await page.goto('/#hang-out');
+        const announcement = page.getByRole('region', { name: 'Hang Out', exact: true });
         await announcement.getByRole('link', { name: 'Play solo', exact: true }).click();
         await expect(page).toHaveURL(/\/play\/$/);
         await expect(page.getByRole('heading', { name: 'Rad Dad Arcade' })).toBeVisible();
@@ -142,9 +151,7 @@ test.describe('homepage without JavaScript', () => {
         expect((await online.boundingBox()).height).toBeGreaterThanOrEqual(44);
         await online.click();
         await expect(page).toHaveURL(/#hang-out$/);
-        await open.click();
-        await expect(page).toHaveURL(destination);
-        await expect(page.getByRole('heading', { name: 'Pick a nickname' })).toBeVisible();
+        await expect(announcement.getByRole('link', { name: 'Open Hang Out', exact: true })).toBeInViewport();
     });
     test('keeps cover credits, social links, booking and all five native video links', async ({ page }) => {
         await page.goto('/');
