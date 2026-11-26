@@ -76,6 +76,7 @@
 @media (max-width: 440px) {
     .hangout-card__actions { grid-template-columns:1fr; gap:8px; }
     .hangout-card__choice { grid-template-columns:minmax(0,1fr) minmax(7.6rem,1fr); align-items:center; padding:7px; }
+    .hangout-card .button { white-space:nowrap; }
 }
 .home-page .arcade-section { position:relative; background:var(--blue); color:var(--ink); border-block:3px solid var(--ink); padding-bottom:64px; }
 .arcade-heading { display:grid; grid-template-columns:1fr auto; align-items:center; gap:32px; margin-bottom:32px; }
