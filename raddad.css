@@ -51,6 +51,7 @@
 .home-page .video-card__label { color:var(--lime); }
 .home-page .video-card__image .play-button { width:44px; height:44px; font-size:1rem; background:var(--lime); color:var(--ink); border:2px solid var(--ink); }
 .home-page .video-card figcaption > span:last-child { color:var(--blue-bright); }
+html:has(#hang-out:target) { scroll-behavior:auto; }
 .hangout-section { padding-block:clamp(1.5rem,4vw,3.5rem); }
 .hangout-card {
     display:grid;
@@ -70,6 +71,7 @@
 .hangout-card__choice + .hangout-card__choice { border-top-color:var(--lime); }
 .hangout-card__choice p { margin:0; color:var(--muted); font-size:.8rem; font-weight:800; }
 .hangout-card .button { justify-content:center; min-height:44px; padding-inline:.4rem; text-align:center; }
+.hangout-card .button:hover { transform:none; }
 @media (max-width: 680px) {
     .hangout-card .button { min-height:48px; padding-block:.35rem; font-size:.82rem; line-height:1.15; letter-spacing:0; }
 }
