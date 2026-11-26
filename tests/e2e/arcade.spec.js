@@ -135,3 +135,40 @@ test('score sharing identifies Rad Dad and links back to the game on the review 
     expect(result.text).not.toContain('Stalemate');
     expect(result.url).toBe(new URL('/play/turdomania.html?level=normal', baseURL).href);
 });
+
+test('Turdtris Ultra shortcut opens the actual mode and Play honors a changed selection', async ({ page }) => {
+    await page.goto('/play/');
+    const shortcut = page.getByRole('link', { name: 'Turdtris · 2-minute Ultra →', exact: true });
+    await expect(shortcut).toHaveAttribute('href', 'turdtris.html?mode=ultra');
+    expect(await shortcut.evaluate((a) => a.closest('.game-card'))).toBeNull();
+    await shortcut.click();
+    await expect(page.locator('#attractModeSetting')).toHaveValue('ultra');
+    await expect(page.locator('.hud[data-mode="ultra"]')).toHaveCount(1);
+    await page.locator('#attractModeSetting').selectOption('sprint');
+    await page.getByRole('button', { name: 'Play', exact: true }).click();
+    await expect(page.locator('.hud[data-mode="sprint"]')).toHaveCount(1);
+    await expect(page.locator('#welcomeGuide')).toBeHidden();
+    await expect(page.locator('#highLabel')).toHaveText('Best time');
+    await page.evaluate(() => { score = 123; showWelcomeGuide(); });
+    await page.getByRole('button', { name: 'Resume run', exact: true }).click();
+    expect(await page.evaluate(() => ({ mode: runMode, score }))).toEqual({ mode: 'sprint', score: 123 });
+    await page.goto('/play/turdtris.html?mode=invalid');
+    await expect(page.locator('#attractModeSetting')).toHaveValue('classic');
+});
+
+test('Turdtris keeps keyboard focus in the start guide and moves it to the board when play starts', async ({ page }) => {
+    await page.goto('/play/turdtris.html');
+    const guide = page.getByRole('dialog', { name: 'Start Turdtris' });
+    const play = guide.getByRole('button', { name: 'Play', exact: true });
+    await expect(play).toBeEnabled();
+    await expect(guide).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(play).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(guide.locator('#attractModeSetting')).toBeFocused();
+    await play.focus();
+    await page.keyboard.press('Enter');
+    await expect(guide).toBeHidden();
+    await expect(page.locator('#game')).toBeFocused();
+    await expect(page.locator('.layout')).not.toHaveAttribute('inert');
+});
