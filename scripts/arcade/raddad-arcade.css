@@ -12,6 +12,8 @@ body.arcade[data-arcade-game="hub"] .shell { width:min(1120px,100%); margin-inli
 body.arcade[data-arcade-game="hub"] .masthead h1 { color:#20baff; }
 body.arcade[data-arcade-game="hub"] .arcade-kicker { color:#b5dc08; }
 body.arcade[data-arcade-game="hub"] .shell { padding-top:24px; }
+body.arcade[data-arcade-game="hub"] .arcade-mode-shortcut { display:flex; flex-wrap:wrap; justify-content:space-between; column-gap:.75rem; }
+body.arcade[data-arcade-game="hub"] .arcade-hangout-link { color:#9de5ff; font-weight:700; text-underline-offset:.2em; }
 @media (prefers-reduced-motion:reduce) { .rad-arcade-nav * { transition:none; } }
 /* This receiver has no music strip below the table. Keep the existing Hub
    pill and Rummy colour setting beside one another, clear of draw actions. */

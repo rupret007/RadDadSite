@@ -54,18 +54,25 @@
 .hangout-section { padding-block:clamp(1.5rem,4vw,3.5rem); }
 .hangout-card {
     display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-columns:minmax(0,1fr) minmax(18rem,.88fr);
     align-items:center;
     gap:1.5rem clamp(1.75rem,5vw,4.5rem);
     padding:clamp(1rem,4vw,2.5rem);
-    background:var(--surface);
+    background:linear-gradient(120deg, #20baff14, transparent 56%), var(--surface);
     border:1px solid var(--line);
     border-left:4px solid var(--blue-bright);
 }
 .hangout-card .section-kicker { margin:0 0 .25rem; }
 .hangout-card h2 { margin:0; font:700 clamp(2.4rem,6vw,4.4rem)/1.05 var(--display); text-transform:uppercase; }
 .hangout-card__copy > p:last-child { color:var(--muted); max-width:60ch; margin:.85rem 0 0; }
-.hangout-card .button { justify-self:start; min-height:44px; }
+.hangout-card__actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.hangout-card__choice { display:grid; align-content:space-between; gap:8px; padding:10px; border:1px solid var(--line); border-top:2px solid var(--blue-bright); background:var(--ink); }
+.hangout-card__choice + .hangout-card__choice { border-top-color:var(--lime); }
+.hangout-card__choice p { margin:0; color:var(--muted); font-size:.8rem; font-weight:800; }
+.hangout-card .button { justify-content:center; min-height:44px; padding-inline:.4rem; text-align:center; }
+@media (max-width: 680px) {
+    .hangout-card .button { font-size:.82rem; letter-spacing:0; }
+}
 .home-page .arcade-section { position:relative; background:var(--blue); color:var(--ink); border-block:3px solid var(--ink); padding-bottom:64px; }
 .arcade-heading { display:grid; grid-template-columns:1fr auto; align-items:center; gap:32px; margin-bottom:32px; }
 .home-page .arcade-section .section-kicker { color:var(--ink); }

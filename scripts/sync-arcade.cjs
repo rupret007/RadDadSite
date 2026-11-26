@@ -78,6 +78,9 @@ try {
     fs.writeFileSync(path.join(stage, `assets/cover-${name}.svg`), `<svg xmlns="http://www.w3.org/2000/svg"${match[2]}</svg>\n`);
   }
   fs.copyFileSync(path.join(ROOT, 'scripts/arcade/raddad-arcade.css'), path.join(stage, 'assets/raddad-arcade.css'));
+  fs.copyFileSync(path.join(ROOT, 'scripts/arcade/solo-play-finish.css'), path.join(stage, 'assets/solo-play-finish.css'));
+  fs.mkdirSync(path.join(stage, 'assets/table-art'), { recursive: true });
+  fs.copyFileSync(path.join(ROOT, 'scripts/arcade/felt-noise.svg'), path.join(stage, 'assets/table-art/felt-noise.svg'));
   for (const file of walk(stage).filter(file => file.endsWith('.html')).map(file => path.relative(stage, file))) {
     let html = fs.readFileSync(path.join(stage, file), 'utf8');
     // Keep the unpromoted legacy game on its existing audio path.
@@ -101,8 +104,12 @@ try {
         .replace('Nine games. Pick your next round.', 'Play solo, or choose 2 players in Royal Flush Chess to share one device.')
         .replace('Nine games. Zero dignity.', 'Pick a game. Beat your best.')
         .replace('Nine games • one sewer • Stalemate punk rock on every table', 'Nine free games. Sound effects optional. No sign-in.')
-        .replace(/\s*<details class="changelog">[\s\S]*?<\/details>/, '');
+        .replace(/\s*<details class="changelog">[\s\S]*?<\/details>/, '')
+        .replace(/(<p class="arcade-mode-shortcut">.*?)(<\/p>)/,
+          '$1 <a class="arcade-hangout-link" href="../#hang-out">Hang Out online →</a>$2');
       html = html.replace(/<body\b[^>]*>/, '$&\n<nav class="rad-arcade-nav" aria-label="Rad Dad"><a href="../"><img src="../RadDad_Logo.jpg" width="40" height="40" alt="">Rad Dad</a><a href="../#watch">Do your homework ↗</a></nav>');
+    } else if (STUDIO_PAGES.has(file)) {
+      html = html.replace('</head>', '<link rel="stylesheet" href="assets/solo-play-finish.css">\n</head>');
     }
     fs.writeFileSync(path.join(stage, file), html);
   }
