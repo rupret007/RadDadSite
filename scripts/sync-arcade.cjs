@@ -7,7 +7,7 @@ const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const { versionArcadeAssets } = require('./lib/arcade-asset-versions.cjs');
 const ROOT = path.resolve(__dirname, '..');
-const PIN = '4745b3337eb2888b38dd8175498569cf01d8debc';
+const PIN = 'e43219e7ec22180cfd170f3d755552b2eab11acb';
 const FILES = ['index.html', 'hub.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
   'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html', 'turdrush.html',
   'neon-arkanoid.html', 'game.js', 'favicon.svg', 'assets', 'games'];
@@ -108,7 +108,7 @@ try {
     if (file === 'index.html') {
       html = html.replaceAll('Stalemate Arcade', 'Rad Dad Arcade')
         .replace('Punk rock. Bathroom humor. One more round.', 'Loud guitars. Silly games. One more round.')
-        .replace('Nine games. Pick your next round.', 'Nine games for solo play. Royal Flush Chess also supports two players on one device.')
+        .replace('Nine games. Pick your next round.', 'Nine games. Play solo, or choose 2 players in Royal Flush Chess to share one device.')
         .replace('Nine games. Zero dignity.', 'Pick a game. Beat your best.')
         .replace('Nine games • one sewer • Stalemate punk rock on every table', 'Nine free games. Sound effects optional. No sign-in.')
         .replace(/\s*<details class="changelog">[\s\S]*?<\/details>/, '');
@@ -126,7 +126,7 @@ try {
     fs.writeFileSync(path.join(stage, file), html);
   }
   versionArcadeAssets(stage);
-  fs.writeFileSync(path.join(stage, 'VENDORED.txt'), `Rad Dad Arcade: github.com/rupret007/Turdanoid@${sha}\nOriginal arcade material: same owner as RadDadSite. New chess modules/page and Chessground10.5.0: GPL-3.0-or-later. Spatial piece artwork by Maurizio Monge: MIT. chess.js 1.4.0: BSD-2-Clause. Stockfish.js 19.0.1: GPL-3.0. See assets/chess/credits.html, included licenses and corresponding-source archive.\nGenerated with node scripts/sync-arcade.cjs ${sha}. Edit the importer and scripts/arcade/, not play/.\nNo Stalemate recordings or private band-lab files are included.\n`);
+  fs.writeFileSync(path.join(stage, 'VENDORED.txt'), `Rad Dad Arcade: github.com/rupret007/Turdanoid@${sha}\nOriginal arcade material: same owner as RadDadSite. New chess modules/page and Chessground10.5.0: GPL-3.0-or-later. Spatial piece artwork by Maurizio Monge: MIT. chess.js 1.4.0: BSD-2-Clause. Stockfish.js 19.0.1: GPL-3.0. See assets/chess/credits.html, included licenses and corresponding-source archive.\nGenerated with node scripts/sync-arcade.cjs --source ../Turdanoid ${sha}. Edit the importer and scripts/arcade/, not play/.\nNo Stalemate recordings or private band-lab files are included.\n`);
   const inventory = walk(stage).map(file => `play/${path.relative(stage, file).split(path.sep).join('/')}`).sort();
   const dest = path.join(ROOT, 'play');
   const backup = `${stage}-previous`;
