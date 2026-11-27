@@ -189,7 +189,15 @@ test('desktop Turdanoid keeps its HUD clear of the Rad Dad effects controls', as
         await audio.click();
         const dialog = page.getByRole('dialog', { name: 'Sound effects' });
         await expect(dialog).toBeVisible();
+        await expect.poll(() => page.evaluate(() => Suite.getSoundState().paused)).toBe(true);
         await dialog.getByRole('button', { name: 'Done' }).click();
-        await expect(audio).toBeFocused();
+        await expect(dialog).toBeHidden();
+        // Audio pauses the run, so its close returns focus to the pause menu.
+        const resume = page.getByRole('button', { name: 'RESUME', exact: true });
+        await expect(resume).toBeFocused();
+        await page.keyboard.press('Enter');
+        await expect(resume).toBeHidden();
+        await expect.poll(() => page.evaluate(() => Suite.getSoundState().paused)).toBe(false);
+        await expect(audio).toBeVisible();
     }
 });
