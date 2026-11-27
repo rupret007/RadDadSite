@@ -140,18 +140,23 @@ test.describe('homepage without JavaScript', () => {
         await expect(page.getByRole('heading', { name: 'Pick a nickname' })).toBeVisible();
     });
 
-    test('the solo Arcade returns to Hang Out without JavaScript', async ({ page }) => {
+    test('the solo Arcade links directly to online multiplayer without JavaScript', async ({ page }) => {
         await page.setViewportSize({ width: 320, height: 800 });
+        const destination = 'https://stalemate-hangout-demo.jeffstory007.workers.dev/?via=rad-dad';
+        await page.route(url => url.href === destination, route => route.fulfill({
+            contentType: 'text/html',
+            body: '<!doctype html><html lang="en"><title>Hang Out</title><h1>Pick a nickname</h1></html>'
+        }));
         await page.goto('/#hang-out');
         const announcement = page.getByRole('region', { name: 'Hang Out', exact: true });
-        await announcement.getByRole('link', { name: 'Play solo', exact: true }).click();
+        await announcement.getByRole('link', { name: 'Single player', exact: true }).click();
         await expect(page).toHaveURL(/\/play\/$/);
         await expect(page.getByRole('heading', { name: 'Rad Dad Arcade' })).toBeVisible();
-        const online = page.getByRole('link', { name: /Hang Out online/ });
+        const online = page.getByRole('link', { name: /Multiplayer online/ });
         expect((await online.boundingBox()).height).toBeGreaterThanOrEqual(44);
         await online.click();
-        await expect(page).toHaveURL(/#hang-out$/);
-        await expect(announcement.getByRole('link', { name: 'Open Hang Out', exact: true })).toBeInViewport();
+        await expect(page).toHaveURL(destination);
+        await expect(page.getByRole('heading', { name: 'Pick a nickname' })).toBeVisible();
     });
     test('keeps cover credits, social links, booking and all five native video links', async ({ page }) => {
         await page.goto('/');

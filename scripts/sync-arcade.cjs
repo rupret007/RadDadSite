@@ -108,11 +108,11 @@ try {
     if (file === 'index.html') {
       html = html.replaceAll('Stalemate Arcade', 'Rad Dad Arcade')
         .replace('Punk rock. Bathroom humor. One more round.', 'Loud guitars. Silly games. One more round.')
-        .replace('Nine games. Pick your next round.', 'Nine games. Play solo, or choose 2 players in Royal Flush Chess to share one device.')
+        .replace('Nine games. Pick your next round.', 'Nine single-player games. In Royal Flush Chess, choose 2 players to share one device.')
         .replace('Nine games. Zero dignity.', 'Pick a game. Beat your best.')
         .replace('Nine games • one sewer • Stalemate punk rock on every table', 'Nine free games. Sound effects optional. No sign-in.')
         .replace(/\s*<details class="changelog">[\s\S]*?<\/details>/, '');
-      const hangout = '<a class="arcade-hangout-link" href="../#hang-out">Hang Out online →</a>';
+      const hangout = '<a class="arcade-hangout-link" href="https://stalemate-hangout-demo.jeffstory007.workers.dev/?via=rad-dad">Multiplayer online →</a>';
       if (html.includes('<div class="arcade-hub-actions">')) {
         const progress = '<div id="suite-progress-hub">';
         html = replaceRequired(html, progress, hangout + '\n      ' + progress, 'Arcade Hub shortcuts');
