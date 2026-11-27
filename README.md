@@ -29,7 +29,7 @@ Both pages load `styles.css` followed by `qr/styles.css`. The homepage additiona
 
 ## Arcade source and isolated review build
 
-Run `node scripts/sync-arcade.cjs` to reproduce the pinned import from Turdanoid. For a local source checkout, use `node scripts/sync-arcade.cjs --source ../Turdanoid`. Integration changes belong in that importer or `scripts/arcade/`, rather than generated `play/` files. The importer updates both exact artifact inventories. The private band lab stays excluded.
+The Arcade import uses Turdanoid `4745b3337eb2888b38dd8175498569cf01d8debc`, recorded in `play/VENDORED.txt`. Until the source branch is published, regenerate it from the local canonical checkout with `node scripts/sync-arcade.cjs --source ../Turdanoid 4745b3337eb2888b38dd8175498569cf01d8debc`. Integration changes belong in that importer or `scripts/arcade/`, rather than generated `play/` files. The importer updates both exact artifact inventories. The private band lab stays excluded.
 
 `npm run build:preview` first verifies the clean client artifact, then creates `preview-dist/` for the existing independent Sites demo, with a review banner, preview sharing, noindex and absolute preview social metadata. The separate `preview-artifact.json` records its exact source identity and file hashes. Verify the copied snapshot with `npm run verify:preview -- --artifact-dir ../RadDadDesignPreview/dist/client --expected-sha YOUR_40_CHARACTER_GIT_SHA`. Do not use the established project ID in `.openai/hosting.json`, attach the live domain, or push main. See [the reproducible preview workflow](docs/raddad-preview.md) and [active polish evidence](docs/raddad-polish.md).
 

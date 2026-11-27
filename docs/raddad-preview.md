@@ -2,16 +2,16 @@
 
 Review URL: https://rad-dad-design-preview.jeffstory007.chatgpt.site/
 
-This is the blue/lime Rad Dad design, with the five original live clips, homework invitation and seven games. It preserves cover credits, contacts, members, recording links, historical shows, printed `/tap/` and legacy `/nfc/` routes. It does not display an empty upcoming-shows notice.
+This is the blue/lime Rad Dad design, with the five original live clips, homework invitation and nine Arcade games. It preserves cover credits, contacts, members, recording links, historical shows, printed `/tap/` and legacy `/nfc/` routes. It does not display an empty upcoming-shows notice.
 
 The established site at raddadband.com and RadDadSite main are outside this release. The existing source `.openai/hosting.json` identifies that established site; never copy or deploy it for this review. The demo has its own project, `appgprj_6adc6437250c81919a5aee09cb9d91a5`, and separate hosting checkout `../RadDadDesignPreview/`. Its provider `main` branch is not RadDadSite main. Reuse this project and URL rather than creating another site or changing domains/access.
 
 ## Repeatable build and snapshot
 
-Use the tested Node 24 runtime for RadDadSite. Commit the reviewed source before building the release snapshot. The importer defaults to the full revision pinned in `scripts/sync-arcade.cjs`; for a local committed upstream checkout:
+Use the tested Node 24 runtime for RadDadSite. Commit the reviewed source before building the release snapshot. The importer defaults to the full revision pinned in `scripts/sync-arcade.cjs`. The README records the current pin and local-source command. To reproduce the import from a local canonical checkout:
 
 ```sh
-node scripts/sync-arcade.cjs --source ../Turdanoid-raddad-polish
+node scripts/sync-arcade.cjs --source ../Turdanoid
 git diff --exit-code -- play scripts/arcade/client-paths.json scripts/deploy/server-deploy.sh
 npm test
 npm run lint:deploy
@@ -36,6 +36,6 @@ Do not copy this repository or its established hosting config wholesale. Commit 
 
 The preview verifier rejects mismatched source versions, unexpected files, symlinks, changed bytes, missing review identity and indexing-policy drift. Its manifest stays outside the public tree. Clean artifact verification remains independent of preview verification; preview transforms intentionally change HTML bytes.
 
-After publication, verify anonymously: source version, review/noindex labels, homepage and QR sharing of the review origin, preserved route aliases, all seven game starts, clean game URLs, saved-table continuation, result links and recovery controls. Inspect actual rendered desktop and phone screenshots, and distinguish provider mocks, real playback, emulated devices and physical-device checks.
+After publication, verify anonymously: source version, review/noindex labels, homepage and QR sharing of the review origin, preserved route aliases, all nine game starts, clean game URLs, saved-table continuation, result links and recovery controls. Inspect actual rendered desktop and phone screenshots, and distinguish provider mocks, real playback, emulated devices and physical-device checks.
 
 Initial design evidence: `../release-evidence/raddad-preview/`. The new audit is in `../release-evidence/raddad-deep-audit-2026-10-24/`; ongoing polish checks are in `../release-evidence/raddad-polish/` and [the progress record](raddad-polish.md). The parent workspace's `RADDAD-PREVIEW-HANDOFF.md` records exact published versions and deployment status.

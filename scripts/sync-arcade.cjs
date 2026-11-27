@@ -7,7 +7,7 @@ const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const { versionArcadeAssets } = require('./lib/arcade-asset-versions.cjs');
 const ROOT = path.resolve(__dirname, '..');
-const PIN = 'd6d06c9abe2a054648c5870b0e6ca6de94445654';
+const PIN = '4745b3337eb2888b38dd8175498569cf01d8debc';
 const FILES = ['index.html', 'hub.html', 'TurdAnoid.html', 'turdomania.html', 'turdtris.html',
   'turdjack.html', 'crapeights.html', 'turdrummy.html', 'turdspades.html', 'chess.html', 'turdrush.html',
   'neon-arkanoid.html', 'game.js', 'favicon.svg', 'assets', 'games'];
@@ -26,22 +26,26 @@ function walk(dir) {
   });
 }
 const args = process.argv.slice(2);
-let source = 'https://github.com/rupret007/Turdanoid.git';
-if (args[0] === '--source' && args[1]) { source = fs.realpathSync(args[1]); args.splice(0, 2); }
+const upstream = 'https://github.com/rupret007/Turdanoid.git';
+let localSource;
+if (args[0] === '--source' && args[1]) {
+  localSource = fs.realpathSync(args[1]);
+  args.splice(0, 2);
+}
 if (args.length > 1 || args.some(arg => arg.startsWith('-'))) throw new Error('Usage: node scripts/sync-arcade.cjs [--source local-repo] [ref]');
 const ref = args[0] || PIN;
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'raddad-arcade-'));
 const stage = fs.mkdtempSync(path.join(ROOT, '.arcade-stage-'));
 try {
   let sha;
-  if (source.startsWith('/')) {
-    sha = git(['rev-parse', '--verify', `${ref}^{commit}`], source);
+  if (localSource) {
+    sha = git(['rev-parse', '--verify', '--end-of-options', ref + '^{commit}'], localSource);
     // Extract only the committed public files; don't duplicate history/screenshots locally.
-    const archive = execFileSync('git', ['archive', sha, ...FILES], { cwd: source, maxBuffer: 50 * 1024 * 1024 });
+    const archive = execFileSync('git', ['archive', sha, ...FILES], { cwd: localSource, maxBuffer: 50 * 1024 * 1024 });
     execFileSync('tar', ['-xf', '-', '-C', tmp], { input: archive });
   } else {
     git(['init', '--quiet', tmp], ROOT);
-    git(['remote', 'add', 'origin', source], tmp);
+    git(['remote', 'add', 'origin', upstream], tmp);
     git(['fetch', '--quiet', '--depth=1', 'origin', ref], tmp);
     sha = git(['rev-parse', '--verify', 'FETCH_HEAD^{commit}'], tmp);
     git(['checkout', '--quiet', '--detach', sha], tmp);
@@ -78,9 +82,12 @@ try {
     fs.writeFileSync(path.join(stage, `assets/cover-${name}.svg`), `<svg xmlns="http://www.w3.org/2000/svg"${match[2]}</svg>\n`);
   }
   fs.copyFileSync(path.join(ROOT, 'scripts/arcade/raddad-arcade.css'), path.join(stage, 'assets/raddad-arcade.css'));
-  fs.copyFileSync(path.join(ROOT, 'scripts/arcade/solo-play-finish.css'), path.join(stage, 'assets/solo-play-finish.css'));
-  fs.mkdirSync(path.join(stage, 'assets/table-art'), { recursive: true });
-  fs.copyFileSync(path.join(ROOT, 'scripts/arcade/felt-noise.svg'), path.join(stage, 'assets/table-art/felt-noise.svg'));
+  const sharedFinish = fs.existsSync(path.join(stage, 'assets/solo-play-finish.css'));
+  if (!sharedFinish) {
+    fs.copyFileSync(path.join(ROOT, 'scripts/arcade/solo-play-finish.css'), path.join(stage, 'assets/solo-play-finish.css'));
+    fs.mkdirSync(path.join(stage, 'assets/table-art'), { recursive: true });
+    fs.copyFileSync(path.join(ROOT, 'scripts/arcade/felt-noise.svg'), path.join(stage, 'assets/table-art/felt-noise.svg'));
+  }
   for (const file of walk(stage).filter(file => file.endsWith('.html')).map(file => path.relative(stage, file))) {
     let html = fs.readFileSync(path.join(stage, file), 'utf8');
     // Keep the unpromoted legacy game on its existing audio path.
@@ -101,14 +108,19 @@ try {
     if (file === 'index.html') {
       html = html.replaceAll('Stalemate Arcade', 'Rad Dad Arcade')
         .replace('Punk rock. Bathroom humor. One more round.', 'Loud guitars. Silly games. One more round.')
-        .replace('Nine games. Pick your next round.', 'Play solo, or choose 2 players in Royal Flush Chess to share one device.')
+        .replace('Nine games. Pick your next round.', 'Nine games for solo play. Royal Flush Chess also supports two players on one device.')
         .replace('Nine games. Zero dignity.', 'Pick a game. Beat your best.')
         .replace('Nine games • one sewer • Stalemate punk rock on every table', 'Nine free games. Sound effects optional. No sign-in.')
-        .replace(/\s*<details class="changelog">[\s\S]*?<\/details>/, '')
-        .replace(/(<p class="arcade-mode-shortcut">.*?)(<\/p>)/,
-          '$1 <a class="arcade-hangout-link" href="../#hang-out">Hang Out online →</a>$2');
+        .replace(/\s*<details class="changelog">[\s\S]*?<\/details>/, '');
+      const hangout = '<a class="arcade-hangout-link" href="../#hang-out">Hang Out online →</a>';
+      if (html.includes('<div class="arcade-hub-actions">')) {
+        const progress = '<div id="suite-progress-hub">';
+        html = replaceRequired(html, progress, hangout + '\n      ' + progress, 'Arcade Hub shortcuts');
+      } else {
+        html = html.replace(/(<p class="arcade-mode-shortcut">.*?)(<\/p>)/, '$1 ' + hangout + '$2');
+      }
       html = html.replace(/<body\b[^>]*>/, '$&\n<nav class="rad-arcade-nav" aria-label="Rad Dad"><a href="../"><img src="../RadDad_Logo.jpg" width="40" height="40" alt="">Rad Dad</a><a href="../#watch">Do your homework ↗</a></nav>');
-    } else if (STUDIO_PAGES.has(file)) {
+    } else if (!sharedFinish && STUDIO_PAGES.has(file)) {
       html = html.replace('</head>', '<link rel="stylesheet" href="assets/solo-play-finish.css">\n</head>');
     }
     fs.writeFileSync(path.join(stage, file), html);
