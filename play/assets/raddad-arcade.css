@@ -23,3 +23,15 @@ body.arcade[data-arcade-game="hub"] .arcade-hangout-link { color:#9de5ff; font-w
   /* The centered1100px Spades table needs Hub space only near the left edge. */
   body.arcade[data-arcade-game="turdspades"] .dock-grid { padding-left:calc(clamp(0px, calc(640px - 50vw), 82px) + env(safe-area-inset-left, 0px)); }
 }
+
+/* Desktop Turdanoid's toolbar includes the Rad Dad Audio button. */
+@media (min-width: 981px) {
+  body.arcade[data-arcade-game="turdanoid"] #stage.layout-wide .topbtns {
+    left: calc(100% + 8px);
+    right: auto;
+    width: max-content;
+    max-width: none;
+  }
+  body.arcade[data-arcade-game="turdanoid"] #stage:not(.layout-wide) .topbtns { right: 10px; }
+  body.arcade[data-arcade-game="turdanoid"] #stage:not(.layout-wide) .hud { right: 170px; }
+}

@@ -172,3 +172,24 @@ test('Turdtris keeps keyboard focus in the start guide and moves it to the board
     await expect(page.locator('#game')).toBeFocused();
     await expect(page.locator('.layout')).not.toHaveAttribute('inert');
 });
+
+test('desktop Turdanoid keeps its HUD clear of the Rad Dad effects controls', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('turdanoid_v3_coach_v1', '1'));
+    for (const viewport of [{ width: 1280, height: 850 }, { width: 981, height: 900 }]) {
+        await page.setViewportSize(viewport);
+        await page.goto('/play/TurdAnoid.html');
+        await page.locator('#btnStart').click();
+        await expect(page.locator('#titleScreen')).toHaveAttribute('aria-hidden', 'true');
+        const audio = page.getByRole('button', { name: 'Audio settings' });
+        await expect(audio).toBeVisible();
+        const hud = await page.locator('#playShell .hud').boundingBox();
+        const controls = await page.locator('#playShell .topbtns-icons').boundingBox();
+        expect(controls.x, 'The controls must clear the HUD').toBeGreaterThanOrEqual(hud.x + hud.width);
+        expect(controls.x + controls.width, 'All effects controls must stay on screen').toBeLessThanOrEqual(viewport.width);
+        await audio.click();
+        const dialog = page.getByRole('dialog', { name: 'Sound effects' });
+        await expect(dialog).toBeVisible();
+        await dialog.getByRole('button', { name: 'Done' }).click();
+        await expect(audio).toBeFocused();
+    }
+});
