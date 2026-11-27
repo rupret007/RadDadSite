@@ -1380,45 +1380,36 @@ HOME_PAGE="$(
 printf '%s' "$HOME_PAGE" | grep -F -- "<title>$EXPECTED_TITLE</title>"
 ```
 
-Require HTTP 200 for every exact production path:
+Require HTTP 200 for every file in the approved release. Use the verified
+artifact saved with that release's workflow and rollout record. For a rollback
+verification, use the artifact of the selected previous release.
 
 ```bash
 set -Eeuo pipefail
 SITE_URL='https://raddadband.com'
 EXPECTED_SHA='<FILL IN EXACT 40-CHARACTER WORKFLOW SHA>'
+ARTIFACT_DIR='<FILL IN VERIFIED LOCAL ARTIFACT DIRECTORY FOR THAT SHA>'
 [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]
-production_paths=(
-  RadDad_Logo.jpg
-  SHA256SUMS
-  artifact-manifest.json
-  assets/rad-dad-friends-guitars-growlers-2026-1122.webp
-  assets/rad-dad-friends-guitars-growlers-2026-561.webp
-  assets/rad-dad-friends-guitars-growlers-2026-v2-1024.webp
-  assets/rad-dad-friends-guitars-growlers-2026-v2-512.webp
-  assets/rad-dad-friends-guitars-growlers-2026-v2-full.png
-  assets/rad-dad-friends-guitars-growlers-2026-full.png
-  assets/rad-dad-friends-guitars-growlers-2026.ics
-  assets/rad-dad-social-2026-v2.png
-  assets/rad-dad-social-2026.png
-  assets/rad-dad-tap-og.png
-  assets/story-of-us-cassette-render.webp
-  assets/story-of-us-cover.webp
-  assets/the-middle-jimmy-eat-world-thumbnail.webp
-  assets/wildflower-2026-poster-720.webp
-  assets/wildflower-she-green-day.webp
-  index.html
-  live-video.js
-  nfc/index.html
-  qr/index.html
-  qr/script.js
-  qr/styles.css
-  script.js
-  show-state.js
-  styles.css
-  tap/index.html
-  version.json
-)
-for path in "${production_paths[@]}"; do
+production_paths="$(
+  node --input-type=commonjs - "$ARTIFACT_DIR" "$EXPECTED_SHA" <<'NODE'
+const { readFileSync } = require('node:fs');
+const { join } = require('node:path');
+const [root, sha] = process.argv.slice(2);
+const json = name => JSON.parse(readFileSync(join(root, name), 'utf8'));
+const manifest = json('artifact-manifest.json');
+if (manifest.commitSha !== sha || json('version.json').commitSha !== sha
+    || !Array.isArray(manifest.files) || !manifest.files.length) {
+    throw new Error('The verified local artifact does not match the expected release.');
+}
+const paths = [...manifest.files.map(file => file.path), 'artifact-manifest.json', 'SHA256SUMS'];
+if (new Set(paths).size !== paths.length || paths.some(path =>
+    typeof path !== 'string' || path.split('/').some(segment => !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(segment)))) {
+    throw new Error('The artifact manifest has unsafe or duplicate paths.');
+}
+console.log(paths.sort().join('\n'));
+NODE
+)"
+while IFS= read -r path; do
   code="$(
     curl --proto '=https' --silent --show-error \
       --output /dev/null --write-out '%{http_code}' \
@@ -1428,7 +1419,7 @@ for path in "${production_paths[@]}"; do
     printf '%s returned %s, expected 200\n' "$path" "$code" >&2
     exit 1
   }
-done
+done <<< "$production_paths"
 ```
 
 Require HTTP 404 for representative development, credential, repository, and
@@ -1495,7 +1486,8 @@ known-good rollback procedure.
 Never choose a rollback target by directory modification time or by taking the
 first SHA returned by `ls`. The helper maintains health-success state in its
 private, atomic `.known-good` ledger outside the immutable release directories.
-Its read-only inventory validates that ledger and the release checksums:
+Use the installed helper and current configuration to list and roll back
+retained releases. The read-only inventory validates the ledger and checksums:
 
 ```bash
 set -Eeuo pipefail
