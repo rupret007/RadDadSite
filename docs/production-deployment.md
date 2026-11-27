@@ -174,9 +174,13 @@ sensitive.
 
 Before altering a virtual host or moving a file, create a restorable snapshot or
 verified backup through the confirmed hosting control plane. Record its
-identifier, exact restore steps, and restore operator. A backup is not verified
-merely because a job reports success: confirm that its inventory includes the
-legacy root and both vhost files and that the restore operator can access it.
+identifier, timestamp, exact restore steps, and restore operator. Confirm the
+inventory covers each effective document root, both vhost files and their
+required includes, and the server-managed content identified during discovery.
+If the roots are shared, record that fact and preserve the shared root once.
+Have the operator verify access and restore to an isolated destination before
+relying on the backup for the first cutover. Record the restore result and the
+checks that will confirm both public domains after a rollback.
 
 ### Mandatory stop conditions
 
@@ -226,43 +230,24 @@ write access to Apache, certificates, other virtual hosts, or the rest of
 
 ### Exact production allowlist and immutable releases
 
-The production artifact contains only these paths:
+The [production packager](../scripts/lib/production-artifact.mjs) defines the
+exact band-site files and imports the [solo Arcade path list](../scripts/arcade/client-paths.json).
+The [server helper](../scripts/deploy/server-deploy.sh) checks the archive against
+the same release paths. To list the exact public files for review, run this from
+a clean checkout of the proposed commit using Node 24:
 
-```text
-RadDad_Logo.jpg
-SHA256SUMS
-artifact-manifest.json
-assets/rad-dad-friends-guitars-growlers-2026-1122.webp
-assets/rad-dad-friends-guitars-growlers-2026-561.webp
-assets/rad-dad-friends-guitars-growlers-2026-v2-1024.webp
-assets/rad-dad-friends-guitars-growlers-2026-v2-512.webp
-assets/rad-dad-friends-guitars-growlers-2026-v2-full.png
-assets/rad-dad-friends-guitars-growlers-2026-full.png
-assets/rad-dad-friends-guitars-growlers-2026.ics
-assets/rad-dad-social-2026-v2.png
-assets/rad-dad-social-2026.png
-assets/rad-dad-tap-og.png
-assets/story-of-us-cassette-render.webp
-assets/story-of-us-cover.webp
-assets/the-middle-jimmy-eat-world-thumbnail.webp
-assets/wildflower-2026-poster-720.webp
-assets/wildflower-she-green-day.webp
-index.html
-live-video.js
-nfc/index.html
-qr/index.html
-qr/script.js
-qr/styles.css
-script.js
-show-state.js
-styles.css
-tap/index.html
-version.json
+```bash
+set -Eeuo pipefail
+test -z "$(git status --porcelain)"
+REVIEWED_SHA="$(git rev-parse --verify 'HEAD^{commit}')"
+npm run build:production
+npm run verify:production -- --expected-sha "$REVIEWED_SHA"
+node -e 'const { files } = require("./dist/client/artifact-manifest.json"); console.log([...files.map(({ path }) => path), "artifact-manifest.json", "SHA256SUMS"].sort().join("\n"));'
 ```
 
-`artifact-manifest.json` and `SHA256SUMS` must account for every file exactly.
-Anything else, including a dotfile, symlink, archive, upload, or repository
-file, makes the release invalid.
+The verifier checks `artifact-manifest.json` and `SHA256SUMS` against the exact
+package contents. Extra paths, symlinks, archives, uploads, and repository
+files make a release invalid.
 
 The helper maintains a root-level `.known-good` ledger, owned by its effective
 deployment user and mode `0600`, using atomic replacement. It records only SHAs
